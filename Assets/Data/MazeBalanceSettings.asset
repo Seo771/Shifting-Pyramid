@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a94eb78e0e67fef479c1a849193af788, type: 3}
+  m_Name: MazeBalanceSettings
+  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Maze.Settings.MazeBalanceSettings
+  mazeWidth: 10
+  mazeHeight: 10
+  treasureRoomCount: 5
+  fixedSpecialRoomCount: 2
+  requiredTreasureCount: 3
+  mazeChangeRegionSize: 3
+  mazeChangeInterval: 20
+  playerSafeRadius: 1
+  mummySafeRadius: 1
+  useRandomSeed: 1
+  seed: 12345

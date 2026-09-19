@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
         Defeat
     }
 
+    [Header("Game Rules")]
     [SerializeField] private int requiredTreasureCount = 3;
 
     private int collectedTreasureCount;
@@ -20,7 +21,7 @@ public class GameManager : MonoBehaviour
     public GameState CurrentState { get; private set; } = GameState.Ready;
     public int RequiredTreasureCount => requiredTreasureCount;
     public int CollectedTreasureCount => collectedTreasureCount;
-    public bool IsExitUnlocked => collectedTreasureCount >= requiredTreasureCount;
+    public bool IsExitUnlocked => collectedTreasureCount >= RequiredTreasureCount;
     public bool IsGameFinished => CurrentState == GameState.Victory || CurrentState == GameState.Defeat;
 
     private void Start()
