@@ -14,7 +14,7 @@ namespace ShiftingPyramid.Maze.Core
 
     public static class MazeDirectionExtensions
     {
-        // 서로 마주 보는 방향을 구한다. 동쪽 벽을 열면 이웃의 서쪽 벽도 열어야 한다.
+        // 한쪽 벽을 열면 이웃 타일의 반대쪽 벽도 같이 열어야 한다.
         public static MazeDirection Opposite(this MazeDirection direction)
         {
             switch (direction)
@@ -32,7 +32,7 @@ namespace ShiftingPyramid.Maze.Core
             }
         }
 
-        // 방향을 좌표 이동값으로 바꾼다.
+        // 방향을 격자 좌표 이동값으로 바꾼다.
         public static MazeCoordinate ToOffset(this MazeDirection direction)
         {
             switch (direction)

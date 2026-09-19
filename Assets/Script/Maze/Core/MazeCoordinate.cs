@@ -4,6 +4,7 @@ namespace ShiftingPyramid.Maze.Core
 {
     /// <summary>
     /// 미로 안에서 사용하는 2D 격자 좌표.
+    /// Unity 위치(Vector3)와 분리해서 미로 계산 로직을 독립적으로 유지한다.
     /// </summary>
     [Serializable]
     public readonly struct MazeCoordinate : IEquatable<MazeCoordinate>
@@ -19,7 +20,7 @@ namespace ShiftingPyramid.Maze.Core
             Y = y;
         }
 
-        // 좌표 이동 계산에 사용한다. 예: 현재 좌표 + North 방향 오프셋.
+        // 현재 좌표에 방향 이동값을 더할 때 사용한다.
         public static MazeCoordinate operator +(MazeCoordinate left, MazeCoordinate right)
         {
             return new MazeCoordinate(left.X + right.X, left.Y + right.Y);
