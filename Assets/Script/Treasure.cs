@@ -14,6 +14,7 @@ public class Treasure : MonoBehaviour
     // 3D 물리 이벤트(일반 물리 엔진)를 처리
     private void OnTriggerEnter(Collider other)
     {
+
         if (isCollected) return;
         // 충돌한 오브젝트의 태그가 "Player"인지 안전하게 비교
         if (other.CompareTag("Player"))

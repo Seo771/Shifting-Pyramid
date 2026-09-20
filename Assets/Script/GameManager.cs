@@ -28,9 +28,7 @@ public class GameManager : MonoBehaviour
     private bool hasReachedExit;
 
     public GameState CurrentState { get; private set; } = GameState.Ready;
-    public int RequiredTreasureCount => mazeBalanceSettings != null
-        ? mazeBalanceSettings.RequiredTreasureCount
-        : fallbackRequiredTreasureCount;
+    public int RequiredTreasureCount => fallbackRequiredTreasureCount;
     public int CollectedTreasureCount => collectedTreasureCount;
     public bool IsExitUnlocked => collectedTreasureCount >= RequiredTreasureCount;
     public bool IsGameFinished => CurrentState == GameState.Victory || CurrentState == GameState.Defeat;
