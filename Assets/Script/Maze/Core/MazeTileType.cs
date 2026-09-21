@@ -9,7 +9,6 @@ namespace ShiftingPyramid.Maze.Core
         Normal,
         TreasureRoom,
         Exit,
-        FixedSpecialRoom,
-        DynamicSpecialRoom
+        SpecialRoom
     }
 }

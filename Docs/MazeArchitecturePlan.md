@@ -88,7 +88,7 @@ Project 창 우클릭
 mazeWidth
 mazeHeight
 treasureRoomCount
-fixedSpecialRoomCount
+specialRoomCount
 mazeChangeRegionSize
 mazeChangeInterval
 playerSafeRadius
@@ -99,6 +99,25 @@ seed
 
 `requiredTreasureCount`처럼 승리 조건에 직접 들어가는 게임 룰은 `GameManager`에서 관리한다.
 나중에 GitHub 공개용으로 다듬을 때는 `MazeBalanceSettings`와 미로 알고리즘 쪽만 남기고, `GameManager` 같은 게임 전용 코드는 제외한다.
+
+## 방 데이터 범위
+
+현재 방 데이터는 단순하게 유지한다.
+
+```text
+보물방
+-> 형태는 1개
+-> 별도 데이터베이스를 만들지 않는다.
+-> 개수는 MazeBalanceSettings.TreasureRoomCount로 관리한다.
+
+특수방
+-> 전부 동적으로 등장한다.
+-> 아직 종류별 데이터베이스를 만들지 않는다.
+-> 개수는 MazeBalanceSettings.SpecialRoomCount로 관리한다.
+-> 타일 타입은 MazeTileType.SpecialRoom 하나만 사용한다.
+```
+
+나중에 특수방 종류가 여러 개로 확정되고, 각 방마다 프리팹/가중치/등장 조건이 필요해지면 그때 `SpecialRoomData`와 `SpecialRoomDatabase`를 다시 추가한다.
 
 ## 다음 구현 추천
 

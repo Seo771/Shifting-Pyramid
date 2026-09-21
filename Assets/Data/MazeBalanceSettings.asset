@@ -15,7 +15,7 @@ MonoBehaviour:
   mazeWidth: 10
   mazeHeight: 10
   treasureRoomCount: 5
-  fixedSpecialRoomCount: 2
+  specialRoomCount: 2
   requiredTreasureCount: 3
   mazeChangeRegionSize: 3
   mazeChangeInterval: 20

@@ -15,7 +15,7 @@ namespace ShiftingPyramid.Maze.Settings
 
         [Header("Rooms")]
         [SerializeField, Min(0)] private int treasureRoomCount = 5;
-        [SerializeField, Min(0)] private int fixedSpecialRoomCount = 2;
+        [SerializeField, Min(0)] private int specialRoomCount = 2;
 
         [Header("Runtime Maze Change")]
         [SerializeField, Min(1)] private int mazeChangeRegionSize = 3;
@@ -30,7 +30,7 @@ namespace ShiftingPyramid.Maze.Settings
         public int MazeWidth => mazeWidth;
         public int MazeHeight => mazeHeight;
         public int TreasureRoomCount => treasureRoomCount;
-        public int FixedSpecialRoomCount => fixedSpecialRoomCount;
+        public int SpecialRoomCount => specialRoomCount;
         public int MazeChangeRegionSize => mazeChangeRegionSize;
         public float MazeChangeInterval => mazeChangeInterval;
         public int PlayerSafeRadius => playerSafeRadius;
