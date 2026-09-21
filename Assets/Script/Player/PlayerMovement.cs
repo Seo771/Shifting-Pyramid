@@ -57,8 +57,8 @@ public class PlayerMovement : MonoBehaviour
         float currentSpeed = moveSpeed;
         if (isRunning) currentSpeed *= runSpeedMultiplier;
 
-        // 4. 수평 이동 방향 계산
-        Vector3 moveDirection = new Vector3(horizontal, 0f, vertical).normalized;
+        // 4. 수평 이동 방향 계산 (플레이어가 바라보는 방향 기준)
+        Vector3 moveDirection = (transform.right * horizontal + transform.forward * vertical).normalized;
 
         // ----------------------------------------------------
         // 5. 점프 처리 (스페이스바 + 땅에 닿아있을 때만)
