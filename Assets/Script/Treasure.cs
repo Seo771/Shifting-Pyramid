@@ -42,9 +42,4 @@ public class Treasure : MonoBehaviour
         // 맵에서 보물 제거
         Destroy(gameObject);
     }
-
-    // 에디터 세팅 팁 (요약):
-    // 1) 보물 프리팹: Collider 또는 Collider2D 컴포넌트 추가 후 Is Trigger 체크
-    // 2) 플레이어: Tag를 "Player"로 설정
-    // 3) Rigidbody 또는 Rigidbody2D: 플레이어나 보물 중 적어도 하나에 추가(정적 트리거의 경우에는 플레이어에 추가하는 것이 일반적)
 }

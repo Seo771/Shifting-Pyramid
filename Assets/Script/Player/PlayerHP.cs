@@ -25,7 +25,7 @@ public class PlayerHP : MonoBehaviour
         {
             currentHealth = 0f;
             isDead = true;
-            Debug.Log("💀 플레이어가 사망했습니다!");
+            Debug.Log("플레이어가 사망했습니다!");
         }
 
         if (Input.GetKeyDown(KeyCode.K))
