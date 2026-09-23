@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using ShiftingPyramid.Maze.View;
 using UnityEngine;
 
 namespace ShiftingPyramid.Maze.Settings
@@ -17,6 +19,11 @@ namespace ShiftingPyramid.Maze.Settings
         [SerializeField, Min(0)] private int treasureRoomCount = 5;
         [SerializeField, Min(0)] private int specialRoomCount = 2;
 
+        [Header("Room Prefabs")]
+        [SerializeField] private MazeTileView treasureRoomPrefab;
+        [SerializeField] private List<MazeTileView> specialRoomPrefabs = new List<MazeTileView>();
+        [SerializeField] private MazeTileView exitRoomPrefab;
+
         [Header("Runtime Maze Change")]
         [SerializeField, Min(1)] private int mazeChangeRegionSize = 3;
         [SerializeField, Min(1f)] private float mazeChangeInterval = 20f;
@@ -31,6 +38,9 @@ namespace ShiftingPyramid.Maze.Settings
         public int MazeHeight => mazeHeight;
         public int TreasureRoomCount => treasureRoomCount;
         public int SpecialRoomCount => specialRoomCount;
+        public MazeTileView TreasureRoomPrefab => treasureRoomPrefab;
+        public IReadOnlyList<MazeTileView> SpecialRoomPrefabs => specialRoomPrefabs;
+        public MazeTileView ExitRoomPrefab => exitRoomPrefab;
         public int MazeChangeRegionSize => mazeChangeRegionSize;
         public float MazeChangeInterval => mazeChangeInterval;
         public int PlayerSafeRadius => playerSafeRadius;

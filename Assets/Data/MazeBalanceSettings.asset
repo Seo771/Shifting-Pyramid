@@ -16,7 +16,9 @@ MonoBehaviour:
   mazeHeight: 10
   treasureRoomCount: 5
   specialRoomCount: 2
-  requiredTreasureCount: 3
+  treasureRoomPrefab: {fileID: 7863490368430874800, guid: bbedbbb7216afc443be272d06752393a, type: 3}
+  specialRoomPrefabs: []
+  exitRoomPrefab: {fileID: 7863490368430874800, guid: 9b0422de140504f449145791e84d81a1, type: 3}
   mazeChangeRegionSize: 3
   mazeChangeInterval: 20
   playerSafeRadius: 1

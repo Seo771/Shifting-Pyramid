@@ -119,6 +119,16 @@ seed
 
 나중에 특수방 종류가 여러 개로 확정되고, 각 방마다 프리팹/가중치/등장 조건이 필요해지면 그때 `SpecialRoomData`와 `SpecialRoomDatabase`를 다시 추가한다.
 
+## 방 프리팹 연결
+
+씬의 `MazeRenderer` 컴포넌트에서 `Tile Prefab`은 일반 타일로 연결한다.
+`Assets/Data/MazeBalanceSettings.asset`에서 `Treasure Room Prefab`은 게임 전용 보물방으로 연결한다.
+같은 에셋의 `Special Room Prefabs` 리스트에는 특수방 프리팹을 여러 개 넣고, `Exit Room Prefab`에는 출구방 프리팹을 연결한다.
+방 프리팹도 루트에 `MazeTileView`가 필요하며, 기본 타일과 같은 크기 및 벽 방향으로 만들어야 벽 개폐가 정상적으로 적용된다.
+프리팹이 비어 있으면 기본 타일을 사용한다. 현재 출구 좌표를 지정하는 로직은 없으므로 출구 프리팹은 `Exit` 타일이 생길 때 표시된다.
+
+공개용으로 미로 시스템을 분리할 때는 게임 전용 `Treasure Room Prefab` 연결과 보물방 배치를 제외하고, 특수방 리스트와 출구방 연결은 유지한다.
+
 ## 다음 구현 추천
 
 다음은 `MazeTile`을 만드는 것이 좋다.

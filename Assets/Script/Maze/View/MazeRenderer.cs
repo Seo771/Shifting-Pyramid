@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ShiftingPyramid.Maze.Core;
+using ShiftingPyramid.Maze.Settings;
 using UnityEngine;
 
 namespace ShiftingPyramid.Maze.View
@@ -24,7 +25,7 @@ namespace ShiftingPyramid.Maze.View
         public float TileSize => tileSize;
 
         // MazeGrid 전체를 프리팹으로 새로 만든다.
-        public void Build(MazeGrid grid)
+        public void Build(MazeGrid grid, MazeBalanceSettings settings, int? seed = null)
         {
             if (grid == null)
             {
@@ -40,9 +41,23 @@ namespace ShiftingPyramid.Maze.View
 
             Clear();
 
+            var random = seed.HasValue ? new System.Random(seed.Value) : new System.Random();
+            var availableSpecialRooms = new List<MazeTileView>();
+            if (settings != null && settings.SpecialRoomPrefabs != null)
+            {
+                foreach (var prefab in settings.SpecialRoomPrefabs)
+                {
+                    if (prefab != null)
+                    {
+                        availableSpecialRooms.Add(prefab);
+                    }
+                }
+            }
+
             foreach (var tile in grid.Tiles)
             {
-                var view = Instantiate(tilePrefab, GetTileRoot());
+                var prefab = GetPrefab(tile.TileType, settings, availableSpecialRooms, random);
+                var view = Instantiate(prefab, GetTileRoot());
                 view.transform.localPosition = GetLocalPosition(tile.Coordinate, grid.Width, grid.Height);
                 view.name = $"MazeTile_{tile.Coordinate.X}_{tile.Coordinate.Y}";
                 view.Apply(tile);
@@ -94,6 +109,32 @@ namespace ShiftingPyramid.Maze.View
         private Transform GetTileRoot()
         {
             return tileRoot != null ? tileRoot : transform;
+        }
+
+        // 비워 둔 방 종류는 기본 타일 프리팹으로 표시한다.
+        private MazeTileView GetPrefab(
+            MazeTileType tileType,
+            MazeBalanceSettings settings,
+            List<MazeTileView> availableSpecialRooms,
+            System.Random random)
+        {
+            switch (tileType)
+            {
+                case MazeTileType.TreasureRoom:
+                    return settings != null && settings.TreasureRoomPrefab != null
+                        ? settings.TreasureRoomPrefab
+                        : tilePrefab;
+                case MazeTileType.SpecialRoom:
+                    return availableSpecialRooms.Count > 0
+                        ? availableSpecialRooms[random.Next(availableSpecialRooms.Count)]
+                        : tilePrefab;
+                case MazeTileType.Exit:
+                    return settings != null && settings.ExitRoomPrefab != null
+                        ? settings.ExitRoomPrefab
+                        : tilePrefab;
+                default:
+                    return tilePrefab;
+            }
         }
 
         private Vector3 GetLocalPosition(MazeCoordinate coordinate, int width, int height)

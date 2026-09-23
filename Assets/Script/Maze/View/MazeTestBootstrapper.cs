@@ -47,12 +47,18 @@ namespace ShiftingPyramid.Maze.View
 
             var seed = settings != null && !settings.UseRandomSeed
                 ? settings.Seed
-                : (int?)null;
+                : new System.Random().Next();
 
             var generator = new DepthFirstMazeGenerator();
             currentGrid = generator.Generate(width, height, seed);
 
-            mazeRenderer.Build(currentGrid);
+            if (settings != null)
+            {
+                var roomPlacer = new MazeRoomPlacer();
+                roomPlacer.Place(currentGrid, settings.TreasureRoomCount, settings.SpecialRoomCount, seed);
+            }
+
+            mazeRenderer.Build(currentGrid, settings, seed);
         }
     }
 }
