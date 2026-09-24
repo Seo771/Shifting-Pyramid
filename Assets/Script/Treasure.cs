@@ -2,10 +2,11 @@ using UnityEngine;
 
 // Treasure 스크립트는 보물 프리팹에 붙입니다.
 // 작동 개요:
-// - 프리팹에 Collider를 추가하고 "Is Trigger"를 체크합니다.
+// - 프리팹에 Collider를 추가하고 "Is Trigger"는 끕니다(비활성화).
+//   이렇게 하면 보물이 물체로 동작하여 플레이어가 통과하지 못하게 합니다.
 // - 플레이어 오브젝트에 태그 "Player"를 설정합니다 (Inspector > Tag > Player).
-// - 플레이어나 보물 중 적어도 한쪽에 Rigidbody가 있어야 트리거 이벤트가 발생합니다.
-// - 플레이어가 충돌하면 GameManager.Instance.AddTreasure()를 호출하고 보물을 삭제합니다.
+// - 플레이어는 CharacterController를 사용하므로 보물은 일반 Collider(비트리거)로 두면 충돌하여 막습니다.
+// - 상호작용은 G키(또는 PlayerInteractor의 전방 검사)를 통해 Interact()로 수행하세요.
 public class Treasure : MonoBehaviour, IInteractable
 {
     // 재진입 방지: 플레이어가 동시에 여러 번 충돌해 중복 획득되는 것을 막음

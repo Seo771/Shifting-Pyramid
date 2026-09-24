@@ -21,6 +21,14 @@ public class PlayerInteractor : MonoBehaviour
     // 간단하게 nearbyInteractables[0]을 사용하므로 이 변수는 편의용입니다.
     private IInteractable currentInteractable => nearbyInteractables.Count > 0 ? nearbyInteractables[0] : null;
 
+    [Header("직접 상호작용(전방) 설정")]
+    [Tooltip("플레이어 전방으로 검사할 최대 거리(미터)")]
+    public float interactionRange = 2f;
+    [Tooltip("전방 검사 시 사용하는 구 반지름(미터)")]
+    public float interactionRadius = 0.5f;
+    [Tooltip("전방 상호작용 검사에 사용할 레이어 마스크(필요 시 설정)")]
+    public LayerMask interactionMask = ~0;
+
     private void Reset()
     {
         // RequireComponent로 Collider가 붙어야 한다는 안내용. 실제로는 자식의 Trigger Collider를 권장합니다.
@@ -33,7 +41,14 @@ public class PlayerInteractor : MonoBehaviour
             // 먼저 리스트에 남아있는 파괴된(또는 null) 항목을 정리
             CleanUpNulls();
 
+            // 우선 트리거로 감지된 대상이 있으면 그것을 사용
             var target = currentInteractable;
+            if (target == null)
+            {
+                // 트리거 범위 안에 대상이 없으면 플레이어 전방을 검사해서 상호작용 가능 대상 찾기
+                target = FindInteractableInFront();
+            }
+
             if (target != null)
             {
                 target.Interact();
@@ -94,5 +109,37 @@ public class PlayerInteractor : MonoBehaviour
     {
         if (interactable != null)
             nearbyInteractables.Remove(interactable);
+    }
+
+    // 플레이어 전방을 스피어캐스트로 검사해 IInteractable을 찾는다.
+    private IInteractable FindInteractableInFront()
+    {
+        // 캐스트의 시작점을 플레이어 약간 위로 올립니다(대상 높이를 고려)
+        Vector3 origin = transform.position + Vector3.up * 0.5f;
+        Vector3 dir = transform.forward;
+
+        // SphereCastAll로 전방의 모든 충돌을 확인하고 가장 가까운 IInteractable을 선택
+        RaycastHit[] hits = Physics.SphereCastAll(origin, interactionRadius, dir, interactionRange, interactionMask, QueryTriggerInteraction.Collide);
+        float bestDist = float.MaxValue;
+        IInteractable best = null;
+
+        foreach (var h in hits)
+        {
+            var comps = h.collider.GetComponents<MonoBehaviour>();
+            foreach (var c in comps)
+            {
+                if (c is IInteractable interactable)
+                {
+                    float dist = h.distance;
+                    if (dist < bestDist)
+                    {
+                        bestDist = dist;
+                        best = interactable;
+                    }
+                }
+            }
+        }
+
+        return best;
     }
 }
