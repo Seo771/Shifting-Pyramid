@@ -30,15 +30,27 @@ public class PlayerInteractor : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.G))
         {
-            if (currentInteractable != null)
+            // 먼저 리스트에 남아있는 파괴된(또는 null) 항목을 정리
+            CleanUpNulls();
+
+            var target = currentInteractable;
+            if (target != null)
             {
-                currentInteractable.Interact();
+                target.Interact();
+                // 상호작용 후 대상은 소비될 수 있으므로 리스트에서 제거
+                nearbyInteractables.Remove(target);
             }
             else
             {
                 Debug.Log("[PlayerInteractor] 상호작용 가능한 대상이 없습니다.");
             }
         }
+    }
+
+    // 리스트에서 이미 파괴되어 null로 보이는 항목 제거
+    private void CleanUpNulls()
+    {
+        nearbyInteractables.RemoveAll(i => i == null || (i as Object) == null);
     }
 
     // 다른 객체의 Collider가 플레이어의 트리거에 들어왔을 때 호출
