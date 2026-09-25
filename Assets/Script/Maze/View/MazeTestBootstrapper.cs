@@ -14,6 +14,7 @@ namespace ShiftingPyramid.Maze.View
     {
         [SerializeField] private MazeRenderer mazeRenderer;
         [SerializeField] private MazeBalanceSettings settings;
+        [SerializeField] private PlayerMazeSpawner playerSpawner;
 
         [Header("Fallback Size")]
         [SerializeField] private int fallbackWidth = 5;
@@ -62,6 +63,10 @@ namespace ShiftingPyramid.Maze.View
             }
 
             mazeRenderer.Build(currentGrid, settings, seed);
+            if (playerSpawner != null)
+            {
+                playerSpawner.SpawnAtStart(mazeRenderer);
+            }
         }
     }
 }

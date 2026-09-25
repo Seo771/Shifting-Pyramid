@@ -137,7 +137,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!81 &330585544
 AudioListener:
   m_ObjectHideFlags: 0
@@ -383,6 +383,55 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &487055573
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 487055574}
+  - component: {fileID: 487055575}
+  m_Layer: 0
+  m_Name: MazeTestBootstrapper
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &487055574
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 487055573}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1383976438}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &487055575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 487055573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4baf2c1b5b6f4804083b863872085761, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Maze.View.MazeTestBootstrapper
+  mazeRenderer: {fileID: 1014796560}
+  settings: {fileID: 11400000, guid: c719456dd0de20141b440727caa63ecd, type: 2}
+  playerSpawner: {fileID: 0}
+  fallbackWidth: 5
+  fallbackHeight: 5
 --- !u!1 &562330936
 GameObject:
   m_ObjectHideFlags: 0
@@ -393,6 +442,7 @@ GameObject:
   m_Component:
   - component: {fileID: 562330938}
   - component: {fileID: 562330937}
+  - component: {fileID: 562330939}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -412,7 +462,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f52d43ac5c858c4588700c8482a6e71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  requiredTreasureCount: 3
+  treasureCount: 0
+  mazeBalanceSettings: {fileID: 0}
+  fallbackRequiredTreasureCount: 3
 --- !u!4 &562330938
 Transform:
   m_ObjectHideFlags: 0
@@ -428,6 +480,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &562330939
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 562330936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd2fd246a2514f23a849d71ca9d8f135, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMazeSpawner
+  playerPrefab: {fileID: 549291245094821423, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+  existingPlayer: {fileID: 779279313}
+  spawnHeight: 1.25
+--- !u!4 &779279313 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1255643523970855556, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+  m_PrefabInstance: {fileID: 939059301}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -477,6 +549,144 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &939059301
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 549291245094821423, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_Name
+      value: PlayerT
+      objectReference: {fileID: 0}
+    - target: {fileID: 1255643523970855556, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1255643523970855556, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1255643523970855556, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1255643523970855556, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1255643523970855556, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1255643523970855556, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1255643523970855556, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1255643523970855556, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1255643523970855556, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1255643523970855556, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+--- !u!1 &1014796559
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1014796561}
+  - component: {fileID: 1014796560}
+  m_Layer: 0
+  m_Name: MazeRenderer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1014796560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1014796559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9caa31143bc793a4881da5cfc12ac7e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Maze.View.MazeRenderer
+  tilePrefab: {fileID: 7863490368430874800, guid: 80204dc2eead9bd49aefda50eaeb1a64, type: 3}
+  tileRoot: {fileID: 0}
+  tileSize: 10
+  centerOnOrigin: 1
+--- !u!4 &1014796561
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1014796559}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1383976438}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1383976437
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1383976438}
+  m_Layer: 0
+  m_Name: Maze
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1383976438
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1383976437}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1014796561}
+  - {fileID: 487055574}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -485,3 +695,5 @@ SceneRoots:
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 562330938}
+  - {fileID: 939059301}
+  - {fileID: 1383976438}

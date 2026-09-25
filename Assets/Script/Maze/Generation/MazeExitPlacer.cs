@@ -68,6 +68,17 @@ namespace ShiftingPyramid.Maze.Generation
 
             exit.TileType = MazeTileType.Exit;
             exit.IsProtected = true;
+
+            // 미로 바깥을 향한 벽 하나를 열어 출구를 만든다.
+            foreach (var direction in Directions)
+            {
+                if (!grid.Contains(exit.Coordinate + direction.ToOffset()))
+                {
+                    grid.SetConnection(exit.Coordinate, direction, true);
+                    break;
+                }
+            }
+
             return exit.Coordinate;
         }
 

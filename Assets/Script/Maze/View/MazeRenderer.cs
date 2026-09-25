@@ -24,6 +24,18 @@ namespace ShiftingPyramid.Maze.View
 
         public float TileSize => tileSize;
 
+        public bool TryGetTileWorldPosition(MazeCoordinate coordinate, out Vector3 worldPosition)
+        {
+            if (tileViews.TryGetValue(coordinate, out var view) && view != null)
+            {
+                worldPosition = view.transform.position;
+                return true;
+            }
+
+            worldPosition = default;
+            return false;
+        }
+
         // MazeGrid 전체를 프리팹으로 새로 만든다.
         public void Build(MazeGrid grid, MazeBalanceSettings settings, int? seed = null)
         {
