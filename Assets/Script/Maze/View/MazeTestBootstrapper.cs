@@ -52,6 +52,9 @@ namespace ShiftingPyramid.Maze.View
             var generator = new DepthFirstMazeGenerator();
             currentGrid = generator.Generate(width, height, seed);
 
+            var exitPlacer = new MazeExitPlacer();
+            exitPlacer.Place(currentGrid);
+
             if (settings != null)
             {
                 var roomPlacer = new MazeRoomPlacer();
