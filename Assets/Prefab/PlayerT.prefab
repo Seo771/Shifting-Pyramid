@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 858221094408649524}
   - component: {fileID: 4363583351168173341}
   - component: {fileID: 686432363632347206}
+  - component: {fileID: 1156414229935768804}
   m_Layer: 0
   m_Name: PlayerT
   m_TagString: Player
@@ -194,6 +195,18 @@ MonoBehaviour:
   maxHealth: 100
   currentHealth: 0
   isDead: 0
+--- !u!114 &1156414229935768804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 549291245094821423}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8f8366fb9f33194893318971c2e7c7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractor
 --- !u!1 &4907436150270478942
 GameObject:
   m_ObjectHideFlags: 0
