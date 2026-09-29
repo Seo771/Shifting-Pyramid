@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using ShiftingPyramid.Maze.Core;
 using ShiftingPyramid.Maze.Generation;
 using ShiftingPyramid.Maze.Settings;
+using ShiftingPyramid.Maze.Validation;
 using UnityEngine;
 
 namespace ShiftingPyramid.Maze.View
@@ -60,6 +62,22 @@ namespace ShiftingPyramid.Maze.View
             {
                 var roomPlacer = new MazeRoomPlacer();
                 roomPlacer.Place(currentGrid, settings.TreasureRoomCount, settings.SpecialRoomCount, seed);
+            }
+
+            var requiredRooms = new List<MazeCoordinate>();
+            foreach (var tile in currentGrid.Tiles)
+            {
+                if (tile.TileType == MazeTileType.Exit || tile.TileType == MazeTileType.TreasureRoom)
+                {
+                    requiredRooms.Add(tile.Coordinate);
+                }
+            }
+
+            var pathValidator = new MazePathValidator();
+            if (!pathValidator.AreReachable(currentGrid, MazeCoordinate.Zero, requiredRooms))
+            {
+                Debug.LogError("Maze generation failed: exit or treasure room is unreachable.", this);
+                return;
             }
 
             mazeRenderer.Build(currentGrid, settings, seed);
