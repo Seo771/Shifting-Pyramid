@@ -1,10 +1,14 @@
 using ShiftingPyramid.Maze.Settings;
+using System;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
     // 싱글톤 인스턴스: 어디서든 GameManager.Instance로 접근
     public static GameManager Instance { get; private set; }
+
+    public event Action<int, int> OnTreasureChanged;
+    public event Action OnExitUnlocked;
 
     // 에디터 및 외부에서 쉽게 접근 가능한 보물 개수 변수 (요구사항)
     [Tooltip("획득한 보물의 개수")]
@@ -26,11 +30,12 @@ public class GameManager : MonoBehaviour
     private int collectedTreasureCount;
     private bool isPlayerDead;
     private bool hasReachedExit;
+    private bool hasUnlockedExit;
 
     public GameState CurrentState { get; private set; } = GameState.Ready;
     public int RequiredTreasureCount => fallbackRequiredTreasureCount;
     public int CollectedTreasureCount => collectedTreasureCount;
-    public bool IsExitUnlocked => collectedTreasureCount >= RequiredTreasureCount;
+    public bool IsExitUnlocked => hasUnlockedExit;
     public bool IsGameFinished => CurrentState == GameState.Victory || CurrentState == GameState.Defeat;
 
     // 씬 시작 시 바로 플레이 상태로 전환한다.
@@ -57,9 +62,16 @@ public class GameManager : MonoBehaviour
         collectedTreasureCount = 0;
         isPlayerDead = false;
         hasReachedExit = false;
+        hasUnlockedExit = RequiredTreasureCount <= 0;
         CurrentState = GameState.Playing;
         // 외부 요구사항: 공개된 treasureCount 변수도 동기화
         treasureCount = 0;
+
+        OnTreasureChanged?.Invoke(collectedTreasureCount, RequiredTreasureCount);
+        if (hasUnlockedExit)
+        {
+            OnExitUnlocked?.Invoke();
+        }
     }
 
     // 보물 획득 처리는 나중에 Treasure 관련 스크립트에서 이 함수를 호출한다.
@@ -80,7 +92,21 @@ public class GameManager : MonoBehaviour
         collectedTreasureCount += amount;
         // 공개 변수와 동기화 및 디버그 출력
         treasureCount += amount;
+        OnTreasureChanged?.Invoke(collectedTreasureCount, RequiredTreasureCount);
+
+        if (!hasUnlockedExit && collectedTreasureCount >= RequiredTreasureCount)
+        {
+            UnlockExit();
+        }
+
         Debug.Log($"[GameManager] 보물 획득! 현재 보물 개수: {treasureCount}");
+    }
+
+    private void UnlockExit()
+    {
+        hasUnlockedExit = true;
+        OnExitUnlocked?.Invoke();
+        Debug.Log("[GameManager] 출구가 열렸습니다.");
     }
 
     // 출구에 닿았을 때 호출한다. 출구가 잠겨 있으면 탈출 실패로 처리한다.
