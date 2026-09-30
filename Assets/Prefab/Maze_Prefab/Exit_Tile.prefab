@@ -606,6 +606,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7569881722080064900}
   - component: {fileID: 7863490368430874800}
+  - component: {fileID: 7014689636194014231}
+  - component: {fileID: 7289067401089315463}
   m_Layer: 0
   m_Name: Exit_Tile
   m_TagString: Untagged
@@ -651,6 +653,41 @@ MonoBehaviour:
   eastWall: {fileID: 7023578386048093162}
   southWall: {fileID: 4458485622507623190}
   westWall: {fileID: 5626685013691551112}
+--- !u!65 &7014689636194014231
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5487287106706641711}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 8, y: 4, z: 8}
+  m_Center: {x: 0, y: 2, z: 0}
+--- !u!114 &7289067401089315463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5487287106706641711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41c697fa686de814a928a279f6eab9d6, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::ExitGate
+  gameManager: {fileID: 0}
+  playerTag: Player
 --- !u!1 &5626685013691551112
 GameObject:
   m_ObjectHideFlags: 0

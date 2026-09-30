@@ -15,7 +15,17 @@ Unity 프로젝트 안에서 개발한다.
 ```text
 Assets/Script/Maze/Core/MazeCoordinate.cs
 Assets/Script/Maze/Core/MazeDirection.cs
+Assets/Script/Maze/Core/MazeTile.cs
+Assets/Script/Maze/Core/MazeTileType.cs
+Assets/Script/Maze/Core/MazeGrid.cs
+Assets/Script/Maze/Generation/DepthFirstMazeGenerator.cs
+Assets/Script/Maze/Generation/MazeRoomPlacer.cs
+Assets/Script/Maze/Generation/MazeExitPlacer.cs
+Assets/Script/Maze/Validation/MazePathValidator.cs
 Assets/Script/Maze/Settings/MazeBalanceSettings.cs
+Assets/Script/Maze/View/MazeTileView.cs
+Assets/Script/Maze/View/MazeRenderer.cs
+Assets/Script/Maze/View/MazeTestBootstrapper.cs
 ```
 
 ## 폴더 기준
@@ -125,28 +135,26 @@ seed
 `Assets/Data/MazeBalanceSettings.asset`에서 `Treasure Room Prefab`은 게임 전용 보물방으로 연결한다.
 같은 에셋의 `Special Room Prefabs` 리스트에는 특수방 프리팹을 여러 개 넣고, `Exit Room Prefab`에는 출구방 프리팹을 연결한다.
 방 프리팹도 루트에 `MazeTileView`가 필요하며, 기본 타일과 같은 크기 및 벽 방향으로 만들어야 벽 개폐가 정상적으로 적용된다.
-프리팹이 비어 있으면 기본 타일을 사용한다. 현재 출구 좌표를 지정하는 로직은 없으므로 출구 프리팹은 `Exit` 타일이 생길 때 표시된다.
+프리팹이 비어 있으면 기본 타일을 사용한다. 초기 생성 시에는 시작점에서 통로 거리상 가장 먼 가장자리 칸을 `Exit` 타일로 지정한 뒤 나머지 방을 배치한다.
+출구 칸은 보호 대상으로 표시하고, 미로 바깥을 향한 벽 하나를 연다.
+`Exit_Tile.prefab` 루트의 트리거와 `ExitGate`가 플레이어 진입 시 `GameManager.TryEscape()`를 호출한다.
+탈출 가능 여부는 `GameManager`가 보물 획득 상태로 판정하며, 잠금 상태를 나타내는 물리적 문은 아직 없다.
+
+## 플레이어 시작 위치
+
+`MazeRenderer`가 만든 시작 타일 `(0,0)`의 월드 위치를 `PlayerMazeSpawner`가 사용한다.
+`Maze_TestScene`은 씬에 있는 플레이어를 재배치한다. 플레이어 프리팹을 사용할 때는 스포너의 `Existing Player` 참조를 비우고 `Player Prefab`에 연결한다.
+`Spawn Height`는 플레이어 피벗과 바닥 높이에 맞춰 조정한다. 플레이어 생성 코드는 미로 계산 코드 밖에 둔다.
+
+## 경로 검증
+
+`MazePathValidator`는 시작 좌표에서 한 목적지(`IsReachable`) 또는 여러 목적지(`AreReachable`)까지 열린 통로로 이동할 수 있는지 검사한다.
+초기 생성 후에는 시작 칸에서 출구와 모든 보물방에 도달 가능한지 확인한다.
+나중에 게임 중 벽을 변경할 때도 변경 결과를 확정하기 전에 같은 검증기를 사용한다.
 
 공개용으로 미로 시스템을 분리할 때는 게임 전용 `Treasure Room Prefab` 연결과 보물방 배치를 제외하고, 특수방 리스트와 출구방 연결은 유지한다.
 
 ## 다음 구현 추천
 
-다음은 `MazeTile`을 만드는 것이 좋다.
-
-이유:
-
-```text
-MazeCoordinate와 MazeDirection이 준비됨
-이제 타일 하나가 어떤 벽을 가지고 있는지 표현할 수 있음
-그 다음에 MazeGrid로 전체 미로를 만들 수 있음
-```
-
-추천 순서:
-
-```text
-1. MazeTile
-2. MazeGrid
-3. DepthFirstMazeGenerator
-4. PathValidator
-5. MazeTileView / MazeRenderer
-```
+다음은 게임 중 미로 일부의 벽을 변경하는 로직이다.
+변경 후 `MazePathValidator`로 현재 위치에서 출구와 필요한 방까지 도달 가능한지 확인하고, 길이 끊기면 변경을 취소한다.

@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using ShiftingPyramid.Maze.Core;
 using ShiftingPyramid.Maze.Generation;
 using ShiftingPyramid.Maze.Settings;
+using ShiftingPyramid.Maze.Validation;
 using UnityEngine;
 
 namespace ShiftingPyramid.Maze.View
@@ -14,6 +16,7 @@ namespace ShiftingPyramid.Maze.View
     {
         [SerializeField] private MazeRenderer mazeRenderer;
         [SerializeField] private MazeBalanceSettings settings;
+        [SerializeField] private PlayerMazeSpawner playerSpawner;
 
         [Header("Fallback Size")]
         [SerializeField] private int fallbackWidth = 5;
@@ -52,13 +55,36 @@ namespace ShiftingPyramid.Maze.View
             var generator = new DepthFirstMazeGenerator();
             currentGrid = generator.Generate(width, height, seed);
 
+            var exitPlacer = new MazeExitPlacer();
+            exitPlacer.Place(currentGrid);
+
             if (settings != null)
             {
                 var roomPlacer = new MazeRoomPlacer();
                 roomPlacer.Place(currentGrid, settings.TreasureRoomCount, settings.SpecialRoomCount, seed);
             }
 
+            var requiredRooms = new List<MazeCoordinate>();
+            foreach (var tile in currentGrid.Tiles)
+            {
+                if (tile.TileType == MazeTileType.Exit || tile.TileType == MazeTileType.TreasureRoom)
+                {
+                    requiredRooms.Add(tile.Coordinate);
+                }
+            }
+
+            var pathValidator = new MazePathValidator();
+            if (!pathValidator.AreReachable(currentGrid, MazeCoordinate.Zero, requiredRooms))
+            {
+                Debug.LogError("Maze generation failed: exit or treasure room is unreachable.", this);
+                return;
+            }
+
             mazeRenderer.Build(currentGrid, settings, seed);
+            if (playerSpawner != null)
+            {
+                playerSpawner.SpawnAtStart(mazeRenderer);
+            }
         }
     }
 }
