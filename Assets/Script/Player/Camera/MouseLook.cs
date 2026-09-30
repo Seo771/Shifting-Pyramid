@@ -3,7 +3,7 @@
 public class MouseLook : MonoBehaviour
 {
     [Header("마우스 감도")]
-    public float mouseSensitivity = 100f;
+    public float mouseSensitivity = 200f;
 
     [Header("연결할 플레이어 몸통 Transform")]
     public Transform playerBody;
