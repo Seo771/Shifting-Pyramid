@@ -36,7 +36,7 @@ public class PlayerInteractor : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.G))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             // 먼저 리스트에 남아있는 파괴된(또는 null) 항목을 정리
             CleanUpNulls();
