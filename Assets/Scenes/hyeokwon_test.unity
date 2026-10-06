@@ -1202,6 +1202,10 @@ MonoBehaviour:
   currentSlotIndex: 0
   visibleDuration: 2
   fadeSpeed: 3
+  useDuration: 3
+  useProgressSlider: {fileID: 0}
+  useProgressText: {fileID: 0}
+  useProgressGroup: {fileID: 0}
 --- !u!114 &1352982121
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1819,6 +1823,7 @@ GameObject:
   - component: {fileID: 1735276340}
   - component: {fileID: 1735276341}
   - component: {fileID: 1735276342}
+  - component: {fileID: 1735276343}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2008,7 +2013,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8f8366fb9f33194893318971c2e7c7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractor
-  interactionDistance: 3
+  interactionRange: 2
+  interactionRadius: 0.1
+  interactionMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &1735276343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1735276333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ab346c4a5568b143be6729ce5d47f67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mummification
+  increaseRatePerSecond: 10
+  currentMummification: 0
+  onMummificationChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onMummified:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1810997495
 GameObject:
   m_ObjectHideFlags: 0
