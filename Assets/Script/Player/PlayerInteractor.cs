@@ -3,7 +3,7 @@ using UnityEngine;
 
 // PlayerInteractor
 // - 주변의 IInteractable 감지
-// - F키로 상호작용
+// - G키로 상호작용
 // - 상호작용 가능한 대상이 가까이 있으면 Interaction UI 표시
 // - Interaction UI는 현재 대상의 아래쪽에 표시됨
 // - 보물의 Collider 크기와 관계없이 Transform 위치를 기준으로 UI 위치 결정
@@ -51,8 +51,8 @@ public class PlayerInteractor : MonoBehaviour
         {
             ShowInteractionUI(target);
 
-            // F키로 상호작용
-            if (Input.GetKeyDown(KeyCode.F))
+            // G키로 상호작용
+            if (Input.GetKeyDown(KeyCode.G))
             {
                 target.Interact();
 
