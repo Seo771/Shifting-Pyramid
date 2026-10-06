@@ -1383,7 +1383,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StaminaBarUI
   staminaSlider: {fileID: 560014892}
   staminaText: {fileID: 259972258}
-  playerStamina: {fileID: 0}
+  playerStamina: {fileID: 1504025123}
 --- !u!114 &560014892
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2887,7 +2887,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HealthBarUI
   healthSlider: {fileID: 1276292861}
   healthText: {fileID: 508534551}
-  playerHP: {fileID: 0}
+  playerHP: {fileID: 1504025122}
 --- !u!1 &1324384761
 GameObject:
   m_ObjectHideFlags: 0
@@ -2996,6 +2996,28 @@ Transform:
   - {fileID: 487055574}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1504025122 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7034789590385032235, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+  m_PrefabInstance: {fileID: 939059301}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca541c5cfc3e7ba4dabffbe24519eebd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHP
+--- !u!114 &1504025123 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7332598304695130220, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+  m_PrefabInstance: {fileID: 939059301}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0fa75bf9f20e454699da10d0916d667, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStamina
 --- !u!1 &1540142477
 GameObject:
   m_ObjectHideFlags: 0
