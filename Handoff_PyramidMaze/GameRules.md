@@ -31,14 +31,19 @@ Treasure Rooms are core objective rooms.
 
 Rules:
 - N Treasure Rooms are generated at initial map creation.
+- Representation: one manually authored 3x3 prefab per room, occupying nine grid cells. Use MazeRoomView and declared entrance markers.
 - Their positions are fixed for the whole run.
 - Their structure never changes.
-- They are excluded from maze-change regions.
+- Their entire footprints and entrance connections are protected from maze changes.
 - Collected treasure contributes to the escape requirement.
 - They must remain reachable after every maze change.
 
 ## 4. Special Rooms
 Special Rooms are separate from Treasure Rooms.
+
+Their representation is also a manually authored 3x3 prefab with declared entrances. Room count means whole rooms, not occupied cells. Authors choose entrance count; the generator connects every declared entrance.
+
+Current code places Special Rooms during initial generation and protects all nine cells. Runtime appearance/removal is not implemented. Fixed rooms are the current behavior; the dynamic variant below remains a future candidate.
 
 ### Fixed Special Rooms
 Current idea:
@@ -58,9 +63,11 @@ Exact types are not finalized.
 
 ### Dynamic Special Rooms
 Candidate feature:
-- during maze changes, a normal room may become a temporary Special Room
+- during maze changes, a suitable 3x3 ordinary-cell footprint may become a temporary Special Room
 
 Restrictions:
+- reserve the entire non-overlapping 3x3 footprint and reconnect only through declared entrances
+- validate reachability when the room appears or is removed; never partially replace its footprint
 - never replace Treasure Room
 - never replace Exit
 - never replace player tile

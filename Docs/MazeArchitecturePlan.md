@@ -18,12 +18,15 @@ Assets/Script/Maze/Core/MazeDirection.cs
 Assets/Script/Maze/Core/MazeTile.cs
 Assets/Script/Maze/Core/MazeTileType.cs
 Assets/Script/Maze/Core/MazeGrid.cs
+Assets/Script/Maze/Core/MazeRoom.cs
 Assets/Script/Maze/Generation/DepthFirstMazeGenerator.cs
 Assets/Script/Maze/Generation/MazeRoomPlacer.cs
 Assets/Script/Maze/Generation/MazeExitPlacer.cs
 Assets/Script/Maze/Validation/MazePathValidator.cs
 Assets/Script/Maze/Settings/MazeBalanceSettings.cs
 Assets/Script/Maze/View/MazeTileView.cs
+Assets/Script/Maze/View/MazeRoomView.cs
+Assets/Script/Maze/View/MazeRoomEntranceMarker.cs
 Assets/Script/Maze/View/MazeRenderer.cs
 Assets/Script/Maze/View/MazeTestBootstrapper.cs
 ```
@@ -110,35 +113,95 @@ seed
 `requiredTreasureCount`처럼 승리 조건에 직접 들어가는 게임 룰은 `GameManager`에서 관리한다.
 나중에 GitHub 공개용으로 다듬을 때는 `MazeBalanceSettings`와 미로 알고리즘 쪽만 남기고, `GameManager` 같은 게임 전용 코드는 제외한다.
 
-## 방 데이터 범위
+## 현재 방 구현
 
-현재 방 데이터는 단순하게 유지한다.
+현재는 3x3 보물방·특수방 영역을 먼저 예약하고, 일반 칸과 방을 각각 방문 단위로 삼아 DFS로 통로를 생성한다.
+표시한 출입구는 모두 연결하고 이후 출구를 배치한다. 보물방·특수방은 9칸 전체를 보호 대상으로 표시한다.
+특수방의 런타임 등장·제거는 아직 구현되지 않았다.
+개수는 `MazeBalanceSettings.TreasureRoomCount`와 `SpecialRoomCount`로 관리한다.
 
-```text
-보물방
--> 형태는 1개
--> 별도 데이터베이스를 만들지 않는다.
--> 개수는 MazeBalanceSettings.TreasureRoomCount로 관리한다.
-
-특수방
--> 전부 동적으로 등장한다.
--> 아직 종류별 데이터베이스를 만들지 않는다.
--> 개수는 MazeBalanceSettings.SpecialRoomCount로 관리한다.
--> 타일 타입은 MazeTileType.SpecialRoom 하나만 사용한다.
-```
-
-나중에 특수방 종류가 여러 개로 확정되고, 각 방마다 프리팹/가중치/등장 조건이 필요해지면 그때 `SpecialRoomData`와 `SpecialRoomDatabase`를 다시 추가한다.
-
-## 방 프리팹 연결
+## 현재 방 프리팹 연결
 
 씬의 `MazeRenderer` 컴포넌트에서 `Tile Prefab`은 일반 타일로 연결한다.
-`Assets/Data/MazeBalanceSettings.asset`에서 `Treasure Room Prefab`은 게임 전용 보물방으로 연결한다.
-같은 에셋의 `Special Room Prefabs` 리스트에는 특수방 프리팹을 여러 개 넣고, `Exit Room Prefab`에는 출구방 프리팹을 연결한다.
-방 프리팹도 루트에 `MazeTileView`가 필요하며, 기본 타일과 같은 크기 및 벽 방향으로 만들어야 벽 개폐가 정상적으로 적용된다.
-프리팹이 비어 있으면 기본 타일을 사용한다. 초기 생성 시에는 시작점에서 통로 거리상 가장 먼 가장자리 칸을 `Exit` 타일로 지정한 뒤 나머지 방을 배치한다.
+`Assets/Data/MazeBalanceSettings.asset`의 `Treasure Room 3x3 Prefab`과 `Special Room 3x3 Prefabs`에는 루트에 `MazeRoomView`가 붙은 큰 방을 연결한다.
+`Exit Room Prefab`에는 기존 1칸 출구방의 `MazeTileView`를 연결한다.
+큰 방에는 `MazeTileView`를 사용하지 않는다. 기존 1칸 방 참조는 숨겨서 보존하고 새 생성에 사용하지 않는다.
+방 개수가 양수인데 큰 방 프리팹이 비어 있으면 생성 오류를 표시한다. 출구 프리팹이 비어 있으면 일반 타일로 표시한다.
+초기 생성 시에는 방과 통로를 연결한 뒤 시작점에서 통로 거리상 가장 먼 가장자리 칸을 `Exit` 타일로 지정한다.
 출구 칸은 보호 대상으로 표시하고, 미로 바깥을 향한 벽 하나를 연다.
 `Exit_Tile.prefab` 루트의 트리거와 `ExitGate`가 플레이어 진입 시 `GameManager.TryEscape()`를 호출한다.
 탈출 가능 여부는 `GameManager`가 보물 획득 상태로 판정하며, 잠금 상태를 나타내는 물리적 문은 아직 없다.
+
+## 구현된 구조: 직접 제작하는 3x3 방 프리팹
+
+보물방과 특수방은 각각 일반 미로 타일 9칸을 차지하는 프리팹 하나로 제작한다.
+예약·생성·검증·렌더링 코드를 이 방식으로 전환했다. 제작한 방 프리팹은 아래 컴포넌트를 붙이고 설정 에셋에 직접 연결해야 한다.
+구체적인 제작/연결 순서는 [RoomPrefabSetup.md](RoomPrefabSetup.md)를 참고한다.
+일반 통로는 기존 타일의 네 방향 벽 개폐 방식을 유지하고, 방 내부와 문은 제작자가 직접 구성한다.
+
+### 프리팹 제작 기준
+
+- 가로·세로는 각각 `tileSize * 3`. 현재 타일 간격 10 기준으로 30x30 크기다.
+- 루트 피벗은 방 중앙의 바닥에 둔다.
+- 바닥, 외벽, 천장, 내부 장식과 실제 문 오브젝트를 직접 만든다.
+- 방이 차지하는 9칸에는 일반 타일 프리팹을 중복 생성하지 않는다.
+- 문 위치에는 출입구 표시점을 두고, 표시점마다 방 내부의 경계 칸 좌표와 바깥 방향을 지정한다.
+- 문은 인접 일반 타일의 통로와 높이·폭·위치가 맞아야 한다. 표시점 데이터와 실제 구멍/콜라이더도 일치해야 한다.
+
+방 내부 로컬 격자는 남서쪽을 `(0,0)`, 북동쪽을 `(2,2)`로 잡는다.
+북쪽 중앙 출입구는 `(1,2), North`, 동쪽 중앙 출입구는 `(2,1), East`로 표현한다.
+문은 해당 경계 칸의 외곽 변에 놓는다. 프리팹 피벗과 출입구 로컬 격자 원점은 서로 다른 기준이다.
+
+기존 `MazeTileView`는 1칸 타일의 네 벽을 관리한다.
+큰 방 루트에는 `MazeRoomView`, 문 표시점에는 `MazeRoomEntranceMarker`를 붙인다.
+표시점은 `Local Cell`과 `Direction`으로 경계를 지정하며, `Align Marker To Grid`로 위치를 맞출 수 있다.
+
+### 논리 데이터와 문 동작
+
+미로 계산에 필요한 방 데이터는 방 식별자, 배치 기준 좌표, 점유한 9칸, 출입구의 경계 칸 좌표와 방향이다.
+Unity 쪽이 표시점에서 이 정보를 읽어 계산 코드에 전달한다.
+Core·Generation·Validation은 프리팹, Transform, 문 스크립트를 직접 참조하지 않는다.
+문 열림 애니메이션, 잠금 조건, 상호작용은 게임/표시 계층에서 담당한다.
+
+초기 설계에서는 방 안의 모든 출입구와 보물 상호작용 지점 사이를 이동할 수 있다고 가정한다.
+내부 벽으로 공간을 분리하면 별도 내부 연결 정보가 필요하다.
+잠긴 문을 쓰는 경우 검증 대상이 현재 이동 가능성인지, 잠금 해제 후 이동 가능성인지 정하고 상태를 반영해야 한다.
+
+### 미로 생성 순서
+
+1. 시작점과 겹치지 않는 3x3 방 영역들을 먼저 예약하고 출입구 데이터를 정한다.
+2. 각 출입구 바깥에 통로를 연결할 공간이 있는지 검사한다.
+3. 일반 타일과 방 전체를 각각 연결 단위로 취급해 미로를 생성한다. 방 내부 9칸을 독립 DFS 대상으로 파지 않는다.
+4. 지정된 출입구에서만 방과 통로를 연결하고, 인접 일반 타일의 맞은편 벽을 연다.
+5. 방 점유 영역 밖의 도달 가능한 가장자리 칸에 기존 출구를 배치한다.
+6. BFS로 시작점에서 출구와 모든 보물방까지의 경로를 검사한다.
+7. 검증된 결과에 일반 타일 프리팹과 방당 하나의 3x3 프리팹을 배치한다.
+
+DFS는 방 중심 좌표를 대표 방문 노드로 사용하고, 방의 출입구에서 바깥 칸으로 탐색한다.
+출입구가 여러 개면 전체 경로에 순환이 생길 수 있으므로, 합쳐진 미로가 반드시 트리 형태일 필요는 없다.
+출입구가 없는 외벽에는 연결을 만들지 않는다.
+
+### 경로 검증과 미로 변경
+
+`MazeGrid.AddRoom`이 내부 칸들의 연결을 일관된 격자 데이터로 반영하므로 기존 BFS가 방 안에서도 탐색할 수 있다.
+시작점에서 모든 방 중심과 출구에 도달 가능한지 확인한다.
+제작된 벽이나 닫힌 출입구를 가상의 통로로 처리해서는 안 된다.
+
+보물방은 9칸 전체와 출입구 연결을 보호한다. 주변 통로는 변경 후에도 보물방까지 도달 가능해야 한다.
+방의 3x3 점유 영역과 미로 변경의 3x3 영역은 다른 개념이다.
+미로 변경 중 방의 일부만 재생성하지 않는다.
+현재 특수방도 초기 배치 후 9칸을 보호한다. 동적 이동·제거를 도입한다면 점유 영역 전체와 외부 연결을 함께 검증해야 한다.
+
+### 아직 정하지 않은 사항
+
+- 보물방·특수방별 최종 출입구 수. 현재는 표시한 문을 모두 연결한다.
+- 향후 프리팹 회전 지원. 현재 방 루트는 회전 0, 스케일 1을 요구한다.
+- 특수방의 등장·제거 시점과 보호 정책.
+- 미로 크기, 방 개수, 방 사이 간격, 배치 재시도 및 실패 처리.
+
+현재 설정은 15x15 미로에 보물방 5개와 특수방 2개다.
+맵 가장자리를 일반 통로로 남기고 방 사이를 최소 한 칸 띄운다.
+배치를 최대 128번 재시도하고 실패하면 크기/개수를 조정하도록 오류를 출력한다.
 
 ## 플레이어 시작 위치
 
@@ -156,5 +219,9 @@ seed
 
 ## 다음 구현 추천
 
-다음은 게임 중 미로 일부의 벽을 변경하는 로직이다.
-변경 후 `MazePathValidator`로 현재 위치에서 출구와 필요한 방까지 도달 가능한지 확인하고, 길이 끊기면 변경을 취소한다.
+1. 제작한 큰 방 프리팹에 루트/출입구 컴포넌트를 붙이고 설정에 연결한다.
+2. Unity Play Mode에서 실제 벽·콜라이더·문과 논리 경로가 일치하는지 확인한다.
+3. 맵 크기·방 개수·출입구 수를 플레이테스트로 조정한다.
+4. 이후 게임 중 일부 통로의 벽을 변경하는 로직을 구현한다.
+
+런타임 변경 결과는 현재 플레이어 위치에서 출구와 필요한 방에 도달 가능한지 검사하고, 길이 끊기면 취소한다.

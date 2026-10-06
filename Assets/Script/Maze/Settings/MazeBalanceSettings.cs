@@ -12,16 +12,21 @@ namespace ShiftingPyramid.Maze.Settings
     public class MazeBalanceSettings : ScriptableObject
     {
         [Header("Maze Size")]
-        [SerializeField, Min(2)] private int mazeWidth = 10;
-        [SerializeField, Min(2)] private int mazeHeight = 10;
+        [SerializeField, Min(2)] private int mazeWidth = 15;
+        [SerializeField, Min(2)] private int mazeHeight = 15;
 
         [Header("Rooms")]
         [SerializeField, Min(0)] private int treasureRoomCount = 5;
         [SerializeField, Min(0)] private int specialRoomCount = 2;
 
-        [Header("Room Prefabs")]
-        [SerializeField] private MazeTileView treasureRoomPrefab;
-        [SerializeField] private List<MazeTileView> specialRoomPrefabs = new List<MazeTileView>();
+        [Header("3x3 Room Prefabs")]
+        [SerializeField] private MazeRoomView treasureRoom3x3Prefab;
+        [SerializeField] private List<MazeRoomView> specialRoom3x3Prefabs = new List<MazeRoomView>();
+        // 기존 에셋의 1칸 프리팹 참조는 보존하되 새 생성에는 사용하지 않는다.
+        [SerializeField, HideInInspector] private MazeTileView treasureRoomPrefab;
+        [SerializeField, HideInInspector] private List<MazeTileView> specialRoomPrefabs = new List<MazeTileView>();
+
+        [Header("Exit (1x1)")]
         [SerializeField] private MazeTileView exitRoomPrefab;
 
         [Header("Runtime Maze Change")]
@@ -38,8 +43,8 @@ namespace ShiftingPyramid.Maze.Settings
         public int MazeHeight => mazeHeight;
         public int TreasureRoomCount => treasureRoomCount;
         public int SpecialRoomCount => specialRoomCount;
-        public MazeTileView TreasureRoomPrefab => treasureRoomPrefab;
-        public IReadOnlyList<MazeTileView> SpecialRoomPrefabs => specialRoomPrefabs;
+        public MazeRoomView TreasureRoom3x3Prefab => treasureRoom3x3Prefab;
+        public IReadOnlyList<MazeRoomView> SpecialRoom3x3Prefabs => specialRoom3x3Prefabs;
         public MazeTileView ExitRoomPrefab => exitRoomPrefab;
         public int MazeChangeRegionSize => mazeChangeRegionSize;
         public float MazeChangeInterval => mazeChangeInterval;
