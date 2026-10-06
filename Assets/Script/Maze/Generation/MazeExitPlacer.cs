@@ -52,6 +52,7 @@ namespace ShiftingPyramid.Maze.Generation
                 {
                     if (!tile.IsOpen(direction)
                         || !grid.TryGetNeighbor(coordinate, direction, out var neighbor)
+                        || !neighbor.IsOpen(direction.Opposite())
                         || !visited.Add(neighbor.Coordinate))
                     {
                         continue;

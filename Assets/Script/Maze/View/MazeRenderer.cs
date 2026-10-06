@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ShiftingPyramid.Maze.Core;
 using ShiftingPyramid.Maze.Settings;
@@ -5,10 +6,7 @@ using UnityEngine;
 
 namespace ShiftingPyramid.Maze.View
 {
-    /// <summary>
-    /// MazeGrid 데이터를 Unity 씬의 타일 프리팹들로 배치한다.
-    /// 미로 생성 알고리즘은 담당하지 않고, 생성된 데이터를 보여주는 역할만 한다.
-    /// </summary>
+    /// <summary>일반 타일과 점유 영역당 하나의 3x3 방 프리팹을 배치한다.</summary>
     [DisallowMultipleComponent]
     public class MazeRenderer : MonoBehaviour
     {
@@ -17,105 +15,98 @@ namespace ShiftingPyramid.Maze.View
         [SerializeField] private Transform tileRoot;
 
         [Header("Layout")]
-        [SerializeField] private float tileSize = 10f;
+        [SerializeField, Min(0.01f)] private float tileSize = 10f;
         [SerializeField] private bool centerOnOrigin = true;
 
         private readonly Dictionary<MazeCoordinate, MazeTileView> tileViews = new Dictionary<MazeCoordinate, MazeTileView>();
+        private readonly Dictionary<MazeCoordinate, Vector3> tilePositions = new Dictionary<MazeCoordinate, Vector3>();
+        private readonly List<GameObject> roomObjects = new List<GameObject>();
 
         public float TileSize => tileSize;
 
         public bool TryGetTileWorldPosition(MazeCoordinate coordinate, out Vector3 worldPosition)
         {
-            if (tileViews.TryGetValue(coordinate, out var view) && view != null)
+            if (tilePositions.TryGetValue(coordinate, out var localPosition))
             {
-                worldPosition = view.transform.position;
+                worldPosition = GetTileRoot().TransformPoint(localPosition);
                 return true;
             }
-
             worldPosition = default;
             return false;
         }
 
-        // MazeGrid 전체를 프리팹으로 새로 만든다.
-        public void Build(MazeGrid grid, MazeBalanceSettings settings, int? seed = null)
+        public void ValidateConfiguration()
         {
-            if (grid == null)
-            {
-                Debug.LogWarning("MazeRenderer.Build failed: grid is null.", this);
-                return;
-            }
-
             if (tilePrefab == null)
-            {
-                Debug.LogWarning("MazeRenderer.Build failed: tile prefab is not assigned.", this);
-                return;
-            }
+                throw new InvalidOperationException("MazeRenderer: assign the ordinary Tile Prefab.");
+            if (tileSize <= 0f)
+                throw new InvalidOperationException("MazeRenderer: Tile Size must be positive.");
+        }
+
+        // roomPrefabs는 생성 단계에서 선택한 목록이며 Room.TemplateIndex와 대응한다.
+        public void Build(MazeGrid grid, MazeBalanceSettings settings, int? seed = null,
+            IReadOnlyList<MazeRoomView> roomPrefabs = null)
+        {
+            if (grid == null) throw new ArgumentNullException(nameof(grid));
+            ValidateConfiguration();
+            foreach (var room in grid.Rooms)
+                if (roomPrefabs == null || room.TemplateIndex < 0
+                    || room.TemplateIndex >= roomPrefabs.Count || roomPrefabs[room.TemplateIndex] == null)
+                    throw new InvalidOperationException("MazeRenderer: a reserved room has no matching 3x3 prefab.");
 
             Clear();
-
-            var random = seed.HasValue ? new System.Random(seed.Value) : new System.Random();
-            var availableSpecialRooms = new List<MazeTileView>();
-            if (settings != null && settings.SpecialRoomPrefabs != null)
-            {
-                foreach (var prefab in settings.SpecialRoomPrefabs)
-                {
-                    if (prefab != null)
-                    {
-                        availableSpecialRooms.Add(prefab);
-                    }
-                }
-            }
-
             foreach (var tile in grid.Tiles)
             {
-                var prefab = GetPrefab(tile.TileType, settings, availableSpecialRooms, random);
+                tilePositions.Add(tile.Coordinate, GetLocalPosition(tile.Coordinate, grid.Width, grid.Height));
+                if (grid.TryGetRoom(tile.Coordinate, out _)) continue;
+
+                var prefab = tile.TileType == MazeTileType.Exit && settings != null && settings.ExitRoomPrefab != null
+                    ? settings.ExitRoomPrefab : tilePrefab;
                 var view = Instantiate(prefab, GetTileRoot());
-                view.transform.localPosition = GetLocalPosition(tile.Coordinate, grid.Width, grid.Height);
+                view.transform.localPosition = tilePositions[tile.Coordinate];
                 view.name = $"MazeTile_{tile.Coordinate.X}_{tile.Coordinate.Y}";
                 view.Apply(tile);
-
                 tileViews.Add(tile.Coordinate, view);
             }
+
+            foreach (var room in grid.Rooms)
+            {
+                var view = Instantiate(roomPrefabs[room.TemplateIndex], GetTileRoot());
+                view.transform.localPosition = GetLocalPosition(room.Center, grid.Width, grid.Height);
+                view.transform.localRotation = Quaternion.identity;
+                view.name = $"MazeRoom_{room.Template.TileType}_{room.Origin.X}_{room.Origin.Y}";
+                view.Initialize(room);
+                roomObjects.Add(view.gameObject);
+            }
         }
 
-        // 이미 만들어진 타일 프리팹에 벽 상태만 다시 반영한다.
+        // 방 내부와 문은 프리팹이 관리한다. 여기서는 일반 통로 벽만 갱신한다.
         public void Refresh(MazeGrid grid)
         {
-            if (grid == null)
-            {
-                return;
-            }
-
+            if (grid == null) return;
             foreach (var tile in grid.Tiles)
-            {
-                if (tileViews.TryGetValue(tile.Coordinate, out var view))
-                {
+                if (tileViews.TryGetValue(tile.Coordinate, out var view) && view != null)
                     view.Apply(tile);
-                }
-            }
         }
 
-        // 현재 렌더러가 만든 타일 오브젝트를 모두 삭제한다.
         public void Clear()
         {
             foreach (var view in tileViews.Values)
-            {
-                if (view == null)
-                {
-                    continue;
-                }
-
-                if (Application.isPlaying)
-                {
-                    Destroy(view.gameObject);
-                }
-                else
-                {
-                    DestroyImmediate(view.gameObject);
-                }
-            }
+                if (view != null) RemoveGeneratedObject(view.gameObject);
+            foreach (var room in roomObjects)
+                if (room != null) RemoveGeneratedObject(room);
 
             tileViews.Clear();
+            tilePositions.Clear();
+            roomObjects.Clear();
+        }
+
+        private void RemoveGeneratedObject(GameObject generated)
+        {
+            // Destroy가 프레임 끝에 실행되더라도 이전 미로가 충돌하지 않게 한다.
+            generated.SetActive(false);
+            if (Application.isPlaying) Destroy(generated);
+            else DestroyImmediate(generated);
         }
 
         private Transform GetTileRoot()
@@ -123,43 +114,15 @@ namespace ShiftingPyramid.Maze.View
             return tileRoot != null ? tileRoot : transform;
         }
 
-        // 비워 둔 방 종류는 기본 타일 프리팹으로 표시한다.
-        private MazeTileView GetPrefab(
-            MazeTileType tileType,
-            MazeBalanceSettings settings,
-            List<MazeTileView> availableSpecialRooms,
-            System.Random random)
-        {
-            switch (tileType)
-            {
-                case MazeTileType.TreasureRoom:
-                    return settings != null && settings.TreasureRoomPrefab != null
-                        ? settings.TreasureRoomPrefab
-                        : tilePrefab;
-                case MazeTileType.SpecialRoom:
-                    return availableSpecialRooms.Count > 0
-                        ? availableSpecialRooms[random.Next(availableSpecialRooms.Count)]
-                        : tilePrefab;
-                case MazeTileType.Exit:
-                    return settings != null && settings.ExitRoomPrefab != null
-                        ? settings.ExitRoomPrefab
-                        : tilePrefab;
-                default:
-                    return tilePrefab;
-            }
-        }
-
         private Vector3 GetLocalPosition(MazeCoordinate coordinate, int width, int height)
         {
             var x = coordinate.X * tileSize;
             var z = coordinate.Y * tileSize;
-
             if (centerOnOrigin)
             {
                 x -= (width - 1) * tileSize * 0.5f;
                 z -= (height - 1) * tileSize * 0.5f;
             }
-
             return new Vector3(x, 0f, z);
         }
     }
