@@ -8,29 +8,29 @@ public class MouseLook : MonoBehaviour
     [Header("연결할 플레이어 몸통 Transform")]
     public Transform playerBody;
 
-    private float xRotation = 0f; // 카메라 상하 회전 값 누적용
+    private float xRotation = 0f;
 
     void Start()
     {
-        // 마우스 커서를 화면 중앙에 고정하고 숨김 처리
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-    void Update()
+    // ★ Update 대신 LateUpdate를 사용하여 플레이어 이동이 완전히 끝난 후 카메라 갱신
+    void LateUpdate()
     {
-        // 마우스 입력값 받아오기
+        if (playerBody == null) return;
+
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-        // 상하 회전 (X축 회전) 누적 및 각도 제한 (-90도 ~ 90도)
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-        // 1. 카메라 상하 회전 적용
+        // 1. 카메라 상하 회전
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-        // 2. 플레이어 몸통 좌우 회전 적용 (Y축 회전)
+        // 2. 플레이어 좌우 회전
         playerBody.Rotate(Vector3.up * mouseX);
     }
 }

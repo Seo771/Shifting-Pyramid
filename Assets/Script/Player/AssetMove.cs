@@ -9,7 +9,7 @@ public class AssetMove : MonoBehaviour
     [Header("중력 및 점프 설정")]
     public float gravity = -20f;
     public float jumpHeight = 1.5f;
-    private Vector3 velocity; // ★ CS0103 에러 방지용 변수 선언
+    private Vector3 velocity;
 
     [Header("애니메이션 설정")]
     public Animator animator;
@@ -18,9 +18,7 @@ public class AssetMove : MonoBehaviour
     private PlayerStamina stamina;
     private PlayerHP health;
 
-    // Y좌표 변화량 체크용 변수
-    private float lastYPosition;
-    private bool isYStationary; 
+    private bool isJumping = false;
 
     void Start()
     {
@@ -30,13 +28,11 @@ public class AssetMove : MonoBehaviour
 
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
-
-        // 초기 Y위치 기록
-        lastYPosition = transform.position.y;
     }
 
     void Update()
     {
+        // 사망 시 정지
         if (health != null && health.isDead)
         {
             if (animator != null)
@@ -44,22 +40,15 @@ public class AssetMove : MonoBehaviour
             return;
         }
 
-        // 1. 현재 Y좌표와 이전 프레임 Y좌표 비교 (Y 변화량 계산)
-        float currentY = transform.position.y;
-        float yDelta = Mathf.Abs(currentY - lastYPosition);
-
-        // 한 프레임 동안 Y축 변화가 0.001f 미만이면 "Y좌표 변화 없음" 상태로 판정
-        isYStationary = yDelta < 0.001f;
-
-        // 점프 및 지면 판정 보완
-        bool canJump = controller.isGrounded || isYStationary;
-
-        if (canJump && velocity.y < 0)
+        // 1. 지면 감지 및 중력 초기화
+        // controller.isGrounded를 직접 사용하며, 하강 중(velocity.y <= 0)일 때만 중력을 착지용(-2f)으로 고정
+        if (controller.isGrounded && velocity.y <= 0f)
         {
             velocity.y = -2f;
+            isJumping = false;
         }
 
-        // 2. 이동 입력 처리 (WASD)
+        // 2. WASD 이동 입력
         float horizontal = 0f;
         float vertical = 0f;
 
@@ -69,23 +58,49 @@ public class AssetMove : MonoBehaviour
         if (Input.GetKey(KeyCode.S)) vertical -= 1f;
 
         bool isMoving = horizontal != 0 || vertical != 0;
+        bool isShiftPressed = Input.GetKey(KeyCode.LeftShift);
 
-        // 달리기 및 스태미나
-        bool isRunning = Input.GetKey(KeyCode.LeftShift) && isMoving && stamina != null && stamina.CanRun();
+        // 3. Shift 달리기 및 스태미나 상태 처리
+        bool canRunStamina = (stamina != null) && stamina.CanRun();
+        
+        // 이동 중이고, Shift를 눌렀으며, 스태미나가 있을 때만 달리기 시도
+        bool isRunning = isShiftPressed && isMoving && canRunStamina;
+
         if (stamina != null)
         {
-            if (isRunning) stamina.DrainStamina();
-            else stamina.RegenerateStamina();
+            if (isRunning)
+            {
+                stamina.DrainStamina(); // 스태미나 소모
+
+                // 스태미나 소모 후 탈진했는지 즉시 재검사하여 그 즉시 isRunning 차단
+                if (!stamina.CanRun())
+                {
+                    isRunning = false;
+                }
+            }
+            else
+            {
+                // Shift 키를 누르고 있는 동안에는 걷더라도 스태미나 회복 차단!
+                if (!isShiftPressed)
+                {
+                    stamina.RegenerateStamina();
+                }
+            }
         }
 
+        // 최종 속도 결정
         float currentSpeed = moveSpeed;
-        if (isRunning) currentSpeed *= runSpeedMultiplier;
+        if (isRunning)
+        {
+            currentSpeed *= runSpeedMultiplier;
+        }
 
         Vector3 moveDirection = (transform.right * horizontal + transform.forward * vertical).normalized;
 
-        // 3. 점프 실행 (Y좌표 변화가 없거나 isGrounded일 때)
-        if (Input.GetButtonDown("Jump") && canJump)
+        // 4. 점프 실행 (controller.isGrounded만 확실하게 체크)
+        if (Input.GetButtonDown("Jump") && controller.isGrounded && !isJumping)
         {
+            isJumping = true;
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
 
             if (animator != null)
@@ -95,32 +110,26 @@ public class AssetMove : MonoBehaviour
             }
         }
 
-        // 4. 중력 적용 및 최종 이동
+        // 5. 중력 적용 및 최종 이동
         velocity.y += gravity * Time.deltaTime;
         Vector3 finalMove = (moveDirection * currentSpeed) + new Vector3(0f, velocity.y, 0f);
         controller.Move(finalMove * Time.deltaTime);
 
-        // 5. 다음 프레임 비교를 위한 Y위치 갱신
-        lastYPosition = transform.position.y;
-
-        // 6. 애니메이션 Speed 조절
+        // 6. 애니메이션 파라미터 전달
         if (animator != null)
         {
-            float animationSpeed = 0f;
+            float targetAnimationSpeed = 0f;
 
-            // 이동 입력이 있고 moving 상태일 때만 speed 설정
             if (isMoving)
             {
-                animationSpeed = isRunning ? 2f : 1f;
+                targetAnimationSpeed = isRunning ? 2f : 1f;
             }
             else
             {
-                // 이동 입력이 없거나 제자리에 서 있을 때는 즉시 완벽한 0f로 고정
-                animationSpeed = 0f;
+                targetAnimationSpeed = 0f;
             }
 
-            animator.SetFloat("Speed", animationSpeed);
-            animator.SetBool("isGrounded", canJump);
+            animator.SetFloat("Speed", targetAnimationSpeed);
         }
     }
 }
