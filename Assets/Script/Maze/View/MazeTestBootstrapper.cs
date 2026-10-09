@@ -23,6 +23,9 @@ namespace ShiftingPyramid.Maze.View
         private MazeGrid currentGrid;
         public MazeGrid CurrentGrid => currentGrid;
         public int CurrentSeed { get; private set; }
+        public MazeBalanceSettings Settings => settings;
+        public MazeRenderer Renderer => mazeRenderer;
+        public Transform PlayerTransform => playerSpawner != null ? playerSpawner.PlayerTransform : null;
 
         private void Start()
         {

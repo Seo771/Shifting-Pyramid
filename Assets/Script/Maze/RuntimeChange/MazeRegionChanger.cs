@@ -13,9 +13,28 @@ namespace ShiftingPyramid.Maze.RuntimeChange
             MazeDirection.North, MazeDirection.East, MazeDirection.South, MazeDirection.West
         };
 
+        public IReadOnlyList<MazeCoordinate> ChangeRegions(MazeGrid grid, int regionSize, int regionCount,
+            MazeCoordinate playerCoordinate, int playerSafeRadius, MazeCoordinate? mummyCoordinate,
+            int mummySafeRadius, int? seed = null)
+        {
+            if (regionCount < 1) throw new ArgumentOutOfRangeException(nameof(regionCount));
+
+            var changed = new List<MazeCoordinate>(regionCount);
+            var random = seed.HasValue ? new Random(seed.Value) : new Random();
+            for (var i = 0; i < regionCount; i++)
+            {
+                if (!TryChange(grid, regionSize, playerCoordinate, playerSafeRadius,
+                    mummyCoordinate, mummySafeRadius, out var origin, random.Next(), changed))
+                    break;
+                changed.Add(origin);
+            }
+            return changed;
+        }
+
         public bool TryChange(MazeGrid grid, int regionSize, MazeCoordinate playerCoordinate,
             int playerSafeRadius, MazeCoordinate? mummyCoordinate, int mummySafeRadius,
-            out MazeCoordinate changedOrigin, int? seed = null)
+            out MazeCoordinate changedOrigin, int? seed = null,
+            IReadOnlyList<MazeCoordinate> excludedRegionOrigins = null)
         {
             if (grid == null) throw new ArgumentNullException(nameof(grid));
             if (regionSize < 1 || regionSize % 2 == 0)
@@ -48,6 +67,18 @@ namespace ShiftingPyramid.Maze.RuntimeChange
             var validator = new MazePathValidator();
             foreach (var origin in origins)
             {
+                // 한 주기에 선택한 정사각형 구역끼리는 겹치지 않는다.
+                var overlaps = false;
+                if (excludedRegionOrigins != null)
+                    foreach (var previous in excludedRegionOrigins)
+                        if (Math.Abs(origin.X - previous.X) < regionSize
+                            && Math.Abs(origin.Y - previous.Y) < regionSize)
+                        {
+                            overlaps = true;
+                            break;
+                        }
+                if (overlaps) continue;
+
                 var mutable = GetMutableCells(grid, origin, regionSize, playerCoordinate,
                     playerSafeRadius, mummyCoordinate, mummySafeRadius);
                 var edges = GetInternalEdges(grid, mutable);

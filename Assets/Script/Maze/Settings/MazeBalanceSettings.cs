@@ -31,6 +31,7 @@ namespace ShiftingPyramid.Maze.Settings
 
         [Header("Runtime Maze Change")]
         [SerializeField, Min(1)] private int mazeChangeRegionSize = 3;
+        [SerializeField, Min(1)] private int mazeChangeRegionCount = 3;
         [SerializeField, Min(1f)] private float mazeChangeInterval = 20f;
         [SerializeField, Min(0)] private int playerSafeRadius = 1;
         [SerializeField, Min(0)] private int mummySafeRadius = 1;
@@ -47,6 +48,7 @@ namespace ShiftingPyramid.Maze.Settings
         public IReadOnlyList<MazeRoomView> SpecialRoom3x3Prefabs => specialRoom3x3Prefabs;
         public MazeTileView ExitRoomPrefab => exitRoomPrefab;
         public int MazeChangeRegionSize => mazeChangeRegionSize;
+        public int MazeChangeRegionCount => mazeChangeRegionCount;
         public float MazeChangeInterval => mazeChangeInterval;
         public int PlayerSafeRadius => playerSafeRadius;
         public int MummySafeRadius => mummySafeRadius;

@@ -35,6 +35,18 @@ namespace ShiftingPyramid.Maze.View
             return false;
         }
 
+        public bool TryGetCoordinate(Vector3 worldPosition, MazeGrid grid, out MazeCoordinate coordinate)
+        {
+            coordinate = default;
+            if (grid == null || tileSize <= 0f) return false;
+
+            var local = GetTileRoot().InverseTransformPoint(worldPosition);
+            var x = centerOnOrigin ? local.x + (grid.Width - 1) * tileSize * 0.5f : local.x;
+            var z = centerOnOrigin ? local.z + (grid.Height - 1) * tileSize * 0.5f : local.z;
+            coordinate = new MazeCoordinate(Mathf.RoundToInt(x / tileSize), Mathf.RoundToInt(z / tileSize));
+            return grid.Contains(coordinate);
+        }
+
         public void ValidateConfiguration()
         {
             if (tilePrefab == null)

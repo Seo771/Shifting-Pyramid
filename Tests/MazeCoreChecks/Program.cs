@@ -98,6 +98,43 @@ internal static class Program
         }
         Assert(changedCount > 0, "Default 3x3 region must produce a real change.");
 
+        var fullBatchCount = 0;
+        for (var seed = 0; seed < 100; seed++)
+        {
+            var first = Generate(seed);
+            var second = Generate(seed);
+            var original = Generate(seed);
+            var mummy = new MazeCoordinate(14, 14);
+            var changer = new MazeRegionChanger();
+            var regions = changer.ChangeRegions(first, 3, 3, MazeCoordinate.Zero, 1, mummy, 1, seed);
+            var repeated = changer.ChangeRegions(second, 3, 3, MazeCoordinate.Zero, 1, mummy, 1, seed);
+            Assert(regions.SequenceEqual(repeated) && Signature(first) == Signature(second),
+                "Multiple changes must be deterministic.");
+            Assert(regions.Count <= 3, "A batch must not exceed the configured region count.");
+            if (regions.Count == 3) fullBatchCount++;
+            for (var i = 0; i < regions.Count; i++)
+                for (var j = i + 1; j < regions.Count; j++)
+                    Assert(Math.Abs(regions[i].X - regions[j].X) >= 3
+                        || Math.Abs(regions[i].Y - regions[j].Y) >= 3,
+                        "Changed regions must not overlap.");
+
+            foreach (var tile in first.Tiles)
+            {
+                var coordinate = tile.Coordinate;
+                var withinAnyRegion = regions.Any(origin =>
+                    coordinate.X >= origin.X && coordinate.X < origin.X + 3
+                    && coordinate.Y >= origin.Y && coordinate.Y < origin.Y + 3);
+                var playerSafe = coordinate.X <= 1 && coordinate.Y <= 1;
+                var mummySafe = coordinate.X >= 13 && coordinate.Y >= 13;
+                if (!withinAnyRegion || playerSafe || mummySafe || tile.IsProtected)
+                    foreach (var direction in Directions)
+                        Assert(tile.IsOpen(direction) == original.GetTile(coordinate).IsOpen(direction),
+                            "A batch must preserve protected and out-of-region walls.");
+            }
+            Verify(first);
+        }
+        Assert(fullBatchCount > 0, "The default map must support three changed regions.");
+
         var disconnected = new MazeGrid(5, 5);
         var disconnectedBefore = Signature(disconnected);
         Assert(!new MazeRegionChanger().TryChange(disconnected, 3, MazeCoordinate.Zero, 0,
@@ -105,8 +142,10 @@ internal static class Program
             "Unreachable change must be rolled back.");
         ExpectFailure<ArgumentOutOfRangeException>(() => new MazeRegionChanger().TryChange(
             disconnected, 2, MazeCoordinate.Zero, 0, null, 0, out _));
+        ExpectFailure<ArgumentOutOfRangeException>(() => new MazeRegionChanger().ChangeRegions(
+            disconnected, 3, 0, MazeCoordinate.Zero, 0, null, 0));
 
-        Console.WriteLine($"PASS: four room rotations, 250 generation seeds, {changedCount}/100 runtime changes, protection, reachability, determinism, and rollback checks.");
+        Console.WriteLine($"PASS: four room rotations, 250 generation seeds, {changedCount}/100 single and {fullBatchCount}/100 full three-region changes, protection, reachability, determinism, and rollback checks.");
     }
 
     private static void VerifyRotations()

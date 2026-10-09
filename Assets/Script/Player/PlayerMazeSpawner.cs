@@ -11,6 +11,8 @@ public class PlayerMazeSpawner : MonoBehaviour
 
     private Transform spawnedPlayer;
 
+    public Transform PlayerTransform => existingPlayer != null ? existingPlayer : spawnedPlayer;
+
     // 미로가 만들어진 뒤 시작 칸의 실제 월드 위치에 플레이어를 배치한다.
     public void SpawnAtStart(MazeRenderer mazeRenderer)
     {

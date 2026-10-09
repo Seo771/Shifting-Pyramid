@@ -797,6 +797,8 @@ GameObject:
   m_Component:
   - component: {fileID: 487055574}
   - component: {fileID: 487055575}
+  - component: {fileID: 487055576}
+  - component: {fileID: 487055577}
   m_Layer: 0
   m_Name: MazeTestBootstrapper
   m_TagString: Untagged
@@ -836,6 +838,31 @@ MonoBehaviour:
   playerSpawner: {fileID: 0}
   fallbackWidth: 5
   fallbackHeight: 5
+--- !u!114 &487055576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 487055573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57f6b704671f4bc492d1dd6986249dad, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Maze.View.MazeRuntimeChangeController
+  mummy: {fileID: 0}
+--- !u!114 &487055577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 487055573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5e8c4d3343e491bbda1586fabfc8620, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Maze.View.MazeChangeCountdownView
 --- !u!1 &508168075
 GameObject:
   m_ObjectHideFlags: 0
