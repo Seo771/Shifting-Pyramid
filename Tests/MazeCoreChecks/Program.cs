@@ -12,13 +12,17 @@ internal static class Program
 
     private static void Main()
     {
+        VerifyRotations();
+        var observedRotations = new HashSet<int>();
         for (var seed = 0; seed < 250; seed++)
         {
             var first = Generate(seed);
             var second = Generate(seed);
             Assert(Signature(first) == Signature(second), "Seed must reproduce room placement and walls.");
             Verify(first);
+            foreach (var placedRoom in first.Rooms) observedRotations.Add(placedRoom.RotationQuarterTurns);
         }
+        Assert(observedRotations.SetEquals(new[] { 0, 1, 2, 3 }), "Placement must use all quarter turns.");
 
         // 기존 방 없는 DFS에서도 완전 연결과 내부 통로 수를 보장한다.
         var plain = new DepthFirstMazeGenerator().Generate(8, 6, 12345);
@@ -45,7 +49,7 @@ internal static class Program
         new MazeRoomPlacer().Place(isolated, new[] { Template(MazeTileType.TreasureRoom, 0) }, 3);
         new DepthFirstMazeGenerator().GenerateInto(isolated, 3);
         var room = isolated.Rooms[0];
-        var entrance = room.Template.Entrances[0];
+        var entrance = room.Entrances[0];
         var cell = room.Origin + entrance.LocalCell;
         isolated.SetConnection(cell, entrance.Direction, false);
         Assert(!new MazePathValidator().IsReachable(isolated, MazeCoordinate.Zero, room.Center), "Closed entrance blocks entry.");
@@ -102,7 +106,37 @@ internal static class Program
         ExpectFailure<ArgumentOutOfRangeException>(() => new MazeRegionChanger().TryChange(
             disconnected, 2, MazeCoordinate.Zero, 0, null, 0, out _));
 
-        Console.WriteLine($"PASS: 250 generation seeds, {changedCount}/100 runtime changes, protection, reachability, determinism, and rollback checks.");
+        Console.WriteLine($"PASS: four room rotations, 250 generation seeds, {changedCount}/100 runtime changes, protection, reachability, determinism, and rollback checks.");
+    }
+
+    private static void VerifyRotations()
+    {
+        var source = new MazeRoomTemplate(MazeTileType.TreasureRoom,
+            new[] { new MazeRoomEntrance(new MazeCoordinate(0, 2), MazeDirection.North) });
+        var cells = new[]
+        {
+            new MazeCoordinate(0, 2), new MazeCoordinate(2, 2),
+            new MazeCoordinate(2, 0), new MazeCoordinate(0, 0)
+        };
+        var origin = new MazeCoordinate(1, 1);
+        for (var quarterTurns = 0; quarterTurns < 4; quarterTurns++)
+        {
+            var room = new MazeRoom(origin, source, 0, quarterTurns);
+            var entrance = room.Entrances.Single();
+            Assert(entrance.LocalCell.Equals(cells[quarterTurns])
+                && entrance.Direction == Directions[quarterTurns]
+                && room.HasEntrance(origin + cells[quarterTurns], Directions[quarterTurns]),
+                "Room entrance must rotate with its direction.");
+            var grid = new MazeGrid(5, 5);
+            grid.AddRoom(room);
+            grid.SetConnection(origin + entrance.LocalCell, entrance.Direction, true);
+            Assert(grid.GetTile(origin + entrance.LocalCell).IsOpen(entrance.Direction),
+                "Rotated entrance must connect to its outside corridor.");
+        }
+        Assert(source.Entrances[0].LocalCell.Equals(cells[0])
+            && source.Entrances[0].Direction == MazeDirection.North,
+            "Rotating a room must not mutate its prefab template.");
+        ExpectFailure<ArgumentOutOfRangeException>(() => new MazeRoom(origin, source, 0, 4));
     }
 
     private static MazeGrid Generate(int seed)
@@ -163,8 +197,10 @@ internal static class Program
 
     private static string Signature(MazeGrid grid)
     {
-        return string.Join(";", grid.Tiles.Select(tile =>
-            $"{tile.Coordinate}:{tile.TileType}:{string.Join(",", Directions.Select(tile.IsOpen))}"));
+        return string.Join(";", grid.Rooms.Select(room =>
+            $"{room.Origin}:{room.RotationQuarterTurns}")) + "|"
+            + string.Join(";", grid.Tiles.Select(tile =>
+                $"{tile.Coordinate}:{tile.TileType}:{string.Join(",", Directions.Select(tile.IsOpen))}"));
     }
 
     private static void Assert(bool condition, string message)

@@ -43,7 +43,8 @@ namespace ShiftingPyramid.Maze.Generation
                 var planned = new List<MazeRoom>();
                 foreach (var origin in candidates)
                 {
-                    var room = new MazeRoom(origin, templates[planned.Count], planned.Count);
+                    var room = new MazeRoom(origin, templates[planned.Count], planned.Count,
+                        random.Next(4));
                     if (!CanPlace(grid, room, planned)) continue;
                     planned.Add(room);
                     if (planned.Count != templates.Count) continue;

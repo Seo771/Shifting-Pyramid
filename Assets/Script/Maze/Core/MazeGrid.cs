@@ -60,14 +60,14 @@ namespace ShiftingPyramid.Maze.Core
                     if (GetTile(cell).IsOpen(direction))
                         throw new ArgumentException("Reserve rooms before carving maze connections.");
             }
-            foreach (var entrance in room.Template.Entrances)
+            foreach (var entrance in room.Entrances)
             {
                 var outside = room.Origin + entrance.LocalCell + entrance.Direction.ToOffset();
                 if (!Contains(outside) || roomCells.ContainsKey(outside))
                     throw new ArgumentException("Every entrance needs an ordinary corridor cell outside the room.");
             }
             foreach (var existing in rooms)
-                foreach (var entrance in existing.Template.Entrances)
+                foreach (var entrance in existing.Entrances)
                     if (room.Contains(existing.Origin + entrance.LocalCell + entrance.Direction.ToOffset()))
                         throw new ArgumentException("Room footprint would block an existing room entrance.");
 

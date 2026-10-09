@@ -73,7 +73,7 @@ namespace ShiftingPyramid.Maze.View
             {
                 var view = Instantiate(roomPrefabs[room.TemplateIndex], GetTileRoot());
                 view.transform.localPosition = GetLocalPosition(room.Center, grid.Width, grid.Height);
-                view.transform.localRotation = Quaternion.identity;
+                view.transform.localRotation = Quaternion.Euler(0f, room.RotationQuarterTurns * 90f, 0f);
                 view.name = $"MazeRoom_{room.Template.TileType}_{room.Origin.X}_{room.Origin.Y}";
                 view.Initialize(room);
                 roomObjects.Add(view.gameObject);

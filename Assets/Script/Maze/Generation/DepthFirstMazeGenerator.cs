@@ -40,7 +40,7 @@ namespace ShiftingPyramid.Maze.Generation
                 var candidates = new List<(MazeCoordinate Cell, MazeDirection Direction, MazeCoordinate Node)>();
                 if (grid.TryGetRoom(current, out var room))
                 {
-                    foreach (var entrance in room.Template.Entrances)
+                    foreach (var entrance in room.Entrances)
                         AddCandidate(grid, room.Origin + entrance.LocalCell, entrance.Direction, visited, candidates);
                 }
                 else
@@ -62,7 +62,7 @@ namespace ShiftingPyramid.Maze.Generation
 
             // 제작자가 표시한 문은 모두 연결한다. 방을 통한 순환 경로를 허용한다.
             foreach (var room in grid.Rooms)
-                foreach (var entrance in room.Template.Entrances)
+                foreach (var entrance in room.Entrances)
                     grid.SetConnection(room.Origin + entrance.LocalCell, entrance.Direction, true);
 
             foreach (var tile in grid.Tiles)

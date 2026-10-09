@@ -58,18 +58,40 @@ namespace ShiftingPyramid.Maze.Core
     public sealed class MazeRoom
     {
         public const int Size = 3;
+        private readonly IReadOnlyList<MazeRoomEntrance> entrances;
 
-        public MazeRoom(MazeCoordinate origin, MazeRoomTemplate template, int templateIndex)
+        public MazeRoom(MazeCoordinate origin, MazeRoomTemplate template, int templateIndex,
+            int rotationQuarterTurns = 0)
         {
+            if (rotationQuarterTurns < 0 || rotationQuarterTurns > 3)
+                throw new ArgumentOutOfRangeException(nameof(rotationQuarterTurns));
             Origin = origin;
             Template = template ?? throw new ArgumentNullException(nameof(template));
             TemplateIndex = templateIndex;
+            RotationQuarterTurns = rotationQuarterTurns;
+
+            // 원본 프리팹의 표시점은 유지하고, 배치된 방의 문 좌표만 회전한다.
+            var rotated = new List<MazeRoomEntrance>();
+            foreach (var entrance in template.Entrances)
+            {
+                var cell = entrance.LocalCell;
+                var direction = entrance.Direction;
+                for (var i = 0; i < rotationQuarterTurns; i++)
+                {
+                    cell = new MazeCoordinate(cell.Y, Size - 1 - cell.X);
+                    direction = (MazeDirection)(((int)direction + 1) % 4);
+                }
+                rotated.Add(new MazeRoomEntrance(cell, direction));
+            }
+            entrances = rotated.AsReadOnly();
         }
 
         public MazeCoordinate Origin { get; }
         public MazeCoordinate Center => Origin + new MazeCoordinate(1, 1);
         public MazeRoomTemplate Template { get; }
         public int TemplateIndex { get; }
+        public int RotationQuarterTurns { get; }
+        public IReadOnlyList<MazeRoomEntrance> Entrances => entrances;
 
         public bool Contains(MazeCoordinate coordinate)
         {
@@ -89,7 +111,7 @@ namespace ShiftingPyramid.Maze.Core
 
         public bool HasEntrance(MazeCoordinate cell, MazeDirection direction)
         {
-            foreach (var entrance in Template.Entrances)
+            foreach (var entrance in entrances)
                 if ((Origin + entrance.LocalCell).Equals(cell) && entrance.Direction == direction)
                     return true;
             return false;

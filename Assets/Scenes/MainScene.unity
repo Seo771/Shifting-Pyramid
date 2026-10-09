@@ -2018,6 +2018,18 @@ PrefabInstance:
       propertyPath: interactionUI
       value: 
       objectReference: {fileID: 508168075}
+    - target: {fileID: 8010034990369437996, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8010034990369437996, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8010034990369437996, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 4907436150270478942, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
@@ -3247,7 +3259,7 @@ MonoBehaviour:
   currentSlotIndex: 0
   visibleDuration: 2
   fadeSpeed: 3
-  useDuration: 3
+  defaultUseDuration: 3
   useProgressSlider: {fileID: 1220883230}
   useProgressText: {fileID: 1142492209}
   useProgressGroup: {fileID: 1220883229}

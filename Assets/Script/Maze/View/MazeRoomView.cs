@@ -27,7 +27,7 @@ namespace ShiftingPyramid.Maze.View
                 throw new InvalidOperationException($"Room '{name}': Authored Tile Size must match renderer Tile Size ({tileSize}).");
             if ((transform.localScale - Vector3.one).sqrMagnitude > 0.0001f
                 || Quaternion.Angle(transform.localRotation, Quaternion.identity) > 0.01f)
-                throw new InvalidOperationException($"Room '{name}': root scale must be (1,1,1) and rotation must be zero. Room rotation is not supported yet.");
+                throw new InvalidOperationException($"Room '{name}': prefab root scale must be (1,1,1) and authored rotation must be zero.");
             if (GetComponentsInChildren<MazeTileView>(true).Length != 0)
                 throw new InvalidOperationException($"Room '{name}': remove the old MazeTileView components from the 3x3 room.");
 
