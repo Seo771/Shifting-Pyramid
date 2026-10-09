@@ -3235,10 +3235,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 212695deb878e514291943a63db0b917, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AssetMove
-  moveSpeed: 5
+  moveSpeed: 10
   runSpeedMultiplier: 1.8
-  gravity: -20
-  jumpHeight: 1.5
+  gravity: -9.8
+  jumpHeight: 2.5
   animator: {fileID: 1939708195}
 --- !u!4 &1936457006
 Transform:
@@ -3250,7 +3250,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 11.0519, y: -0, z: 11.74322}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 418977890}
@@ -3299,7 +3299,7 @@ CharacterController:
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &1936457009
 MonoBehaviour:
   m_ObjectHideFlags: 0
