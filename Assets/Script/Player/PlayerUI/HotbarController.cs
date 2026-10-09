@@ -164,7 +164,14 @@ public class HotbarController : MonoBehaviour
                 }
             }
 
-            float duration = item.useDuration > 0f ? item.useDuration : defaultUseDuration;
+            // item.useDuration == 0이면 즉시 적용(지연 없음), 양수면 해당 시간만큼 지연
+            if (item.useDuration <= 0f)
+            {
+                ApplyConsumableEffect(item, slot);
+                return;
+            }
+
+            float duration = item.useDuration;
             pendingSlot = slot;
             useCoroutine = StartCoroutine(UseConsumableRoutine(item, slot, duration));
             return;
@@ -250,6 +257,36 @@ public class HotbarController : MonoBehaviour
         pendingSlot = null;
         if (useProgressGroup != null) useProgressGroup.alpha = 0f;
         Debug.Log("[Hotbar] 사용 완료");
+    }
+
+    // 즉시(지연 없이) 효과 적용
+    private void ApplyConsumableEffect(ItemData item, HotbarSlot slot)
+    {
+        if (item.itemType == ItemData.ItemType.Recovery)
+        {
+            var playerHP = Object.FindFirstObjectByType<PlayerHP>();
+            if (playerHP != null && !playerHP.isDead)
+            {
+                float before = playerHP.currentHealth;
+                playerHP.currentHealth = Mathf.Min(playerHP.maxHealth, playerHP.currentHealth + item.healAmount);
+                Debug.Log($"[Hotbar] 즉시 포션 사용: HP {before} -> {playerHP.currentHealth}");
+            }
+        }
+        else if (item.itemType == ItemData.ItemType.Purify)
+        {
+            var mumi = Object.FindFirstObjectByType<Mummification>();
+            if (mumi != null && !mumi.IsMummified)
+            {
+                mumi.DecreaseMummification(item.purifyAmount);
+                Debug.Log($"[Hotbar] 즉시 정화 사용: 미라화 -{item.purifyAmount}");
+            }
+        }
+
+        if (slot != null)
+        {
+            slot.ClearSlot();
+            ShowHotbar();
+        }
     }
 
     public void SelectSlot(int index)
