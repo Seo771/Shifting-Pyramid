@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,19 +21,18 @@ public class HotbarController : MonoBehaviour
     private List<HotbarSlot> hotbarSlots = new List<HotbarSlot>(); // 슬롯 스크립트 리스트
     private CanvasGroup canvasGroup;
     private Coroutine fadeCoroutine;
+
     // 사용 중인 아이템 지연 처리 관련
     private Coroutine useCoroutine;
     private HotbarSlot pendingSlot;
-    // 사용 지연 관련 설정
-    [Header("사용 지연 설정")]
-    [Tooltip("아이템 사용에 필요한 시간(초)")]
-    public float useDuration = 3f;
+
+    [Header("사용 지연 설정 (기본)")]
+    [Tooltip("기본 사용 시간(초). ItemData.useDuration이 0이면 이 값 사용")]
+    public float defaultUseDuration = 3f;
+
     [Header("사용 UI (선택 사항)")]
-    [Tooltip("사용 진행도를 표시할 Slider를 연결하세요(선택). 빈값이면 UI 표시 안함)")]
     public Slider useProgressSlider;
-    [Tooltip("사용 시간 텍스트(선택)")]
     public Text useProgressText;
-    [Tooltip("사용 UI를 감쌀 CanvasGroup(선택)")]
     public CanvasGroup useProgressGroup;
 
     void Awake()
@@ -84,7 +83,7 @@ public class HotbarController : MonoBehaviour
             ShowHotbar();
         }
 
-        // 핫바 아이템 사용 키(F) 누르면 사용 시작
+        // 핫바 아이템 사용 키(F) 누르면 사용 시작 또는 취소
         if (Input.GetKeyDown(KeyCode.F))
         {
             if (useCoroutine == null)
@@ -92,6 +91,7 @@ public class HotbarController : MonoBehaviour
             else
                 CancelUse();
         }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (useCoroutine != null) CancelUse();
@@ -111,7 +111,6 @@ public class HotbarController : MonoBehaviour
             {
                 slots.Add(child.GetComponent<RectTransform>());
 
-                // HotbarSlot 컴포넌트가 있으면 리스트에 추가
                 HotbarSlot slotScript = child.GetComponent<HotbarSlot>();
                 if (slotScript != null)
                 {
@@ -121,10 +120,7 @@ public class HotbarController : MonoBehaviour
         }
     }
 
-    // 핫바 사용 키는 마우스 우클릭으로 고정되어 있습니다.
-
-    // 현재 선택된 슬롯의 아이템을 사용합니다.
-    // RecoveryPotion 프리팹이면 플레이어의 HP를 회복시키고 슬롯에서 제거합니다.
+    // 현재 선택된 슬롯의 아이템을 사용합니다. 데이터 중심 방식(ItemData)으로 처리합니다.
     public void UseCurrentSlot()
     {
         if (hotbarSlots.Count == 0) return;
@@ -139,37 +135,45 @@ public class HotbarController : MonoBehaviour
             return;
         }
 
-        if (item.itemPrefab != null)
+        // 소비형(ItemType) 처리
+        if (item.itemType == ItemData.ItemType.Recovery || item.itemType == ItemData.ItemType.Purify)
         {
-            // RecoveryPotion인지 체크
-            var potion = item.itemPrefab.GetComponent<RecoveryPotion>();
-            if (potion != null)
+            if (useCoroutine != null)
             {
-                // 이미 사용 중이면 새로 시작하지 않음
-                if (useCoroutine != null)
-                {
-                    Debug.Log("[Hotbar] 이미 사용 중입니다.");
-                    return;
-                }
+                Debug.Log("[Hotbar] 이미 사용 중입니다.");
+                return;
+            }
 
-                // 시작 가능한지 상태 확인 (실제 효과 적용은 완료 시점에 함)
+            // 상태 검증
+            if (item.itemType == ItemData.ItemType.Recovery)
+            {
                 var playerHP = Object.FindFirstObjectByType<PlayerHP>();
                 if (playerHP == null || playerHP.isDead)
                 {
                     Debug.LogWarning("[Hotbar] PlayerHP를 찾을 수 없거나 사망 상태입니다.");
                     return;
                 }
-
-                // 지연 사용 시작
-                pendingSlot = slot;
-                useCoroutine = StartCoroutine(UseRoutine(potion, slot));
-                return;
+            }
+            else if (item.itemType == ItemData.ItemType.Purify)
+            {
+                var mumi = Object.FindFirstObjectByType<Mummification>();
+                if (mumi == null || mumi.IsMummified)
+                {
+                    Debug.LogWarning("[Hotbar] Mummification을 찾을 수 없거나 이미 미라화 상태입니다.");
+                    return;
+                }
             }
 
-            // 다른 아이템 타입은 인스턴스화하여 동작시키거나 별도 처리 필요
-            // 기본 동작: 프리팹을 인스턴스화하여 사용 가능한 컴포넌트가 있으면 호출
+            float duration = item.useDuration > 0f ? item.useDuration : defaultUseDuration;
+            pendingSlot = slot;
+            useCoroutine = StartCoroutine(UseConsumableRoutine(item, slot, duration));
+            return;
+        }
+
+        // 그 외: 기존 프리팹 인스턴스화 동작(이전 동작 유지)
+        if (item.itemPrefab != null)
+        {
             GameObject inst = Instantiate(item.itemPrefab);
-            // 만약 인스턴스가 핫바 사용 시 자동으로 소모되게 설계되었다면 슬롯을 비웁니다.
             slot.ClearSlot();
             ShowHotbar();
         }
@@ -187,25 +191,22 @@ public class HotbarController : MonoBehaviour
         Debug.Log("[Hotbar] 사용 취소 처리됨");
     }
 
-    private System.Collections.IEnumerator UseRoutine(RecoveryPotion potion, HotbarSlot slot)
+    private IEnumerator UseConsumableRoutine(ItemData item, HotbarSlot slot, float duration)
     {
         float elapsed = 0f;
 
-        // 초기 UI 표시
         if (useProgressGroup != null) useProgressGroup.alpha = 1f;
         if (useProgressSlider != null) useProgressSlider.value = 0f;
-        if (useProgressText != null) useProgressText.text = $"{Mathf.CeilToInt(useDuration)}s";
-        // 시작 프레임의 키 입력을 무시하기 위해 한 프레임 대기합니다.
-        // Update()에서 F키로 코루틴을 시작한 그 프레임의 GetKeyDown이
-        // 즉시 취소 신호로 인식되는 문제를 방지합니다.
+        if (useProgressText != null) useProgressText.text = $"{Mathf.CeilToInt(duration)}s";
+
+        // 시작 프레임 입력 무시
         yield return null;
 
-        while (elapsed < useDuration)
+        while (elapsed < duration)
         {
-            // 취소 조건: ESC 또는 F 재누름
             if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.F))
             {
-                Debug.Log("[Hotbar] 포션 사용 취소됨");
+                Debug.Log("[Hotbar] 사용 취소됨");
                 useCoroutine = null;
                 pendingSlot = null;
                 if (useProgressGroup != null) useProgressGroup.alpha = 0f;
@@ -213,36 +214,42 @@ public class HotbarController : MonoBehaviour
             }
 
             elapsed += Time.deltaTime;
-
-            // UI 업데이트
-            if (useProgressSlider != null) useProgressSlider.value = Mathf.Clamp01(elapsed / useDuration);
-            if (useProgressText != null) useProgressText.text = $"{Mathf.CeilToInt(Mathf.Max(0f, useDuration - elapsed))}s";
-
+            if (useProgressSlider != null) useProgressSlider.value = Mathf.Clamp01(elapsed / duration);
+            if (useProgressText != null) useProgressText.text = $"{Mathf.CeilToInt(Mathf.Max(0f, duration - elapsed))}s";
             yield return null;
         }
 
-        // 사용 완료 시 효과 적용 (포션 힐)
-        var playerHP = Object.FindFirstObjectByType<PlayerHP>();
-        if (playerHP != null && !playerHP.isDead)
+        // 사용 완료: 데이터 기반 효과 적용
+        if (item.itemType == ItemData.ItemType.Recovery)
         {
-            float before = playerHP.currentHealth;
-            playerHP.currentHealth = Mathf.Min(playerHP.maxHealth, playerHP.currentHealth + potion.healAmount);
-            Debug.Log($"[Hotbar] 포션 사용: HP {before} -> {playerHP.currentHealth}");
-            if (slot != null)
+            var playerHP = Object.FindFirstObjectByType<PlayerHP>();
+            if (playerHP != null && !playerHP.isDead)
             {
-                slot.ClearSlot();
-                ShowHotbar();
+                float before = playerHP.currentHealth;
+                playerHP.currentHealth = Mathf.Min(playerHP.maxHealth, playerHP.currentHealth + item.healAmount);
+                Debug.Log($"[Hotbar] 포션 사용: HP {before} -> {playerHP.currentHealth}");
             }
         }
-        else
+        else if (item.itemType == ItemData.ItemType.Purify)
         {
-            Debug.LogWarning("[Hotbar] PlayerHP를 찾을 수 없거나 사망 상태입니다.");
+            var mumi = Object.FindFirstObjectByType<Mummification>();
+            if (mumi != null && !mumi.IsMummified)
+            {
+                mumi.DecreaseMummification(item.purifyAmount);
+                Debug.Log($"[Hotbar] 정화 사용: 미라화 -{item.purifyAmount}");
+            }
+        }
+
+        if (slot != null)
+        {
+            slot.ClearSlot();
+            ShowHotbar();
         }
 
         useCoroutine = null;
         pendingSlot = null;
         if (useProgressGroup != null) useProgressGroup.alpha = 0f;
-        Debug.Log("[Hotbar] 포션 사용 완료");
+        Debug.Log("[Hotbar] 사용 완료");
     }
 
     public void SelectSlot(int index)
@@ -260,7 +267,6 @@ public class HotbarController : MonoBehaviour
     // ★ 아이템 획득 시 빈 슬롯에 아이템 추가하는 함수
     public bool AddItemToHotbar(ItemData item)
     {
-        // 1. 현재 선택된 슬롯이 비어있다면 거기에 먼저 넣음
         if (currentSlotIndex < hotbarSlots.Count && hotbarSlots[currentSlotIndex].IsEmpty())
         {
             hotbarSlots[currentSlotIndex].AddItem(item);
@@ -268,7 +274,6 @@ public class HotbarController : MonoBehaviour
             return true;
         }
 
-        // 2. 아니면 첫 번째로 비어있는 슬롯을 찾아 들어감
         for (int i = 0; i < hotbarSlots.Count; i++)
         {
             if (hotbarSlots[i].IsEmpty())
@@ -280,7 +285,7 @@ public class HotbarController : MonoBehaviour
         }
 
         Debug.Log("인벤토리가 가득 찼습니다!");
-        return false; // 인벤토리 꽉 참
+        return false;
     }
 
     public void ShowHotbar()
