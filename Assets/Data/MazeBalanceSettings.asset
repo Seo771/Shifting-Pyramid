@@ -24,7 +24,7 @@ MonoBehaviour:
   exitRoomPrefab: {fileID: 7863490368430874800, guid: 9b0422de140504f449145791e84d81a1, type: 3}
   mazeChangeRegionSize: 11
   mazeChangeRegionCount: 5
-  mazeChangeInterval: 1
+  mazeChangeInterval: 5
   playerSafeRadius: 1
   mummySafeRadius: 1
   useRandomSeed: 1

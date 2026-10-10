@@ -198,6 +198,7 @@ DFS는 방 중심 좌표를 대표 방문 노드로 사용하고, 방의 출입�
 변경 후 현재 플레이어 위치에서 모든 칸으로 이동할 수 있는지 검사하고, 실패하거나 벽이 그대로면 해당 구역을 원상복구한 뒤 다른 구역을 시도한다.
 시드를 지정하면 같은 미로와 위치에서 변경 결과를 재현할 수 있다.
 `MazeRuntimeChangeController`가 설정된 주기마다 플레이어 월드 위치를 격자 좌표로 변환하고 변경을 시도한다. 성공하면 `MazeRenderer.Refresh`로 벽을 갱신한다.
+`MazeRenderer`는 배치 또는 갱신 후 `GeometryChanged` 이벤트만 보낸다. 몬스터 이동용 NavMesh 재구성은 `Assets/Script/Monster/MazeNavMeshUpdater.cs`가 선택적으로 담당하며 미로 코드에 AI 패키지 의존성을 두지 않는다.
 미라 Transform은 실행기에서 선택적으로 연결한다. 지정하지 않으면 미라 안전 반경은 적용되지 않는다.
 
 ### 아직 정하지 않은 사항

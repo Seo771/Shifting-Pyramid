@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using ShiftingPyramid.Maze.Core;
 using ShiftingPyramid.Maze.Settings;
-using Unity.AI.Navigation; // ★ 추가 1: NavMeshSurface 사용을 위한 네임스페이스
 using UnityEngine;
 
 namespace ShiftingPyramid.Maze.View
@@ -15,9 +14,6 @@ namespace ShiftingPyramid.Maze.View
         [SerializeField] private MazeTileView tilePrefab;
         [SerializeField] private Transform tileRoot;
 
-        [Header("NavMesh")]
-        [SerializeField] private NavMeshSurface navMeshSurface; // ★ 추가 2: NavMeshSurface 참조 변수
-
         [Header("Layout")]
         [SerializeField, Min(0.01f)] private float tileSize = 10f;
         [SerializeField] private bool centerOnOrigin = true;
@@ -27,6 +23,7 @@ namespace ShiftingPyramid.Maze.View
         private readonly List<GameObject> roomObjects = new List<GameObject>();
 
         public float TileSize => tileSize;
+        public event Action GeometryChanged;
 
         public bool TryGetTileWorldPosition(MazeCoordinate coordinate, out Vector3 worldPosition)
         {
@@ -95,8 +92,7 @@ namespace ShiftingPyramid.Maze.View
                 roomObjects.Add(view.gameObject);
             }
 
-            // ★ 추가 3: 미로 생성이 완전히 완료된 직후 런타임 Bake 실행
-            RebuildNavMesh();
+            GeometryChanged?.Invoke();
         }
 
         // 방 내부와 문은 프리팹이 관리한다. 여기서는 일반 통로 벽만 갱신한다.
@@ -107,8 +103,7 @@ namespace ShiftingPyramid.Maze.View
                 if (tileViews.TryGetValue(tile.Coordinate, out var view) && view != null)
                     view.Apply(tile);
 
-            // ★ 추가 3: 미로 지형/통로가 변경된 후에도 Bake 재실행
-            RebuildNavMesh();
+            GeometryChanged?.Invoke();
         }
 
         public void Clear()
@@ -145,31 +140,6 @@ namespace ShiftingPyramid.Maze.View
                 z -= (height - 1) * tileSize * 0.5f;
             }
             return new Vector3(x, 0f, z);
-        }
-
-        // ★ 추가: NavMesh 재구성 헬퍼 메서드
-        public void RebuildNavMesh()
-        {
-            // 1. 변환된 navMeshSurface가 비어있다면, 현재 오브젝트나 자식, 혹은 씬 전체에서 검색
-            if (navMeshSurface == null)
-            {
-                navMeshSurface = GetComponentInChildren<NavMeshSurface>();
-                if (navMeshSurface == null)
-                {
-                    navMeshSurface = FindFirstObjectByType<NavMeshSurface>();
-                }
-            }
-
-            // 2. 찾았다면 바로 빌드 실행
-            if (navMeshSurface != null)
-            {
-                navMeshSurface.BuildNavMesh();
-                Debug.Log("[MazeRenderer] 실시간 미로 NavMesh 재구성 완료!");
-            }
-            else
-            {
-                Debug.LogWarning("[MazeRenderer] NavMeshSurface를 찾을 수 없어 재구성을 스킵합니다.");
-            }
         }
     }
 }
