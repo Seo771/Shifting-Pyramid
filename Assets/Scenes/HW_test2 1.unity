@@ -1272,8 +1272,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterAI
   currentState: 0
-  wanderRadius: 10
-  wanderInterval: 4
+  wanderRadius: 20
+  wanderInterval: 5
   targetPlayer: {fileID: 0}
   detectRange: 7
   loseTargetRange: 10
@@ -3880,9 +3880,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2099011280}
   - component: {fileID: 2099011279}
-  - component: {fileID: 2099011278}
   - component: {fileID: 2099011277}
   - component: {fileID: 2099011276}
+  - component: {fileID: 2099011281}
   m_Layer: 0
   m_Name: MazeTestBootstrapper
   m_TagString: Untagged
@@ -3915,21 +3915,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Maze.View.MazeRuntimeChangeController
   mummy: {fileID: 0}
---- !u!114 &2099011278
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2099011275}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd2fd246a2514f23a849d71ca9d8f135, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMazeSpawner
-  playerPrefab: {fileID: 286453359}
-  existingPlayer: {fileID: 0}
-  spawnHeight: 1.25
 --- !u!114 &2099011279
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3944,7 +3929,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Maze.View.MazeTestBootstrapper
   mazeRenderer: {fileID: 1682450876}
   settings: {fileID: 11400000, guid: c719456dd0de20141b440727caa63ecd, type: 2}
-  playerSpawner: {fileID: 2099011278}
+  playerSpawner: {fileID: 0}
   fallbackWidth: 5
   fallbackHeight: 5
 --- !u!4 &2099011280
@@ -3962,6 +3947,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2099011281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099011275}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd2fd246a2514f23a849d71ca9d8f135, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMazeSpawner
+  playerPrefab: {fileID: 0}
+  existingPlayer: {fileID: 0}
+  spawnHeight: 1.25
 --- !u!4 &646568542936875016
 Transform:
   m_ObjectHideFlags: 0

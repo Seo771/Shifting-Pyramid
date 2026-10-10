@@ -1,25 +1,27 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
 
-public class MonsterAI : MonoBehaviour
+// 1. ISensoryReceiver 인터페이스 상속 추가
+public class MonsterAI : MonoBehaviour, ISensoryReceiver
 {
-    // AI 상태 정의 (추후 감지 시스템 확장용)
-    public enum AIState { Wander, Chase }
+    // AI 상태 정의
+    public enum AIState { Wander, Chase, Investigate } // Investigate(수색) 추가
 
     [Header("상태 확인 (확인용)")]
     [SerializeField] private AIState currentState = AIState.Wander;
 
     [Header("배회(Wander) 설정")]
-    [SerializeField] private float wanderRadius = 10f;
+    [SerializeField] private float wanderRadius = 18f; // 최근에 조정한 값
     [SerializeField] private float wanderInterval = 4f;
 
     [Header("추적(Chase) 설정")]
     [SerializeField] private Transform targetPlayer;
-    [SerializeField] private float detectRange = 8f;     // 감지 거리 (이 안에 들어오면 추적)
-    [SerializeField] private float loseTargetRange = 12f; // 포기 거리 (이보다 멀어지면 다시 배회)
+    [SerializeField] private float detectRange = 8f;     // 감지 거리
+    [SerializeField] private float loseTargetRange = 12f; // 포기 거리
 
     private NavMeshAgent agent;
     private float wanderTimer;
+    private Vector3 lastStimulusPosition; // 소리/상호작용 자극 위치 기억용
 
     private void Awake()
     {
@@ -43,10 +45,10 @@ public class MonsterAI : MonoBehaviour
 
     private void Update()
     {
-        // 1. 거리 기반 기본 감지 (3단계에서 시야/소리 감지로 확장될 부분)
+        // 기존거리 기반 감지 유지
         CheckPlayerDetection();
 
-        // 2. 현재 상태에 따른 행동 수행
+        // 상태별 행동
         switch (currentState)
         {
             case AIState.Wander:
@@ -56,8 +58,41 @@ public class MonsterAI : MonoBehaviour
             case AIState.Chase:
                 HandleChase();
                 break;
+
+            case AIState.Investigate:
+                HandleInvestigate();
+                break;
         }
     }
+
+    #region ISensoryReceiver 구현 (외부 자극 수신)
+    // 소리, 시야, 상호작용 자극이 들어왔을 때 실행됨
+    public void OnReceiveStimulus(StimulusData stimulus)
+    {
+        switch (stimulus.type)
+        {
+            case StimulusType.Sight:
+                // 눈으로 봄 ➔ 즉시 추적 상태로 전환
+                if (stimulus.source != null)
+                {
+                    targetPlayer = stimulus.source.transform;
+                    currentState = AIState.Chase;
+                }
+                break;
+
+            case StimulusType.Sound:
+            case StimulusType.Interaction:
+                // 소리/상호작용 감지 ➔ 추적 중이 아니면 해당 위치로 수색하러 이동
+                if (currentState != AIState.Chase)
+                {
+                    lastStimulusPosition = stimulus.position;
+                    agent.SetDestination(lastStimulusPosition);
+                    currentState = AIState.Investigate;
+                }
+                break;
+        }
+    }
+    #endregion
 
     #region AI 상태별 로직
     private void HandleWander()
@@ -74,9 +109,17 @@ public class MonsterAI : MonoBehaviour
     private void HandleChase()
     {
         if (targetPlayer == null) return;
-
-        // 플레이어의 현재 위치로 계속 이동 명령
         agent.SetDestination(targetPlayer.position);
+    }
+
+    private void HandleInvestigate()
+    {
+        // 소리 난 곳까지 걸어가서 도착하면 다시 배회(Wander)로 복귀
+        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
+        {
+            currentState = AIState.Wander;
+            wanderTimer = wanderInterval; // 즉시 다음 목적지 잡도록 초기화
+        }
     }
 
     private void SetRandomDestination()
@@ -97,21 +140,18 @@ public class MonsterAI : MonoBehaviour
 
         float distanceToPlayer = Vector3.Distance(transform.position, targetPlayer.position);
 
-        // 배회 중 플레이어가 감지 거리 안에 들어오면 ➔ 추적 모드
         if (currentState == AIState.Wander && distanceToPlayer <= detectRange)
         {
             currentState = AIState.Chase;
         }
-        // 추적 중 플레이어가 포기 거리보다 멀어지면 ➔ 다시 배회 모드
         else if (currentState == AIState.Chase && distanceToPlayer > loseTargetRange)
         {
             currentState = AIState.Wander;
-            wanderTimer = wanderInterval; // 바로 새 목적지 잡도록 초기화
+            wanderTimer = wanderInterval;
         }
     }
     #endregion
 
-    // Scene 뷰에서 감지 거리를 눈으로 쉽게 확인하기 위한 기즈모
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
