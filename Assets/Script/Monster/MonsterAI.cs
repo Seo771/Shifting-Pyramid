@@ -1,23 +1,23 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
 
-// 1. ISensoryReceiver 인터페이스 상속 추가
 public class MonsterAI : MonoBehaviour, ISensoryReceiver
 {
     // AI 상태 정의
-    public enum AIState { Wander, Chase, Investigate } // Investigate(수색) 추가
+    public enum AIState { Wander, Chase, Investigate }
 
     [Header("상태 확인 (확인용)")]
     [SerializeField] private AIState currentState = AIState.Wander;
 
     [Header("배회(Wander) 설정")]
-    [SerializeField] private float wanderRadius = 18f; // 최근에 조정한 값
-    [SerializeField] private float wanderInterval = 4f;
+    [SerializeField] private float wanderInterval = 4f;        // 다음 목적지 갱신 타이머
+    [SerializeField] private float minWanderDistance = 10f;     // 최소 이동 거리 및 주변 수색 반경
+    [SerializeField] private Vector2 mazeSize = new Vector2(30f, 30f); // 미로 전체 크기 (가로, 세로)
 
     [Header("추적(Chase) 설정")]
     [SerializeField] private Transform targetPlayer;
-    [SerializeField] private float detectRange = 8f;     // 감지 거리
-    [SerializeField] private float loseTargetRange = 12f; // 포기 거리
+    [SerializeField] private float detectRange = 8f;       // 감지 거리
+    [SerializeField] private float loseTargetRange = 12f;   // 포기 거리
 
     private NavMeshAgent agent;
     private float wanderTimer;
@@ -45,7 +45,7 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
     private void Update()
     {
-        // 기존거리 기반 감지 유지
+        // 기존 거리 기반 감지 유지
         CheckPlayerDetection();
 
         // 상태별 행동
@@ -66,7 +66,6 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     }
 
     #region ISensoryReceiver 구현 (외부 자극 수신)
-    // 소리, 시야, 상호작용 자극이 들어왔을 때 실행됨
     public void OnReceiveStimulus(StimulusData stimulus)
     {
         switch (stimulus.type)
@@ -124,13 +123,43 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
     private void SetRandomDestination()
     {
-        Vector3 randomDirection = Random.insideUnitSphere * wanderRadius;
-        randomDirection += transform.position;
+        // 20% 확률로 U턴/주변 수색, 80% 확률로 미로 전체 먼 거리 순찰
+        bool isUturnOrLocal = Random.value < 0.2f;
+        float halfX = mazeSize.x * 0.5f;
+        float halfY = mazeSize.y * 0.5f;
 
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(randomDirection, out hit, wanderRadius, NavMesh.AllAreas))
+        for (int i = 0; i < 10; i++)
         {
-            agent.SetDestination(hit.position);
+            Vector3 targetPos;
+
+            if (isUturnOrLocal)
+            {
+                // [U턴/주변 수색] 현재 위치 주변에서 좁게 무작위 선택
+                Vector3 randomDir = Random.insideUnitSphere * minWanderDistance;
+                targetPos = transform.position + randomDir;
+            }
+            else
+            {
+                // [전역 탐색] 미로 전체 범위 내에서 무작위 목적지 선택
+                targetPos = new Vector3(
+                    Random.Range(-halfX, halfX),
+                    0f,
+                    Random.Range(-halfY, halfY)
+                );
+            }
+
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(targetPos, out hit, 5f, NavMesh.AllAreas))
+            {
+                // 전역 탐색일 때는 최소 이동 거리(minWanderDistance) 이상 떨어진 곳만 지정
+                if (!isUturnOrLocal && Vector3.Distance(transform.position, hit.position) < minWanderDistance)
+                {
+                    continue;
+                }
+
+                agent.SetDestination(hit.position);
+                return;
+            }
         }
     }
 
