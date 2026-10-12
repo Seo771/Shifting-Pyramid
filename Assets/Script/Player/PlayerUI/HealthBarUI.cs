@@ -29,6 +29,6 @@ public class HealthBarUI : MonoBehaviour
     void UpdateHealthText()
     {
         healthText.text =
-            $"   HP  |  {Mathf.CeilToInt(playerHP.currentHealth)} / {Mathf.CeilToInt(playerHP.maxHealth)}";
+            $"HP | {Mathf.CeilToInt(playerHP.currentHealth)} / {Mathf.CeilToInt(playerHP.maxHealth)}";
     }
 }
