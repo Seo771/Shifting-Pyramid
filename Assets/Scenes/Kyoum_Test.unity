@@ -1587,8 +1587,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd2fd246a2514f23a849d71ca9d8f135, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMazeSpawner
-  playerPrefab: {fileID: 1936457004}
-  existingPlayer: {fileID: 1936457006}
+  playerPrefab: {fileID: 549291245094821423, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+  existingPlayer: {fileID: 0}
   spawnHeight: 1.25
 --- !u!1 &564499375
 GameObject:
@@ -3215,6 +3215,7 @@ GameObject:
   - component: {fileID: 1936457012}
   - component: {fileID: 1936457011}
   - component: {fileID: 1936457010}
+  - component: {fileID: 1936457009}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -3249,7 +3250,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 11.0519, y: -0, z: 11.74322}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 418977890}
@@ -3299,6 +3300,21 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &1936457009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1936457004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd2fd246a2514f23a849d71ca9d8f135, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMazeSpawner
+  playerPrefab: {fileID: 0}
+  existingPlayer: {fileID: 0}
+  spawnHeight: 1.25
 --- !u!114 &1936457010
 MonoBehaviour:
   m_ObjectHideFlags: 0

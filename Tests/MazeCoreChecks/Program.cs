@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ShiftingPyramid.Maze.Core;
 using ShiftingPyramid.Maze.Generation;
+using ShiftingPyramid.Maze.RuntimeChange;
 using ShiftingPyramid.Maze.Validation;
 
 internal static class Program
@@ -52,7 +53,56 @@ internal static class Program
         ExpectFailure<InvalidOperationException>(() => isolated.SetConnection(room.Origin, MazeDirection.West, true));
         Assert(!new MazePathValidator().IsReachable(isolated, MazeCoordinate.Zero, new MazeCoordinate(-1, 0)), "Out-of-bounds target.");
 
-        Console.WriteLine("PASS: 250 seeds, deterministic layout/walls, 3x3 ownership/protection, declared entrances, all-cell reachability, exit selection, room-start BFS, legacy DFS, and invalid-input/rollback checks.");
+        var changedCount = 0;
+        for (var seed = 0; seed < 100; seed++)
+        {
+            var first = Generate(seed);
+            var second = Generate(seed);
+            var before = Signature(first);
+            var mummy = new MazeCoordinate(14, 14);
+            var changer = new MazeRegionChanger();
+            var changed = changer.TryChange(first, 3, MazeCoordinate.Zero, 1, mummy, 1,
+                out var origin, seed);
+            var repeated = changer.TryChange(second, 3, MazeCoordinate.Zero, 1, mummy, 1,
+                out var repeatedOrigin, seed);
+            Assert(changed == repeated && origin.Equals(repeatedOrigin)
+                && Signature(first) == Signature(second), "Region change must be deterministic.");
+            if (!changed)
+            {
+                Assert(Signature(first) == before, "Failed change must restore every wall.");
+                continue;
+            }
+
+            changedCount++;
+            Assert(Signature(first) != before, "Successful change must alter a wall.");
+            Assert(new MazePathValidator().AreReachable(first, MazeCoordinate.Zero,
+                first.Tiles.Select(tile => tile.Coordinate)), "Changed maze must stay reachable.");
+            var original = Generate(seed);
+            foreach (var tile in first.Tiles)
+            {
+                var coordinate = tile.Coordinate;
+                var outside = coordinate.X < origin.X || coordinate.X >= origin.X + 3
+                    || coordinate.Y < origin.Y || coordinate.Y >= origin.Y + 3;
+                var playerSafe = coordinate.X <= 1 && coordinate.Y <= 1;
+                var mummySafe = coordinate.X >= 13 && coordinate.Y >= 13;
+                if (outside || playerSafe || mummySafe || tile.IsProtected)
+                    foreach (var direction in Directions)
+                        Assert(tile.IsOpen(direction) == original.GetTile(coordinate).IsOpen(direction),
+                            "Protected, safe, and out-of-region walls must stay unchanged.");
+            }
+            Verify(first);
+        }
+        Assert(changedCount > 0, "Default 3x3 region must produce a real change.");
+
+        var disconnected = new MazeGrid(5, 5);
+        var disconnectedBefore = Signature(disconnected);
+        Assert(!new MazeRegionChanger().TryChange(disconnected, 3, MazeCoordinate.Zero, 0,
+            null, 0, out _, 7) && Signature(disconnected) == disconnectedBefore,
+            "Unreachable change must be rolled back.");
+        ExpectFailure<ArgumentOutOfRangeException>(() => new MazeRegionChanger().TryChange(
+            disconnected, 2, MazeCoordinate.Zero, 0, null, 0, out _));
+
+        Console.WriteLine($"PASS: 250 generation seeds, {changedCount}/100 runtime changes, protection, reachability, determinism, and rollback checks.");
     }
 
     private static MazeGrid Generate(int seed)

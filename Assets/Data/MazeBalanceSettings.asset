@@ -18,7 +18,7 @@ MonoBehaviour:
   specialRoomCount: 2
   treasureRoom3x3Prefab: {fileID: 6803074361362427213, guid: bbedbbb7216afc443be272d06752393a, type: 3}
   specialRoom3x3Prefabs:
-  - {fileID: 6803074361362427213, guid: bbedbbb7216afc443be272d06752393a, type: 3}
+  - {fileID: 6803074361362427213, guid: 7821c6a9a7abc854999be27b3c268fa9, type: 3}
   treasureRoomPrefab: {fileID: 7863490368430874800, guid: bbedbbb7216afc443be272d06752393a, type: 3}
   specialRoomPrefabs: []
   exitRoomPrefab: {fileID: 7863490368430874800, guid: 9b0422de140504f449145791e84d81a1, type: 3}

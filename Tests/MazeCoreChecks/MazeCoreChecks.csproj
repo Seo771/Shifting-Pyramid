@@ -9,5 +9,6 @@
     <Compile Include="../../Assets/Script/Maze/Core/*.cs" />
     <Compile Include="../../Assets/Script/Maze/Generation/*.cs" />
     <Compile Include="../../Assets/Script/Maze/Validation/*.cs" />
+    <Compile Include="../../Assets/Script/Maze/RuntimeChange/*.cs" />
   </ItemGroup>
 </Project>

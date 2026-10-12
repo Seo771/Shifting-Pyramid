@@ -32,6 +32,19 @@ public class Mummification : MonoBehaviour
     }
 
     /// <summary>
+    /// 미라화 수치를 특정 양만큼 감소시키는 함수
+    /// </summary>
+    public void DecreaseMummification(float amount)
+    {
+        if (isMummified) return; // 이미 미라화 상태면 감소 불가(설계상)
+
+        currentMummification -= amount;
+        currentMummification = Mathf.Clamp(currentMummification, 0f, maxMummification);
+
+        onMummificationChanged?.Invoke(currentMummification, maxMummification);
+    }
+
+    /// <summary>
     /// 미라화 수치를 특정 양만큼 증가시키는 함수
     /// </summary>
     public void IncreaseMummification(float amount)

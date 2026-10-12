@@ -3,49 +3,37 @@
 public class PlayerStamina : MonoBehaviour
 {
     [Header("스테미나 설정")]
-    public float maxStamina = 100f;       // 최대 스테미나
-    public float currentStamina;          // 현재 스테미나
-    public float staminaDrainRate = 20f;  // 달릴 때 초당 소모량
-    public float staminaRegenRate = 15f;  // 쉴 때 초당 회복량
+    public float maxStamina = 100f;
+    public float currentStamina;
+    public float staminaDrainRate = 20f;
+    public float staminaRegenRate = 15f;
 
+    [Header("탈진 상태")]
     public bool isExhausted = false;
 
     [Header("회복 딜레이")]
-    public float regenDelay = 1f;         // 달리기를 멈추고 회복 시작까지 걸리는 시간
+    public float regenDelay = 1f;
     private float delayTimer;
+
     void Start()
     {
-        // 시작할 때 스테미나를 최대치로 채웁니다.
         currentStamina = maxStamina;
     }
+
     void Update()
     {
         currentStamina = Mathf.Clamp(currentStamina, 0f, maxStamina);
-    }
 
-    // 1. 달릴 때 호출하여 스테미나를 줄이는 함수
-    public void DrainStamina()
-    {
-        if (currentStamina > 0)
+        // 스태미나가 0이 되면 탈진 설정
+        if (currentStamina <= 0f)
         {
-            currentStamina -= staminaDrainRate * Time.deltaTime;
-
-            // 스테미나가 0 이하가 되면 '탈진 상태'로 전환!
-            if (currentStamina <= 0)
-            {
-                currentStamina = 0;
-                isExhausted = true;
-            }
+            currentStamina = 0f;
+            isExhausted = true;
         }
-    }
-    // 2. 달리지 않을 때(걷거나 멈춤) 호출하여 스테미나를 회복하는 함수
-    public void RegenerateStamina()
-    {
-        if (currentStamina < maxStamina)
-        {
-            currentStamina += staminaRegenRate * Time.deltaTime;
 
-            // 스테미나가 다시 100% (최대치) 다 차면 '탈진 상태' 해제!
+        // ★ 스태미나가 정확히 100% 채워졌을 때만 탈진 해제
+        if (isExhausted)
+        {
             if (currentStamina >= maxStamina)
             {
                 currentStamina = maxStamina;
@@ -54,10 +42,47 @@ public class PlayerStamina : MonoBehaviour
         }
     }
 
-    // 3. 달릴 수 있는 상태인지 확인하는 함수
+    public void DrainStamina()
+    {
+        // 탈진 상태일 때는 소모 로직 실행 안 함
+        if (isExhausted) return;
+
+        delayTimer = regenDelay;
+
+        if (currentStamina > 0f)
+        {
+            currentStamina -= staminaDrainRate * Time.deltaTime;
+
+            if (currentStamina <= 0f)
+            {
+                currentStamina = 0f;
+                isExhausted = true;
+            }
+        }
+    }
+
+    public void RegenerateStamina()
+    {
+        if (delayTimer > 0f)
+        {
+            delayTimer -= Time.deltaTime;
+            return;
+        }
+
+        if (currentStamina < maxStamina)
+        {
+            currentStamina += staminaRegenRate * Time.deltaTime;
+        }
+    }
+
     public bool CanRun()
     {
-        // 스테미나가 0보다 크더라도, 탈진 상태(isExhausted)라면 달릴 수 없음!
-        return currentStamina > 0f && !isExhausted;
+        // ★ 탈진 상태(isExhausted)이거나 스태미나가 0 이하이면 무조건 false
+        if (isExhausted || currentStamina <= 0f)
+        {
+            return false;
+        }
+
+        return true;
     }
 }
