@@ -145,7 +145,99 @@ internal static class Program
         ExpectFailure<ArgumentOutOfRangeException>(() => new MazeRegionChanger().ChangeRegions(
             disconnected, 3, 0, MazeCoordinate.Zero, 0, null, 0));
 
-        Console.WriteLine($"PASS: four room rotations, 250 generation seeds, {changedCount}/100 single and {fullBatchCount}/100 full three-region changes, protection, reachability, determinism, and rollback checks.");
+        VerifySpecialRoomReplacement();
+
+        Console.WriteLine($"PASS: four room rotations, 250 generation seeds, {changedCount}/100 single and {fullBatchCount}/100 full three-region changes, special-room replacement, protection, reachability, determinism, and rollback checks.");
+    }
+
+    private static void VerifySpecialRoomReplacement()
+    {
+        var catalog = new[]
+        {
+            Template(MazeTileType.TreasureRoom, 1),
+            Template(MazeTileType.SpecialRoom, 0),
+            Template(MazeTileType.SpecialRoom, 2)
+        };
+        var successes = 0;
+        var replacer = new SpecialRoomReplacer();
+        for (var seed = 0; seed < 30; seed++)
+        {
+            var first = GenerateForReplacement(seed, catalog);
+            var second = GenerateForReplacement(seed, catalog);
+            var preservedRooms = first.Rooms.Where(room => room.Template.TileType == MazeTileType.TreasureRoom).ToArray();
+            var exit = first.Tiles.Single(tile => tile.TileType == MazeTileType.Exit).Coordinate;
+            var player = MazeCoordinate.Zero;
+            var mummy = new MazeCoordinate(29, 29);
+            for (var tick = 0; tick < 3; tick++)
+            {
+                var snapshot = first.Clone();
+                var before = Signature(first);
+                var previous = first.Rooms.Single(room => room.Template.TileType == MazeTileType.SpecialRoom);
+                var changed = replacer.TryReplace(first, catalog, player, 1, mummy, 1,
+                    out var removed, out var added, seed * 10 + tick);
+                var repeated = replacer.TryReplace(second, catalog, player, 1, mummy, 1,
+                    out var repeatedRemoved, out var repeatedAdded, seed * 10 + tick);
+                Assert(changed == repeated && Signature(first) == Signature(second),
+                    "Special-room replacement must be deterministic.");
+                if (!changed)
+                {
+                    Assert(Signature(first) == before && removed == null && added == null,
+                        "Failed replacement must preserve the original grid.");
+                    continue;
+                }
+                successes++;
+                Assert(ReferenceEquals(removed, previous) && !first.Rooms.Contains(removed)
+                    && first.Rooms.Contains(added) && !added.Origin.Equals(removed.Origin),
+                    "Replacement must move exactly one existing special room.");
+                Assert(first.Rooms.Count == 5
+                    && first.Rooms.Count(room => room.Template.TileType == MazeTileType.SpecialRoom) == 1
+                    && preservedRooms.All(first.Rooms.Contains), "Room counts and treasure rooms must stay fixed.");
+                Assert(first.GetTile(exit).TileType == MazeTileType.Exit && first.GetTile(exit).IsProtected,
+                    "Replacement must preserve the exit.");
+                Assert(new MazePathValidator().AreReachable(first, player,
+                    first.Tiles.Select(tile => tile.Coordinate)), "Replacement must preserve all paths.");
+                foreach (var tile in first.Tiles)
+                {
+                    var cell = tile.Coordinate;
+                    if ((cell.X > 1 || cell.Y > 1)
+                        && (cell.X < 28 || cell.Y < 28)) continue;
+                    foreach (var direction in Directions)
+                        Assert(tile.IsOpen(direction) == snapshot.GetTile(cell).IsOpen(direction),
+                            "Replacement must preserve walls in actor safe areas.");
+                }
+                Assert(repeatedRemoved.Origin.Equals(removed.Origin)
+                    && repeatedAdded.Origin.Equals(added.Origin), "Replacement choices must repeat.");
+                Verify(first, 5);
+                if (tick == 0 && seed < 5)
+                {
+                    var changer = new MazeRegionChanger();
+                    var regions = changer.ChangeRegions(first, 11, 5, player, 1, mummy, 1, seed);
+                    var repeatedRegions = changer.ChangeRegions(second, 11, 5, player, 1, mummy, 1, seed);
+                    Assert(regions.SequenceEqual(repeatedRegions) && Signature(first) == Signature(second),
+                        "Room and corridor changes together must be deterministic.");
+                    Verify(first, 5);
+                }
+            }
+        }
+        Assert(successes > 0, "Replacement must succeed on a realistic map.");
+
+        var occupied = GenerateForReplacement(42, catalog);
+        var special = occupied.Rooms.Single(room => room.Template.TileType == MazeTileType.SpecialRoom);
+        var original = Signature(occupied);
+        Assert(!replacer.TryReplace(occupied, catalog, special.Center, 1, null, 0,
+            out _, out _, 42) && Signature(occupied) == original,
+            "A room containing the player must not be removed.");
+        Console.WriteLine($"Special-room replacements: {successes}/90 attempts.");
+    }
+
+    private static MazeGrid GenerateForReplacement(int seed, MazeRoomTemplate[] catalog)
+    {
+        var grid = new MazeGrid(30, 30);
+        var templates = new[] { catalog[0], catalog[0], catalog[0], catalog[0], catalog[1] };
+        new MazeRoomPlacer().Place(grid, templates, new[] { 0, 0, 0, 0, 1 }, seed);
+        new DepthFirstMazeGenerator().GenerateInto(grid, seed);
+        new MazeExitPlacer().Place(grid);
+        return grid;
     }
 
     private static void VerifyRotations()
@@ -200,10 +292,11 @@ internal static class Program
         return new MazeRoomTemplate(type, entrances);
     }
 
-    private static void Verify(MazeGrid grid)
+    private static void Verify(MazeGrid grid, int expectedRooms = 7)
     {
-        Assert(grid.Rooms.Count == 7, "Expected seven room prefabs.");
-        Assert(grid.Tiles.Count(tile => grid.TryGetRoom(tile.Coordinate, out _)) == 63, "Exactly nine cells per room.");
+        Assert(grid.Rooms.Count == expectedRooms, "Expected the configured room count.");
+        Assert(grid.Tiles.Count(tile => grid.TryGetRoom(tile.Coordinate, out _)) == expectedRooms * 9,
+            "Exactly nine cells per room.");
         Assert(!grid.TryGetRoom(MazeCoordinate.Zero, out _), "Start must be a corridor.");
         var validator = new MazePathValidator();
         var allCells = grid.Tiles.Select(tile => tile.Coordinate).ToArray();
@@ -237,9 +330,9 @@ internal static class Program
     private static string Signature(MazeGrid grid)
     {
         return string.Join(";", grid.Rooms.Select(room =>
-            $"{room.Origin}:{room.RotationQuarterTurns}")) + "|"
+            $"{room.Origin}:{room.RotationQuarterTurns}:{room.TemplateIndex}")) + "|"
             + string.Join(";", grid.Tiles.Select(tile =>
-                $"{tile.Coordinate}:{tile.TileType}:{string.Join(",", Directions.Select(tile.IsOpen))}"));
+                $"{tile.Coordinate}:{tile.TileType}:{tile.IsProtected}:{string.Join(",", Directions.Select(tile.IsOpen))}"));
     }
 
     private static void Assert(bool condition, string message)
