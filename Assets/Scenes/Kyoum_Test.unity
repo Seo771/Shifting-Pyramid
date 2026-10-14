@@ -1587,8 +1587,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd2fd246a2514f23a849d71ca9d8f135, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMazeSpawner
-  playerPrefab: {fileID: 549291245094821423, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
-  existingPlayer: {fileID: 0}
+  playerPrefab: {fileID: 1936457004}
+  existingPlayer: {fileID: 1936457006}
   spawnHeight: 1.25
 --- !u!1 &564499375
 GameObject:
