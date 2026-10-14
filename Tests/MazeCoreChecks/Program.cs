@@ -221,6 +221,21 @@ internal static class Program
         }
         Assert(successes > 0, "Replacement must succeed on a realistic map.");
 
+        var compactReplacements = 0;
+        var compactRegions = 0;
+        for (var seed = 0; seed < 10; seed++)
+        {
+            var compact = GenerateForReplacement(seed, catalog, 20);
+            var compactMummy = new MazeCoordinate(19, 19);
+            if (replacer.TryReplace(compact, catalog, MazeCoordinate.Zero, 1,
+                compactMummy, 1, out _, out _, seed)) compactReplacements++;
+            compactRegions += new MazeRegionChanger().ChangeRegions(compact, 11, 5,
+                MazeCoordinate.Zero, 1, compactMummy, 1, seed).Count;
+        }
+        Assert(compactReplacements > 0 && compactRegions > 0,
+            "The compact scene balance must permit room and corridor changes.");
+        Console.WriteLine($"Compact 20x20: {compactReplacements}/10 room replacements, {compactRegions} corridor regions.");
+
         var occupied = GenerateForReplacement(42, catalog);
         var special = occupied.Rooms.Single(room => room.Template.TileType == MazeTileType.SpecialRoom);
         var original = Signature(occupied);
@@ -230,9 +245,9 @@ internal static class Program
         Console.WriteLine($"Special-room replacements: {successes}/90 attempts.");
     }
 
-    private static MazeGrid GenerateForReplacement(int seed, MazeRoomTemplate[] catalog)
+    private static MazeGrid GenerateForReplacement(int seed, MazeRoomTemplate[] catalog, int size = 30)
     {
-        var grid = new MazeGrid(30, 30);
+        var grid = new MazeGrid(size, size);
         var templates = new[] { catalog[0], catalog[0], catalog[0], catalog[0], catalog[1] };
         new MazeRoomPlacer().Place(grid, templates, new[] { 0, 0, 0, 0, 1 }, seed);
         new DepthFirstMazeGenerator().GenerateInto(grid, seed);

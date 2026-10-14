@@ -204,13 +204,30 @@ namespace ShiftingPyramid.Maze.RuntimeChange
                         edges.Add((cell, direction));
                 }
             Shuffle(edges, random);
+            var components = GetComponents(grid);
+            var parents = new int[grid.Width * grid.Height];
+            for (var i = 0; i < parents.Length; i++) parents[i] = i;
             foreach (var edge in edges)
             {
-                var components = GetComponents(grid);
                 var neighbor = edge.Cell + edge.Direction.ToOffset();
-                if (components[edge.Cell] != components[neighbor])
+                var cellComponent = Find(parents, components[edge.Cell]);
+                var neighborComponent = Find(parents, components[neighbor]);
+                if (cellComponent != neighborComponent)
+                {
                     grid.SetConnection(edge.Cell, edge.Direction, true);
+                    parents[cellComponent] = neighborComponent;
+                }
             }
+        }
+
+        private static int Find(int[] parents, int index)
+        {
+            while (parents[index] != index)
+            {
+                parents[index] = parents[parents[index]];
+                index = parents[index];
+            }
+            return index;
         }
 
         private static Dictionary<MazeCoordinate, int> GetComponents(MazeGrid grid)

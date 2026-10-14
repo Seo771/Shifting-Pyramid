@@ -835,7 +835,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Maze.View.MazeTestBootstrapper
   mazeRenderer: {fileID: 1014796560}
   settings: {fileID: 11400000, guid: c719456dd0de20141b440727caa63ecd, type: 2}
-  playerSpawner: {fileID: 0}
+  playerSpawner: {fileID: 562330939}
   fallbackWidth: 5
   fallbackHeight: 5
 --- !u!114 &487055576
@@ -1385,8 +1385,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd2fd246a2514f23a849d71ca9d8f135, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMazeSpawner
-  playerPrefab: {fileID: 549291245094821423, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
-  existingPlayer: {fileID: 0}
+  playerPrefab: {fileID: 1060043249263795877, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+  existingPlayer: {fileID: 939059302}
   spawnHeight: 1.25
 --- !u!1 &564499375
 GameObject:
@@ -2063,6 +2063,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+--- !u!4 &939059302 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8010034990369437996, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+  m_PrefabInstance: {fileID: 939059301}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1014796559
 GameObject:
   m_ObjectHideFlags: 0

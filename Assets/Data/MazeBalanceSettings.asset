@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a94eb78e0e67fef479c1a849193af788, type: 3}
   m_Name: MazeBalanceSettings
   m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Maze.Settings.MazeBalanceSettings
-  mazeWidth: 30
-  mazeHeight: 30
+  mazeWidth: 20
+  mazeHeight: 20
   treasureRoomCount: 4
   specialRoomCount: 1
   treasureRoom3x3Prefab: {fileID: 6803074361362427213, guid: bbedbbb7216afc443be272d06752393a, type: 3}
