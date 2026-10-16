@@ -1,8 +1,18 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
+using TMPro;
 
 public class Mummification : MonoBehaviour
 {
+    [Header("UI")]
+    [SerializeField] private TMP_Text mummificationText;
+
+    private void LateUpdate()
+    {
+        if (mummificationText != null)
+            mummificationText.SetText("{0:1}%", NormalizedValue * 100f);
+    }
+
     [Header("미라화 설정")]
     [Tooltip("초당 증가하는 미라화 수치")]
     [SerializeField] private float increaseRatePerSecond = 1f;
