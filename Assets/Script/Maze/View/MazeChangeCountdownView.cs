@@ -10,6 +10,7 @@ namespace ShiftingPyramid.Maze.View
     {
         [SerializeField] private TMP_Text countdownText;
         private MazeRuntimeChangeController controller;
+        private int lastSeconds = int.MinValue;
 
         private void Awake()
         {
@@ -20,7 +21,10 @@ namespace ShiftingPyramid.Maze.View
         {
             if (countdownText == null) return;
             int seconds = controller.SecondsRemaining;
-            countdownText.text = seconds >= 0 ? seconds.ToString() : string.Empty;
+            if (seconds == lastSeconds) return;
+            lastSeconds = seconds;
+            countdownText.text = seconds >= 0
+                ? $"다음 미로 변경시간 : {seconds}" : string.Empty;
         }
     }
 }

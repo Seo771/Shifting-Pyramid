@@ -1,6 +1,7 @@
 using ShiftingPyramid.Maze.Settings;
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GameManager : MonoBehaviour
 {
@@ -24,7 +25,13 @@ public class GameManager : MonoBehaviour
 
     [Header("Balance Settings")]
     [SerializeField] private MazeBalanceSettings mazeBalanceSettings;
-    [SerializeField] private int fallbackRequiredTreasureCount = 3;
+    [SerializeField] private int fallbackRequiredTreasureCount = 4;
+    [SerializeField, Min(-1), Tooltip("테스트용 출구 개방 개수. -1이면 미로 설정 값을 사용합니다.")]
+    private int exitUnlockCountOverride = -1;
+
+    [Header("Game Result")]
+    [SerializeField] private UnityEvent onVictory = new UnityEvent();
+    [SerializeField] private UnityEvent onDefeat = new UnityEvent();
 
     // 보물 개수와 승패 판정에 필요한 최소 상태만 관리한다.
     private int collectedTreasureCount;
@@ -33,7 +40,9 @@ public class GameManager : MonoBehaviour
     private bool hasUnlockedExit;
 
     public GameState CurrentState { get; private set; } = GameState.Ready;
-    public int RequiredTreasureCount => fallbackRequiredTreasureCount;
+    public int RequiredTreasureCount => exitUnlockCountOverride >= 0
+        ? exitUnlockCountOverride
+        : mazeBalanceSettings != null ? mazeBalanceSettings.TreasureRoomCount : fallbackRequiredTreasureCount;
     public int CollectedTreasureCount => collectedTreasureCount;
     public bool IsExitUnlocked => hasUnlockedExit;
     public bool IsGameFinished => CurrentState == GameState.Victory || CurrentState == GameState.Defeat;
@@ -145,6 +154,7 @@ public class GameManager : MonoBehaviour
         if (CurrentState == GameState.Playing && hasReachedExit && IsExitUnlocked)
         {
             CurrentState = GameState.Victory;
+            onVictory?.Invoke();
         }
     }
 
@@ -154,6 +164,7 @@ public class GameManager : MonoBehaviour
         if (CurrentState == GameState.Playing && isPlayerDead)
         {
             CurrentState = GameState.Defeat;
+            onDefeat?.Invoke();
         }
     }
 }

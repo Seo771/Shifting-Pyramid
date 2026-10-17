@@ -6,11 +6,15 @@ public class Mummification : MonoBehaviour
 {
     [Header("UI")]
     [SerializeField] private TMP_Text mummificationText;
+    private int lastDisplayedPercent = -1;
 
     private void LateUpdate()
     {
-        if (mummificationText != null)
-            mummificationText.SetText("{0:1}%", NormalizedValue * 100f);
+        if (mummificationText == null) return;
+        int percent = Mathf.Clamp(Mathf.FloorToInt(NormalizedValue * 100f), 0, 100);
+        if (percent == lastDisplayedPercent) return;
+        lastDisplayedPercent = percent;
+        mummificationText.text = $"미라화수치 : {percent}%";
     }
 
     [Header("미라화 설정")]
@@ -36,6 +40,8 @@ public class Mummification : MonoBehaviour
     private void Update()
     {
         if (isMummified) return;
+        if (GameManager.Instance != null
+            && GameManager.Instance.CurrentState != GameManager.GameState.Playing) return;
 
         // 초당 수치 증가
         IncreaseMummification(increaseRatePerSecond * Time.deltaTime);
@@ -82,6 +88,8 @@ public class Mummification : MonoBehaviour
         isMummified = true;
         Debug.Log("[경고] 미라화 수치 100% 도달! 플레이어가 미라가 되었습니다.");
 
+        // 미라화가 끝나면 게임 규칙의 패배 판정을 요청한다.
+        if (GameManager.Instance != null) GameManager.Instance.SetPlayerDead();
         onMummified?.Invoke();
     }
 }

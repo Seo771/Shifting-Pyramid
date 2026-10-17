@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a94eb78e0e67fef479c1a849193af788, type: 3}
   m_Name: MazeBalanceSettings
   m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Maze.Settings.MazeBalanceSettings
-  mazeWidth: 20
-  mazeHeight: 20
-  treasureRoomCount: 4
+  mazeWidth: 10
+  mazeHeight: 10
+  treasureRoomCount: 1
   specialRoomCount: 1
   treasureRoom3x3Prefab: {fileID: 6803074361362427213, guid: bbedbbb7216afc443be272d06752393a, type: 3}
   specialRoom3x3Prefabs:
@@ -24,7 +24,7 @@ MonoBehaviour:
   exitRoomPrefab: {fileID: 7863490368430874800, guid: 9b0422de140504f449145791e84d81a1, type: 3}
   mazeChangeRegionSize: 11
   mazeChangeRegionCount: 5
-  mazeChangeInterval: 5
+  mazeChangeInterval: 30
   playerSafeRadius: 1
   mummySafeRadius: 1
   useRandomSeed: 1

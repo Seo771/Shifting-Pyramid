@@ -22,6 +22,7 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     private NavMeshAgent agent;
     private float wanderTimer;
     private Vector3 lastStimulusPosition; // 소리/상호작용 자극 위치 기억용
+    private bool investigationDestinationPending;
 
     private void Awake()
     {
@@ -45,6 +46,9 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
     private void Update()
     {
+        // 미로 생성/변경 중에는 NavMesh가 잠시 없을 수 있다.
+        if (!TryPrepareAgent()) return;
+
         // 기존 거리 기반 감지 유지
         CheckPlayerDetection();
 
@@ -85,13 +89,23 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
                 if (currentState != AIState.Chase)
                 {
                     lastStimulusPosition = stimulus.position;
-                    agent.SetDestination(lastStimulusPosition);
+                    investigationDestinationPending = true;
                     currentState = AIState.Investigate;
                 }
                 break;
         }
     }
     #endregion
+
+    private bool TryPrepareAgent()
+    {
+        if (agent == null || !agent.isActiveAndEnabled) return false;
+        if (agent.isOnNavMesh) return true;
+
+        // 새 NavMesh가 생기면 현재 위치에서 가까운 통로로 에이전트를 복귀시킨다.
+        if (!NavMesh.SamplePosition(transform.position, out var hit, 3f, agent.areaMask)) return false;
+        return agent.Warp(hit.position) && agent.isOnNavMesh;
+    }
 
     #region AI 상태별 로직
     private void HandleWander()
@@ -113,6 +127,12 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
     private void HandleInvestigate()
     {
+        if (investigationDestinationPending)
+        {
+            agent.SetDestination(lastStimulusPosition);
+            investigationDestinationPending = false;
+        }
+
         // 소리 난 곳까지 걸어가서 도착하면 다시 배회(Wander)로 복귀
         if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
         {
