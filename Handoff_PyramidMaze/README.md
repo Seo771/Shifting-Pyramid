@@ -15,9 +15,9 @@ This capstone is a 3D pyramid maze game where:
 - ordinary corridor N/E/S/W walls are enabled/disabled
 - selected maze regions change periodically
 - changes are path-validated
-- the player must collect a required number of treasures
-- Treasure Rooms are fixed, manually authored 3x3 room prefabs
-- Exit is fixed and unlocks only after the treasure requirement
+- the player must collect a required number of curse jars
+- Curse Jar Rooms are fixed, manually authored 3x3 room prefabs
+- Exit is fixed and unlocks only after the curse jar requirement
 - Special Rooms also use manually authored 3x3 room prefabs; their runtime appearance policy is not finalized
 - the Mummy is the main monster
 - traps are modular game content
@@ -25,7 +25,7 @@ This capstone is a 3D pyramid maze game where:
 ## Current Implementation
 The code reserves 3x3 room footprints first, generates corridors with room-aware randomized DFS, connects every declared entrance, places the exit, and validates room/exit reachability with BFS. Runtime maze changes are not implemented yet.
 
-Each Treasure Room or Special Room uses one prefab occupying nine grid cells. Prefabs need a root `MazeRoomView` and child `MazeRoomEntranceMarker` components. Existing single-tile room prefabs have not been automatically converted; assign authored 3x3 prefabs before playing with nonzero room counts.
+Each Curse Jar Room or Special Room uses one prefab occupying nine grid cells. Prefabs need a root `MazeRoomView` and child `MazeRoomEntranceMarker` components. Existing single-tile room prefabs have not been automatically converted; assign authored 3x3 prefabs before playing with nonzero room counts.
 
 Setup instructions: [3x3 room prefab setup](../Docs/RoomPrefabSetup.md).
 
@@ -44,7 +44,7 @@ Setup instructions: [3x3 room prefab setup](../Docs/RoomPrefabSetup.md).
 - Entrance counts for each authored prefab; currently every declared entrance is connected.
 - Future prefab rotation support; currently room roots require zero rotation and unit scale.
 - Special Room lifetime/protection policy.
-- Final maze dimensions and room counts: the current asset uses 15x15 with five Treasure Rooms and two Special Rooms, leaving a one-cell corridor gap.
+- Final maze dimensions and room counts: the current asset uses 15x15 with five Curse Jar Rooms and two Special Rooms, leaving a one-cell corridor gap.
 
 Implementation details and migration order are recorded in `../Docs/MazeArchitecturePlan.md` and `MazeSystem.md`.
 

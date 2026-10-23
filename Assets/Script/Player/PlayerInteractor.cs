@@ -6,7 +6,7 @@ using UnityEngine;
 // - G키로 상호작용
 // - 상호작용 가능한 대상이 가까이 있으면 Interaction UI 표시
 // - Interaction UI는 현재 대상의 아래쪽에 표시됨
-// - 보물의 Collider 크기와 관계없이 Transform 위치를 기준으로 UI 위치 결정
+// - 저주 단지의 Collider 크기와 관계없이 Transform 위치를 기준으로 UI 위치 결정
 
 [RequireComponent(typeof(Collider))]
 public class PlayerInteractor : MonoBehaviour
@@ -25,7 +25,7 @@ public class PlayerInteractor : MonoBehaviour
     [Tooltip("F 상호작용 팝업 UI")]
     public GameObject interactionUI;
 
-    [Tooltip("보물 중심에서 아래쪽으로 떨어뜨릴 거리")]
+    [Tooltip("저주 단지 중심에서 아래쪽으로 떨어뜨릴 거리")]
     public float uiVerticalOffset = 0.5f;
 
     private Camera mainCamera;
@@ -122,11 +122,11 @@ public class PlayerInteractor : MonoBehaviour
         if (interactableObject == null)
             return;
 
-        // 보물의 Transform 위치
+        // 저주 단지의 Transform 위치
         Vector3 worldPosition =
             interactableObject.transform.position;
 
-        // 보물 중심보다 아래쪽에 UI 배치
+        // 저주 단지 중심보다 아래쪽에 UI 배치
         worldPosition +=
             Vector3.down * uiVerticalOffset;
 

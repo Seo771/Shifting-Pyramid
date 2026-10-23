@@ -1557,9 +1557,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f52d43ac5c858c4588700c8482a6e71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  treasureCount: 0
+  curseJarCount: 0
   mazeBalanceSettings: {fileID: 0}
-  fallbackRequiredTreasureCount: 3
+  fallbackRequiredCurseJarCount: 3
 --- !u!4 &562330938
 Transform:
   m_ObjectHideFlags: 0

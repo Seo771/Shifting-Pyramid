@@ -41,7 +41,7 @@ public class GameNotice : MonoBehaviour
     {
         if (gameManager != null)
         {
-            gameManager.OnTreasureChanged -= HandleTreasureChanged;
+            gameManager.OnCurseJarChanged -= HandleCurseJarChanged;
             gameManager.OnExitUnlocked -= HandleExitUnlocked;
         }
         gameManager = null;
@@ -58,12 +58,12 @@ public class GameNotice : MonoBehaviour
             ? GameManager.Instance : FindFirstObjectByType<GameManager>();
         if (gameManager == null) return;
 
-        lastCollectedCount = gameManager.CollectedTreasureCount;
-        gameManager.OnTreasureChanged += HandleTreasureChanged;
+        lastCollectedCount = gameManager.CollectedCurseJarCount;
+        gameManager.OnCurseJarChanged += HandleCurseJarChanged;
         gameManager.OnExitUnlocked += HandleExitUnlocked;
     }
 
-    private void HandleTreasureChanged(int collectedCount, int requiredCount)
+    private void HandleCurseJarChanged(int collectedCount, int requiredCount)
     {
         if (collectedCount > lastCollectedCount) Enqueue(curseMessage);
         lastCollectedCount = collectedCount;

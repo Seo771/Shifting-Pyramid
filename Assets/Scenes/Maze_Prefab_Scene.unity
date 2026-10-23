@@ -490,7 +490,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7897435374037114361, guid: bbedbbb7216afc443be272d06752393a, type: 3}
       propertyPath: m_Name
-      value: Treasure_Tile
+      value: CurseJar_Tile
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

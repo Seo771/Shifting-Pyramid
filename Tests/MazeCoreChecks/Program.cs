@@ -34,19 +34,19 @@ internal static class Program
 
         var tiny = new MazeGrid(5, 5);
         ExpectFailure<InvalidOperationException>(() => new MazeRoomPlacer().Place(tiny,
-            new[] { Template(MazeTileType.TreasureRoom, 0), Template(MazeTileType.SpecialRoom, 1) }, 1));
+            new[] { Template(MazeTileType.CurseJarRoom, 0), Template(MazeTileType.SpecialRoom, 1) }, 1));
         Assert(tiny.Rooms.Count == 0 && tiny.Tiles.All(tile => tile.TileType == MazeTileType.Normal),
             "Failed placement must leave the grid unchanged.");
 
         ExpectFailure<ArgumentException>(() => new MazeRoomEntrance(new MazeCoordinate(1, 1), MazeDirection.North));
-        ExpectFailure<ArgumentException>(() => new MazeRoomTemplate(MazeTileType.TreasureRoom,
+        ExpectFailure<ArgumentException>(() => new MazeRoomTemplate(MazeTileType.CurseJarRoom,
             Array.Empty<MazeRoomEntrance>()));
         var duplicate = new MazeRoomEntrance(new MazeCoordinate(1, 2), MazeDirection.North);
         ExpectFailure<ArgumentException>(() => new MazeRoomTemplate(MazeTileType.SpecialRoom, new[] { duplicate, duplicate }));
 
         // 유일한 입구를 닫으면 방 내부와 외부 사이를 양방향으로 이동할 수 없다.
         var isolated = new MazeGrid(7, 7);
-        new MazeRoomPlacer().Place(isolated, new[] { Template(MazeTileType.TreasureRoom, 0) }, 3);
+        new MazeRoomPlacer().Place(isolated, new[] { Template(MazeTileType.CurseJarRoom, 0) }, 3);
         new DepthFirstMazeGenerator().GenerateInto(isolated, 3);
         var room = isolated.Rooms[0];
         var entrance = room.Entrances[0];
@@ -154,7 +154,7 @@ internal static class Program
     {
         var catalog = new[]
         {
-            Template(MazeTileType.TreasureRoom, 1),
+            Template(MazeTileType.CurseJarRoom, 1),
             Template(MazeTileType.SpecialRoom, 0),
             Template(MazeTileType.SpecialRoom, 2)
         };
@@ -164,7 +164,7 @@ internal static class Program
         {
             var first = GenerateForReplacement(seed, catalog);
             var second = GenerateForReplacement(seed, catalog);
-            var preservedRooms = first.Rooms.Where(room => room.Template.TileType == MazeTileType.TreasureRoom).ToArray();
+            var preservedRooms = first.Rooms.Where(room => room.Template.TileType == MazeTileType.CurseJarRoom).ToArray();
             var exit = first.Tiles.Single(tile => tile.TileType == MazeTileType.Exit).Coordinate;
             var player = MazeCoordinate.Zero;
             var mummy = new MazeCoordinate(29, 29);
@@ -191,7 +191,7 @@ internal static class Program
                     "Replacement must move exactly one existing special room.");
                 Assert(first.Rooms.Count == 5
                     && first.Rooms.Count(room => room.Template.TileType == MazeTileType.SpecialRoom) == 1
-                    && preservedRooms.All(first.Rooms.Contains), "Room counts and treasure rooms must stay fixed.");
+                    && preservedRooms.All(first.Rooms.Contains), "Room counts and curseJar rooms must stay fixed.");
                 Assert(first.GetTile(exit).TileType == MazeTileType.Exit && first.GetTile(exit).IsProtected,
                     "Replacement must preserve the exit.");
                 Assert(new MazePathValidator().AreReachable(first, player,
@@ -257,7 +257,7 @@ internal static class Program
 
     private static void VerifyRotations()
     {
-        var source = new MazeRoomTemplate(MazeTileType.TreasureRoom,
+        var source = new MazeRoomTemplate(MazeTileType.CurseJarRoom,
             new[] { new MazeRoomEntrance(new MazeCoordinate(0, 2), MazeDirection.North) });
         var cells = new[]
         {
@@ -289,7 +289,7 @@ internal static class Program
     {
         var grid = new MazeGrid(15, 15);
         var templates = Enumerable.Range(0, 7).Select(i =>
-            Template(i < 5 ? MazeTileType.TreasureRoom : MazeTileType.SpecialRoom, i % 3)).ToArray();
+            Template(i < 5 ? MazeTileType.CurseJarRoom : MazeTileType.SpecialRoom, i % 3)).ToArray();
         new MazeRoomPlacer().Place(grid, templates, seed);
         new DepthFirstMazeGenerator().GenerateInto(grid, seed);
         new MazeExitPlacer().Place(grid);

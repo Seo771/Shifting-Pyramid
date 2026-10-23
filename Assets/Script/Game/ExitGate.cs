@@ -59,7 +59,7 @@ public class ExitGate : MonoBehaviour
         }
 
         UnsubscribeFromGameManager();
-        gameManager.OnTreasureChanged += HandleTreasureChanged;
+        gameManager.OnCurseJarChanged += HandleCurseJarChanged;
         gameManager.OnExitUnlocked += HandleExitUnlocked;
     }
 
@@ -70,11 +70,11 @@ public class ExitGate : MonoBehaviour
             return;
         }
 
-        gameManager.OnTreasureChanged -= HandleTreasureChanged;
+        gameManager.OnCurseJarChanged -= HandleCurseJarChanged;
         gameManager.OnExitUnlocked -= HandleExitUnlocked;
     }
 
-    private void HandleTreasureChanged(int collectedCount, int requiredCount)
+    private void HandleCurseJarChanged(int collectedCount, int requiredCount)
     {
         RefreshState();
     }

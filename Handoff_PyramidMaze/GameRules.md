@@ -4,42 +4,42 @@
 - 3D pyramid exploration game
 - desert / ancient pyramid theme
 - mummy monster
-- Treasure Rooms
+- Curse Jar Rooms
 - Special Rooms
 - traps
 - Exit
 - maze changes during play
 
 ## 2. Main Objective
-The player must collect a required number of treasures before escaping.
+The player must collect a required number of curse jars before escaping.
 
 ```text
-Treasure Count < Required Count
+Curse Jar Count < Required Count
 → Exit locked
 
-Treasure Count >= Required Count
+Curse Jar Count >= Required Count
 → Exit active
 
 Player reaches active Exit
 → Escape success
 ```
 
-Exact required treasure count is not fixed yet.
+Exact required curseJar count is not fixed yet.
 
-## 3. Treasure Rooms
-Treasure Rooms are core objective rooms.
+## 3. Curse Jar Rooms
+Curse Jar Rooms are core objective rooms.
 
 Rules:
-- N Treasure Rooms are generated at initial map creation.
+- N Curse Jar Rooms are generated at initial map creation.
 - Representation: one manually authored 3x3 prefab per room, occupying nine grid cells. Use MazeRoomView and declared entrance markers.
 - Their positions are fixed for the whole run.
 - Their structure never changes.
 - Their entire footprints and entrance connections are protected from maze changes.
-- Collected treasure contributes to the escape requirement.
+- Collected curseJar contributes to the escape requirement.
 - They must remain reachable after every maze change.
 
 ## 4. Special Rooms
-Special Rooms are separate from Treasure Rooms.
+Special Rooms are separate from Curse Jar Rooms.
 
 Their representation is also a manually authored 3x3 prefab with declared entrances. Room count means whole rooms, not occupied cells. Authors choose entrance count; the generator connects every declared entrance.
 
@@ -68,7 +68,7 @@ Candidate feature:
 Restrictions:
 - reserve the entire non-overlapping 3x3 footprint and reconnect only through declared entrances
 - validate reachability when the room appears or is removed; never partially replace its footprint
-- never replace Treasure Room
+- never replace Curse Jar Room
 - never replace Exit
 - never replace player tile
 - never replace fixed Special Room
@@ -79,14 +79,14 @@ This feature is not finalized. Keep the architecture open to it, but do not over
 - fixed position
 - does not move
 - may be discovered before it is usable
-- locked until treasure requirement is met
+- locked until curse jar requirement is met
 - must remain reachable after maze changes
 - paths leading to it may change
 
 ## 6. Player
 - explores
-- finds Treasure Rooms
-- collects required treasure
+- finds Curse Jar Rooms
+- collects required curseJar
 - avoids mummy and traps
 - survives maze changes
 - escapes through Exit
@@ -134,7 +134,7 @@ Principles:
 - provide warning where appropriate
 - avoid unfair spawn positions
 - do not place at start
-- avoid critical Exit/Treasure conflicts
+- avoid critical Exit/CurseJar conflicts
 
 Traps belong to Game Layer.
 
@@ -143,11 +143,11 @@ Traps belong to Game Layer.
 ```text
 Enter Pyramid
 → Explore Maze
-→ Find Treasure Rooms
-→ Collect required treasure
+→ Find Curse Jar Rooms
+→ Collect required curseJar
 → Maze periodically changes
 → Avoid Mummy and traps
-→ Treasure requirement completed
+→ Curse jar requirement completed
 → Exit becomes active
 → Reach Exit
 → Escape

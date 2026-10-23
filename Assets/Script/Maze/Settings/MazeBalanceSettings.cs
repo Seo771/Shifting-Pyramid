@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using ShiftingPyramid.Maze.View;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace ShiftingPyramid.Maze.Settings
 {
@@ -16,14 +17,17 @@ namespace ShiftingPyramid.Maze.Settings
         [SerializeField, Min(2)] private int mazeHeight = 15;
 
         [Header("Rooms")]
-        [SerializeField, Min(0)] private int treasureRoomCount = 5;
+        [FormerlySerializedAs("treasureRoomCount")]
+        [SerializeField, Min(0)] private int curseJarRoomCount = 5;
         [SerializeField, Min(0)] private int specialRoomCount = 2;
 
         [Header("3x3 Room Prefabs")]
-        [SerializeField] private MazeRoomView treasureRoom3x3Prefab;
+        [FormerlySerializedAs("treasureRoom3x3Prefab")]
+        [SerializeField] private MazeRoomView curseJarRoom3x3Prefab;
         [SerializeField] private List<MazeRoomView> specialRoom3x3Prefabs = new List<MazeRoomView>();
         // 기존 에셋의 1칸 프리팹 참조는 보존하되 새 생성에는 사용하지 않는다.
-        [SerializeField, HideInInspector] private MazeTileView treasureRoomPrefab;
+        [FormerlySerializedAs("treasureRoomPrefab")]
+        [SerializeField, HideInInspector] private MazeTileView curseJarRoomPrefab;
         [SerializeField, HideInInspector] private List<MazeTileView> specialRoomPrefabs = new List<MazeTileView>();
 
         [Header("Exit (1x1)")]
@@ -42,9 +46,9 @@ namespace ShiftingPyramid.Maze.Settings
 
         public int MazeWidth => mazeWidth;
         public int MazeHeight => mazeHeight;
-        public int TreasureRoomCount => treasureRoomCount;
+        public int CurseJarRoomCount => curseJarRoomCount;
         public int SpecialRoomCount => specialRoomCount;
-        public MazeRoomView TreasureRoom3x3Prefab => treasureRoom3x3Prefab;
+        public MazeRoomView CurseJarRoom3x3Prefab => curseJarRoom3x3Prefab;
         public IReadOnlyList<MazeRoomView> SpecialRoom3x3Prefabs => specialRoom3x3Prefabs;
         public MazeTileView ExitRoomPrefab => exitRoomPrefab;
         public int MazeChangeRegionSize => mazeChangeRegionSize;

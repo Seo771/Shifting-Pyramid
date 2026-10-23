@@ -88,18 +88,18 @@ namespace ShiftingPyramid.Maze.View
         {
             var selected = new List<MazeRoomView>();
             if (settings == null) return selected;
-            if (settings.TreasureRoomCount < 0 || settings.SpecialRoomCount < 0)
+            if (settings.CurseJarRoomCount < 0 || settings.SpecialRoomCount < 0)
                 throw new ArgumentException("Room counts cannot be negative.");
 
-            if (settings.TreasureRoomCount > 0 && settings.TreasureRoom3x3Prefab == null)
-                throw new InvalidOperationException("Assign Treasure Room 3x3 Prefab (MazeRoomView) in MazeBalanceSettings, or set Treasure Room Count to 0.");
-            if (settings.TreasureRoomCount > 0)
+            if (settings.CurseJarRoomCount > 0 && settings.CurseJarRoom3x3Prefab == null)
+                throw new InvalidOperationException("Assign Curse Jar Room 3x3 Prefab (MazeRoomView) in MazeBalanceSettings, or set Curse Jar Room Count to 0.");
+            if (settings.CurseJarRoomCount > 0)
             {
-                var template = settings.TreasureRoom3x3Prefab.CreateTemplate(MazeTileType.TreasureRoom, mazeRenderer.TileSize);
+                var template = settings.CurseJarRoom3x3Prefab.CreateTemplate(MazeTileType.CurseJarRoom, mazeRenderer.TileSize);
                 var index = selected.Count;
-                selected.Add(settings.TreasureRoom3x3Prefab);
+                selected.Add(settings.CurseJarRoom3x3Prefab);
                 catalog.Add(template);
-                for (var i = 0; i < settings.TreasureRoomCount; i++)
+                for (var i = 0; i < settings.CurseJarRoomCount; i++)
                 {
                     templates.Add(template);
                     templateIndexes.Add(index);
