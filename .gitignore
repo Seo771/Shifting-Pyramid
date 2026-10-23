@@ -47,6 +47,9 @@ ExportedObj/
 !Tests/MazeCoreChecks/MazeCoreChecks.csproj
 /Tests/MazeCoreChecks/bin/
 /Tests/MazeCoreChecks/obj/
+!Tests/MapExplorationChecks/MapExplorationChecks.csproj
+/Tests/MapExplorationChecks/bin/
+/Tests/MapExplorationChecks/obj/
 *.unityproj
 *.sln
 *.slnx
