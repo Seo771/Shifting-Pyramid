@@ -27,6 +27,8 @@ namespace ShiftingPyramid.Maze.View
         public IReadOnlyList<MazeRoomTemplate> CurrentRoomTemplates => currentRoomTemplates;
         public IReadOnlyList<MazeRoomView> CurrentRoomPrefabs => currentRoomPrefabs;
         public int CurrentSeed { get; private set; }
+        public bool IsMazeReady { get; private set; }
+        public event Action<MazeGrid> MazeReady;
         public MazeBalanceSettings Settings => settings;
         public MazeRenderer Renderer => mazeRenderer;
         public Transform PlayerTransform => playerSpawner != null ? playerSpawner.PlayerTransform : null;
@@ -48,6 +50,7 @@ namespace ShiftingPyramid.Maze.View
 
             var seed = settings != null && !settings.UseRandomSeed
                 ? settings.Seed : new System.Random().Next();
+            MazeGrid readyGrid = null;
 
             try
             {
@@ -69,18 +72,26 @@ namespace ShiftingPyramid.Maze.View
                 if (!new MazePathValidator().AreReachable(grid, MazeCoordinate.Zero, targets))
                     throw new InvalidOperationException("An exit or room is unreachable.");
 
+                // 새 표시가 만들어지는 동안에는 이전 미로를 준비 완료로 노출하지 않는다.
+                IsMazeReady = false;
                 mazeRenderer.Build(grid, settings, seed, prefabs);
                 currentGrid = grid;
                 currentRoomTemplates = catalog.AsReadOnly();
                 currentRoomPrefabs = prefabs.AsReadOnly();
                 CurrentSeed = seed;
                 if (playerSpawner == null) playerSpawner = FindFirstObjectByType<PlayerMazeSpawner>();
-                if (playerSpawner != null) playerSpawner.SpawnAtStart(mazeRenderer);
+                if (playerSpawner == null || !playerSpawner.SpawnAtStart(mazeRenderer)) return;
+
+                IsMazeReady = true;
+                readyGrid = grid;
             }
             catch (Exception exception) when (exception is ArgumentException || exception is InvalidOperationException)
             {
                 Debug.LogError($"Maze generation failed (seed {seed}): {exception.Message}", this);
             }
+
+            // 구독자 예외를 미로 생성 실패로 처리하지 않는다.
+            if (readyGrid != null) MazeReady?.Invoke(readyGrid);
         }
 
         private List<MazeRoomView> SelectRoomPrefabs(List<MazeRoomTemplate> templates,

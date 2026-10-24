@@ -14,13 +14,13 @@ public class PlayerMazeSpawner : MonoBehaviour
     public Transform PlayerTransform => existingPlayer != null ? existingPlayer : spawnedPlayer;
 
     // 미로가 만들어진 뒤 시작 칸의 실제 월드 위치에 플레이어를 배치한다.
-    public void SpawnAtStart(MazeRenderer mazeRenderer)
+    public bool SpawnAtStart(MazeRenderer mazeRenderer)
     {
         if (mazeRenderer == null
             || !mazeRenderer.TryGetTileWorldPosition(MazeCoordinate.Zero, out var tilePosition))
         {
             Debug.LogWarning("PlayerMazeSpawner failed: start tile is not available.", this);
-            return;
+            return false;
         }
 
         var spawnPosition = tilePosition + Vector3.up * spawnHeight;
@@ -29,7 +29,7 @@ public class PlayerMazeSpawner : MonoBehaviour
         if (existingPlayer != null)
         {
             MovePlayer(existingPlayer, spawnPosition);
-            return;
+            return true;
         }
 
         if (spawnedPlayer == null)
@@ -37,14 +37,15 @@ public class PlayerMazeSpawner : MonoBehaviour
             if (playerPrefab == null)
             {
                 Debug.LogWarning("PlayerMazeSpawner failed: player prefab is not assigned.", this);
-                return;
+                return false;
             }
 
             spawnedPlayer = Instantiate(playerPrefab, spawnPosition, playerPrefab.transform.rotation).transform;
-            return;
+            return true;
         }
 
         MovePlayer(spawnedPlayer, spawnPosition);
+        return true;
     }
 
     private static void MovePlayer(Transform player, Vector3 position)
