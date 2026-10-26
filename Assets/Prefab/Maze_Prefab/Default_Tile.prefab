@@ -383,6 +383,7 @@ GameObject:
   - component: {fileID: 3360370029547975995}
   - component: {fileID: 4383507074656577545}
   - component: {fileID: 1926245217787142416}
+  - component: {fileID: 7362145980123456781}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Untagged
@@ -484,6 +485,18 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &7362145980123456781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5081593249569430583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ff45ed0c7834a7788231274e6cbc68e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.Map.MapFloor
 --- !u!1 &5372361578671057617
 GameObject:
   m_ObjectHideFlags: 0
