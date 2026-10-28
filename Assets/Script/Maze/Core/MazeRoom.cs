@@ -32,8 +32,8 @@ namespace ShiftingPyramid.Maze.Core
     {
         public MazeRoomTemplate(MazeTileType tileType, IEnumerable<MazeRoomEntrance> entrances)
         {
-            if (tileType != MazeTileType.TreasureRoom && tileType != MazeTileType.SpecialRoom)
-                throw new ArgumentException("Only treasure and special rooms use 3x3 footprints.");
+            if (tileType != MazeTileType.CurseJarRoom && tileType != MazeTileType.SpecialRoom)
+                throw new ArgumentException("Only curseJar and special rooms use 3x3 footprints.");
             if (entrances == null) throw new ArgumentNullException(nameof(entrances));
 
             var copy = new List<MazeRoomEntrance>(entrances);

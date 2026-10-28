@@ -9,7 +9,7 @@ Assets/
 ├─ Game/
 │  ├─ Player/
 │  ├─ Mummy/
-│  ├─ Treasure/
+│  ├─ CurseJar/
 │  ├─ SpecialRooms/
 │  ├─ Exit/
 │  ├─ Traps/
@@ -37,7 +37,7 @@ Assets/
 - connectivity data
 - room footprint ownership and entrance lookup using data only
 
-Must not know about Player, Mummy, Treasure, Exit, or UI.
+Must not know about Player, Mummy, CurseJar, Exit, or UI.
 
 ### MazeTile
 - grid coordinate
@@ -91,19 +91,19 @@ Should be reusable and independent from visuals.
 ## 3. Game-Layer Examples
 
 ### Authored Room Prefabs / Doors
-- Treasure Rooms and Special Rooms use a 3x3 footprint and a center-floor pivot
+- Curse Jar Rooms and Special Rooms use a 3x3 footprint and a center-floor pivot
 - room interiors, exterior walls, and doors are authored in Unity
 - markers identify entrances; opening animations, locks, and interactions stay in the game layer
 - every declared entrance is connected; dynamic Special Room replacement remains unimplemented
 
-### TreasureRoomController
-- treasure interaction
+### CurseJarRoomController
+- curse jar interaction
 - collected state
 - report progress to GameFlow
 
 ### ExitController
 - locked/unlocked state
-- treasure requirement
+- curse jar requirement
 - escape interaction
 
 ### MummyAI
@@ -127,7 +127,7 @@ Maze changed
 → event raised
 → Mummy AI requests new route
 
-Treasure collected
+Curse jar collected
 → GameFlow updates count
 → Exit checks unlock state
 ```
@@ -135,14 +135,14 @@ Treasure collected
 Avoid:
 ```text
 MazeChanger directly manipulates MummyAI internals
-MazeGenerator directly modifies Treasure UI
-PathValidator depends on TreasureRoom MonoBehaviour
+MazeGenerator directly modifies CurseJar UI
+PathValidator depends on CurseJarRoom MonoBehaviour
 ```
 
 ## 5. Practical Rule
 If a class name contains a game concept such as:
 - Mummy
-- Treasure
+- CurseJar
 - Pyramid
 - Player
 - Trap

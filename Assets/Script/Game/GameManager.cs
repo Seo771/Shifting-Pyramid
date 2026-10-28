@@ -1,18 +1,21 @@
 using ShiftingPyramid.Maze.Settings;
 using System;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 public class GameManager : MonoBehaviour
 {
     // 싱글톤 인스턴스: 어디서든 GameManager.Instance로 접근
     public static GameManager Instance { get; private set; }
 
-    public event Action<int, int> OnTreasureChanged;
+    public event Action<int, int> OnCurseJarChanged;
     public event Action OnExitUnlocked;
 
-    // 에디터 및 외부에서 쉽게 접근 가능한 보물 개수 변수 (요구사항)
-    [Tooltip("획득한 보물의 개수")]
-    public int treasureCount = 0;
+    // 에디터 및 외부에서 쉽게 접근 가능한 저주 단지 개수 변수 (요구사항)
+    [Tooltip("획득한 저주 단지의 개수")]
+    [FormerlySerializedAs("treasureCount")]
+    public int curseJarCount = 0;
     // 전체 게임 진행 상태
     public enum GameState
     {
@@ -24,17 +27,26 @@ public class GameManager : MonoBehaviour
 
     [Header("Balance Settings")]
     [SerializeField] private MazeBalanceSettings mazeBalanceSettings;
-    [SerializeField] private int fallbackRequiredTreasureCount = 3;
+    [FormerlySerializedAs("fallbackRequiredTreasureCount")]
+    [SerializeField] private int fallbackRequiredCurseJarCount = 4;
+    [SerializeField, Min(-1), Tooltip("테스트용 출구 개방 개수. -1이면 미로 설정 값을 사용합니다.")]
+    private int exitUnlockCountOverride = -1;
 
-    // 보물 개수와 승패 판정에 필요한 최소 상태만 관리한다.
-    private int collectedTreasureCount;
+    [Header("Game Result")]
+    [SerializeField] private UnityEvent onVictory = new UnityEvent();
+    [SerializeField] private UnityEvent onDefeat = new UnityEvent();
+
+    // 저주 단지 개수와 승패 판정에 필요한 최소 상태만 관리한다.
+    private int collectedCurseJarCount;
     private bool isPlayerDead;
     private bool hasReachedExit;
     private bool hasUnlockedExit;
 
     public GameState CurrentState { get; private set; } = GameState.Ready;
-    public int RequiredTreasureCount => fallbackRequiredTreasureCount;
-    public int CollectedTreasureCount => collectedTreasureCount;
+    public int RequiredCurseJarCount => exitUnlockCountOverride >= 0
+        ? exitUnlockCountOverride
+        : mazeBalanceSettings != null ? mazeBalanceSettings.CurseJarRoomCount : fallbackRequiredCurseJarCount;
+    public int CollectedCurseJarCount => collectedCurseJarCount;
     public bool IsExitUnlocked => hasUnlockedExit;
     public bool IsGameFinished => CurrentState == GameState.Victory || CurrentState == GameState.Defeat;
 
@@ -59,47 +71,47 @@ public class GameManager : MonoBehaviour
     // 새 게임 시작 또는 재시작 시 필요한 값을 초기화한다.
     public void StartGame()
     {
-        collectedTreasureCount = 0;
+        collectedCurseJarCount = 0;
         isPlayerDead = false;
         hasReachedExit = false;
-        hasUnlockedExit = RequiredTreasureCount <= 0;
+        hasUnlockedExit = RequiredCurseJarCount <= 0;
         CurrentState = GameState.Playing;
-        // 외부 요구사항: 공개된 treasureCount 변수도 동기화
-        treasureCount = 0;
+        // 외부 요구사항: 공개된 curseJarCount 변수도 동기화
+        curseJarCount = 0;
 
-        OnTreasureChanged?.Invoke(collectedTreasureCount, RequiredTreasureCount);
+        OnCurseJarChanged?.Invoke(collectedCurseJarCount, RequiredCurseJarCount);
         if (hasUnlockedExit)
         {
             OnExitUnlocked?.Invoke();
         }
     }
 
-    // 보물 획득 처리는 나중에 Treasure 관련 스크립트에서 이 함수를 호출한다.
-    // 요구사항: 인자 없는 호출을 지원하는 public void AddTreasure()
-    public void AddTreasure()
+    // 저주 단지 획득 처리는 나중에 CurseJar 관련 스크립트에서 이 함수를 호출한다.
+    // 요구사항: 인자 없는 호출을 지원하는 public void AddCurseJar()
+    public void AddCurseJar()
     {
-        AddTreasure(1);
+        AddCurseJar(1);
     }
 
-    // 실제 보물 개수를 증감하는 메서드(외부에서 특정 개수만큼 늘릴 때 사용)
-    public void AddTreasure(int amount)
+    // 실제 저주 단지 개수를 증감하는 메서드(외부에서 특정 개수만큼 늘릴 때 사용)
+    public void AddCurseJar(int amount)
     {
         if (CurrentState != GameState.Playing || amount <= 0)
         {
             return;
         }
 
-        collectedTreasureCount += amount;
+        collectedCurseJarCount += amount;
         // 공개 변수와 동기화 및 디버그 출력
-        treasureCount += amount;
-        OnTreasureChanged?.Invoke(collectedTreasureCount, RequiredTreasureCount);
+        curseJarCount += amount;
+        OnCurseJarChanged?.Invoke(collectedCurseJarCount, RequiredCurseJarCount);
 
-        if (!hasUnlockedExit && collectedTreasureCount >= RequiredTreasureCount)
+        if (!hasUnlockedExit && collectedCurseJarCount >= RequiredCurseJarCount)
         {
             UnlockExit();
         }
 
-        Debug.Log($"[GameManager] 보물 획득! 현재 보물 개수: {treasureCount}");
+        Debug.Log($"[GameManager] 저주 단지 획득! 현재 저주 단지 개수: {curseJarCount}");
     }
 
     private void UnlockExit()
@@ -139,12 +151,13 @@ public class GameManager : MonoBehaviour
         CheckDefeatCondition();
     }
 
-    // 출구 도달 + 보물 조건 충족이면 승리한다.
+    // 출구 도달 + 저주 단지 조건 충족이면 승리한다.
     public void CheckVictoryCondition()
     {
         if (CurrentState == GameState.Playing && hasReachedExit && IsExitUnlocked)
         {
             CurrentState = GameState.Victory;
+            onVictory?.Invoke();
         }
     }
 
@@ -154,6 +167,7 @@ public class GameManager : MonoBehaviour
         if (CurrentState == GameState.Playing && isPlayerDead)
         {
             CurrentState = GameState.Defeat;
+            onDefeat?.Invoke();
         }
     }
 }

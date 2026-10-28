@@ -21,8 +21,14 @@ namespace ShiftingPyramid.Maze.View
         [SerializeField] private int fallbackHeight = 5;
 
         private MazeGrid currentGrid;
+        private IReadOnlyList<MazeRoomTemplate> currentRoomTemplates;
+        private IReadOnlyList<MazeRoomView> currentRoomPrefabs;
         public MazeGrid CurrentGrid => currentGrid;
+        public IReadOnlyList<MazeRoomTemplate> CurrentRoomTemplates => currentRoomTemplates;
+        public IReadOnlyList<MazeRoomView> CurrentRoomPrefabs => currentRoomPrefabs;
         public int CurrentSeed { get; private set; }
+        public bool IsMazeReady { get; private set; }
+        public event Action<MazeGrid> MazeReady;
         public MazeBalanceSettings Settings => settings;
         public MazeRenderer Renderer => mazeRenderer;
         public Transform PlayerTransform => playerSpawner != null ? playerSpawner.PlayerTransform : null;
@@ -44,6 +50,7 @@ namespace ShiftingPyramid.Maze.View
 
             var seed = settings != null && !settings.UseRandomSeed
                 ? settings.Seed : new System.Random().Next();
+            MazeGrid readyGrid = null;
 
             try
             {
@@ -52,9 +59,11 @@ namespace ShiftingPyramid.Maze.View
                 var height = settings != null ? settings.MazeHeight : fallbackHeight;
                 var grid = new MazeGrid(width, height);
                 var templates = new List<MazeRoomTemplate>();
-                var prefabs = SelectRoomPrefabs(templates, seed);
+                var templateIndexes = new List<int>();
+                var catalog = new List<MazeRoomTemplate>();
+                var prefabs = SelectRoomPrefabs(templates, templateIndexes, catalog, seed);
 
-                new MazeRoomPlacer().Place(grid, templates, seed);
+                new MazeRoomPlacer().Place(grid, templates, templateIndexes, seed);
                 new DepthFirstMazeGenerator().GenerateInto(grid, seed);
                 var exit = new MazeExitPlacer().Place(grid);
                 var targets = new List<MazeCoordinate> { exit };
@@ -63,45 +72,59 @@ namespace ShiftingPyramid.Maze.View
                 if (!new MazePathValidator().AreReachable(grid, MazeCoordinate.Zero, targets))
                     throw new InvalidOperationException("An exit or room is unreachable.");
 
+                // 새 표시가 만들어지는 동안에는 이전 미로를 준비 완료로 노출하지 않는다.
+                IsMazeReady = false;
                 mazeRenderer.Build(grid, settings, seed, prefabs);
                 currentGrid = grid;
+                currentRoomTemplates = catalog.AsReadOnly();
+                currentRoomPrefabs = prefabs.AsReadOnly();
                 CurrentSeed = seed;
                 if (playerSpawner == null) playerSpawner = FindFirstObjectByType<PlayerMazeSpawner>();
-                if (playerSpawner != null) playerSpawner.SpawnAtStart(mazeRenderer);
+                if (playerSpawner == null || !playerSpawner.SpawnAtStart(mazeRenderer)) return;
+
+                IsMazeReady = true;
+                readyGrid = grid;
             }
             catch (Exception exception) when (exception is ArgumentException || exception is InvalidOperationException)
             {
                 Debug.LogError($"Maze generation failed (seed {seed}): {exception.Message}", this);
             }
+
+            // 구독자 예외를 미로 생성 실패로 처리하지 않는다.
+            if (readyGrid != null) MazeReady?.Invoke(readyGrid);
         }
 
-        private List<MazeRoomView> SelectRoomPrefabs(List<MazeRoomTemplate> templates, int seed)
+        private List<MazeRoomView> SelectRoomPrefabs(List<MazeRoomTemplate> templates,
+            List<int> templateIndexes, List<MazeRoomTemplate> catalog, int seed)
         {
             var selected = new List<MazeRoomView>();
             if (settings == null) return selected;
-            if (settings.TreasureRoomCount < 0 || settings.SpecialRoomCount < 0)
+            if (settings.CurseJarRoomCount < 0 || settings.SpecialRoomCount < 0)
                 throw new ArgumentException("Room counts cannot be negative.");
 
-            if (settings.TreasureRoomCount > 0 && settings.TreasureRoom3x3Prefab == null)
-                throw new InvalidOperationException("Assign Treasure Room 3x3 Prefab (MazeRoomView) in MazeBalanceSettings, or set Treasure Room Count to 0.");
-            if (settings.TreasureRoomCount > 0)
+            if (settings.CurseJarRoomCount > 0 && settings.CurseJarRoom3x3Prefab == null)
+                throw new InvalidOperationException("Assign Curse Jar Room 3x3 Prefab (MazeRoomView) in MazeBalanceSettings, or set Curse Jar Room Count to 0.");
+            if (settings.CurseJarRoomCount > 0)
             {
-                var template = settings.TreasureRoom3x3Prefab.CreateTemplate(MazeTileType.TreasureRoom, mazeRenderer.TileSize);
-                for (var i = 0; i < settings.TreasureRoomCount; i++)
+                var template = settings.CurseJarRoom3x3Prefab.CreateTemplate(MazeTileType.CurseJarRoom, mazeRenderer.TileSize);
+                var index = selected.Count;
+                selected.Add(settings.CurseJarRoom3x3Prefab);
+                catalog.Add(template);
+                for (var i = 0; i < settings.CurseJarRoomCount; i++)
                 {
-                    selected.Add(settings.TreasureRoom3x3Prefab);
                     templates.Add(template);
+                    templateIndexes.Add(index);
                 }
             }
 
             if (settings.SpecialRoomCount == 0) return selected;
             var available = new List<MazeRoomView>();
-            var specialTemplates = new List<MazeRoomTemplate>();
             foreach (var prefab in settings.SpecialRoom3x3Prefabs)
             {
                 if (prefab == null) continue;
-                specialTemplates.Add(prefab.CreateTemplate(MazeTileType.SpecialRoom, mazeRenderer.TileSize));
+                catalog.Add(prefab.CreateTemplate(MazeTileType.SpecialRoom, mazeRenderer.TileSize));
                 available.Add(prefab);
+                selected.Add(prefab);
             }
             if (available.Count == 0)
                 throw new InvalidOperationException("Assign Special Room 3x3 Prefabs (MazeRoomView) in MazeBalanceSettings, or set Special Room Count to 0.");
@@ -110,8 +133,9 @@ namespace ShiftingPyramid.Maze.View
             for (var i = 0; i < settings.SpecialRoomCount; i++)
             {
                 var index = random.Next(available.Count);
-                selected.Add(available[index]);
-                templates.Add(specialTemplates[index]);
+                var catalogIndex = catalog.Count - available.Count + index;
+                templates.Add(catalog[catalogIndex]);
+                templateIndexes.Add(catalogIndex);
             }
             return selected;
         }

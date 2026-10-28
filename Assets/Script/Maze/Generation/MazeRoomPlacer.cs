@@ -12,8 +12,16 @@ namespace ShiftingPyramid.Maze.Generation
         // 실패 시 grid를 변경하지 않는다. 같은 seed는 같은 배치를 만든다.
         public void Place(MazeGrid grid, IReadOnlyList<MazeRoomTemplate> templates, int? seed = null)
         {
+            Place(grid, templates, null, seed);
+        }
+
+        public void Place(MazeGrid grid, IReadOnlyList<MazeRoomTemplate> templates,
+            IReadOnlyList<int> templateIndexes, int? seed = null)
+        {
             if (grid == null) throw new ArgumentNullException(nameof(grid));
             if (templates == null) throw new ArgumentNullException(nameof(templates));
+            if (templateIndexes != null && templateIndexes.Count != templates.Count)
+                throw new ArgumentException("Template indexes must match room templates.", nameof(templateIndexes));
             if (grid.Rooms.Count != 0) throw new ArgumentException("Rooms have already been reserved.");
             foreach (var tile in grid.Tiles)
                 foreach (MazeDirection direction in Enum.GetValues(typeof(MazeDirection)))
@@ -21,6 +29,9 @@ namespace ShiftingPyramid.Maze.Generation
                         throw new ArgumentException("Place rooms before generating corridors.");
             foreach (var template in templates)
                 if (template == null) throw new ArgumentException("Room template is null.");
+            if (templateIndexes != null)
+                foreach (var index in templateIndexes)
+                    if (index < 0) throw new ArgumentOutOfRangeException(nameof(templateIndexes));
             if (templates.Count == 0) return;
 
             var candidates = new List<MazeCoordinate>();
@@ -43,7 +54,8 @@ namespace ShiftingPyramid.Maze.Generation
                 var planned = new List<MazeRoom>();
                 foreach (var origin in candidates)
                 {
-                    var room = new MazeRoom(origin, templates[planned.Count], planned.Count,
+                    var templateIndex = templateIndexes != null ? templateIndexes[planned.Count] : planned.Count;
+                    var room = new MazeRoom(origin, templates[planned.Count], templateIndex,
                         random.Next(4));
                     if (!CanPlace(grid, room, planned)) continue;
                     planned.Add(room);

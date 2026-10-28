@@ -47,6 +47,56 @@ namespace ShiftingPyramid.Maze.Core
             return roomCells.TryGetValue(coordinate, out room);
         }
 
+        public MazeGrid Clone()
+        {
+            var copy = new MazeGrid(Width, Height);
+            copy.CopyFrom(this);
+            return copy;
+        }
+
+        // 검증된 복사본의 상태만 현재 격자에 확정한다.
+        internal void CopyFrom(MazeGrid source)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (Width != source.Width || Height != source.Height)
+                throw new ArgumentException("Grid dimensions must match.", nameof(source));
+
+            rooms.Clear();
+            rooms.AddRange(source.rooms);
+            roomCells.Clear();
+            foreach (var pair in source.roomCells) roomCells.Add(pair.Key, pair.Value);
+            foreach (var sourceTile in source.Tiles)
+            {
+                var tile = GetTile(sourceTile.Coordinate);
+                tile.TileType = sourceTile.TileType;
+                tile.IsProtected = sourceTile.IsProtected;
+                foreach (MazeDirection direction in Enum.GetValues(typeof(MazeDirection)))
+                    tile.SetOpen(direction, sourceTile.IsOpen(direction));
+            }
+        }
+
+        public void RemoveRoom(MazeRoom room)
+        {
+            if (room == null || !rooms.Contains(room))
+                throw new ArgumentException("Room is not in this grid.", nameof(room));
+            foreach (var cell in room.Cells)
+                if (!roomCells.TryGetValue(cell, out var owner) || !ReferenceEquals(owner, room))
+                    throw new InvalidOperationException("Room footprint ownership is inconsistent.");
+
+            foreach (var cell in room.Cells)
+                foreach (MazeDirection direction in Enum.GetValues(typeof(MazeDirection)))
+                    SetConnection(cell, direction, false);
+
+            rooms.Remove(room);
+            foreach (var cell in room.Cells)
+            {
+                roomCells.Remove(cell);
+                var tile = GetTile(cell);
+                tile.TileType = MazeTileType.Normal;
+                tile.IsProtected = false;
+            }
+        }
+
         public void AddRoom(MazeRoom room)
         {
             if (room == null) throw new ArgumentNullException(nameof(room));
@@ -77,7 +127,7 @@ namespace ShiftingPyramid.Maze.Core
                 roomCells.Add(cell, room);
                 var tile = GetTile(cell);
                 tile.TileType = room.Template.TileType;
-                // 특수방도 초기 배치 후 고정한다. 동적 교체는 별도 기능으로 구현한다.
+                // 일반 통로 변경과 방 교체는 서로 다른 단계에서 처리한다.
                 tile.IsProtected = true;
             }
             foreach (var cell in room.Cells)

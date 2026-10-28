@@ -37,7 +37,7 @@ Maze Core examples:
 Game Layer examples:
 - Player
 - Mummy
-- TreasureRoom
+- CurseJarRoom
 - SpecialRoom
 - Exit
 - Trap
@@ -45,7 +45,7 @@ Game Layer examples:
 - GameFlow
 - sound / VFX
 
-Maze Core must not directly depend on Player, Mummy, TreasureRoom, Exit, Trap, or UI.
+Maze Core must not directly depend on Player, Mummy, CurseJarRoom, Exit, Trap, or UI.
 
 ## 1.3 Portfolio refactoring happens AFTER game completion
 After the game demo is finished:
@@ -88,7 +88,7 @@ Do not perform a large refactor unless explicitly requested.
 3. 3D wall representation
 4. Path validation
 5. Runtime maze change
-6. Treasure rooms / exit condition
+6. CurseJar rooms / exit condition
 7. Player
 8. Mummy AI
 9. Special rooms

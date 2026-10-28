@@ -224,7 +224,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ab346c4a5568b143be6729ce5d47f67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mummification
-  increaseRatePerSecond: 10
+  increaseRatePerSecond: 1
   currentMummification: 0
   onMummificationChanged:
     m_PersistentCalls:

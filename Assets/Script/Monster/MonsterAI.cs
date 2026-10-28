@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.AI;
 
 public class MonsterAI : MonoBehaviour, ISensoryReceiver
 {
-    // AI 상태 정의
-    public enum AIState { Wander, Chase, Investigate }
+    // AI 상태 정의 (Attack 추가)
+    public enum AIState { Wander, Chase, Investigate, Attack }
 
     [Header("상태 확인 (확인용)")]
     [SerializeField] private AIState currentState = AIState.Wander;
@@ -19,9 +20,19 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     [SerializeField] private float detectRange = 8f;       // 감지 거리
     [SerializeField] private float loseTargetRange = 12f;   // 포기 거리
 
+    [Header("공격(Attack) 설정")]
+    [SerializeField] private float attackRange = 2f;        // 공격 사거리
+    [SerializeField] private float attackCooldown = 2f;     // 공격 딜레이 (쿨타임)
+    [SerializeField] private float attackDamage = 20f;      // 공격 데미지
+    [SerializeField] private float attackHitDelay = 0.5f;   // 공격 모션 중 실제 타격이 들어가는 시간
+
     private NavMeshAgent agent;
     private float wanderTimer;
-    private Vector3 lastStimulusPosition; // 소리/상호작용 자극 위치 기억용
+    private float lastAttackTime;
+    private bool isAttacking = false;
+    private Vector3 lastStimulusPosition;
+    private bool investigationDestinationPending;
+    private PlayerHP playerHP; // PlayerHP 연동
 
     private void Awake()
     {
@@ -31,21 +42,48 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     private void Start()
     {
         wanderTimer = wanderInterval;
+        FindPlayer();
+    }
 
-        // 플레이어 자동 탐색 (태그 기준)
+    private void FindPlayer()
+    {
         if (targetPlayer == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
             if (playerObj != null)
             {
                 targetPlayer = playerObj.transform;
+                playerHP = playerObj.GetComponent<PlayerHP>();
             }
         }
     }
 
     private void Update()
     {
-        // 기존 거리 기반 감지 유지
+        // 미로 생성/변경 중에는 NavMesh가 잠시 없을 수 있다.
+        if (!TryPrepareAgent()) return;
+
+        if (targetPlayer == null)
+        {
+            FindPlayer();
+            return;
+        }
+
+        // 플레이어가 이미 사망했다면 추적/공격 중단 후 배회 모드로 전환
+        if (playerHP != null && playerHP.isDead)
+        {
+            if (currentState == AIState.Chase || currentState == AIState.Attack)
+            {
+                currentState = AIState.Wander;
+                if (agent.isOnNavMesh) agent.isStopped = false;
+            }
+            return;
+        }
+
+        // 공격 모션 수행 중일 때는 이동 및 상태 전환을 잠시 멈춤
+        if (isAttacking) return;
+
+        // 플레이어 거리 감지 및 상태 전환 체크
         CheckPlayerDetection();
 
         // 상태별 행동
@@ -62,30 +100,35 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
             case AIState.Investigate:
                 HandleInvestigate();
                 break;
+
+            case AIState.Attack:
+                HandleAttack();
+                break;
         }
     }
 
     #region ISensoryReceiver 구현 (외부 자극 수신)
     public void OnReceiveStimulus(StimulusData stimulus)
     {
+        if (isAttacking) return;
+
         switch (stimulus.type)
         {
             case StimulusType.Sight:
-                // 눈으로 봄 ➔ 즉시 추적 상태로 전환
                 if (stimulus.source != null)
                 {
                     targetPlayer = stimulus.source.transform;
+                    playerHP = targetPlayer.GetComponent<PlayerHP>();
                     currentState = AIState.Chase;
                 }
                 break;
 
             case StimulusType.Sound:
             case StimulusType.Interaction:
-                // 소리/상호작용 감지 ➔ 추적 중이 아니면 해당 위치로 수색하러 이동
-                if (currentState != AIState.Chase)
+                if (currentState != AIState.Chase && currentState != AIState.Attack)
                 {
                     lastStimulusPosition = stimulus.position;
-                    agent.SetDestination(lastStimulusPosition);
+                    investigationDestinationPending = true;
                     currentState = AIState.Investigate;
                 }
                 break;
@@ -93,9 +136,19 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     }
     #endregion
 
+    private bool TryPrepareAgent()
+    {
+        if (agent == null || !agent.isActiveAndEnabled) return false;
+        if (agent.isOnNavMesh) return true;
+
+        if (!NavMesh.SamplePosition(transform.position, out var hit, 3f, agent.areaMask)) return false;
+        return agent.Warp(hit.position) && agent.isOnNavMesh;
+    }
+
     #region AI 상태별 로직
     private void HandleWander()
     {
+        if (agent.isOnNavMesh) agent.isStopped = false;
         wanderTimer += Time.deltaTime;
 
         if (wanderTimer >= wanderInterval || (agent.hasPath && agent.remainingDistance <= agent.stoppingDistance))
@@ -108,22 +161,79 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     private void HandleChase()
     {
         if (targetPlayer == null) return;
-        agent.SetDestination(targetPlayer.position);
+        if (agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+            agent.SetDestination(targetPlayer.position);
+        }
     }
 
     private void HandleInvestigate()
     {
-        // 소리 난 곳까지 걸어가서 도착하면 다시 배회(Wander)로 복귀
+        if (agent.isOnNavMesh) agent.isStopped = false;
+
+        if (investigationDestinationPending)
+        {
+            agent.SetDestination(lastStimulusPosition);
+            investigationDestinationPending = false;
+        }
+
         if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
         {
             currentState = AIState.Wander;
-            wanderTimer = wanderInterval; // 즉시 다음 목적지 잡도록 초기화
+            wanderTimer = wanderInterval;
         }
+    }
+
+    private void HandleAttack()
+    {
+        // 공격 중에는 제자리에 정지 후 플레이어 조준
+        if (agent.isOnNavMesh) agent.isStopped = true;
+
+        Vector3 lookDir = (targetPlayer.position - transform.position).normalized;
+        lookDir.y = 0;
+        if (lookDir != Vector3.zero)
+        {
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), Time.deltaTime * 10f);
+        }
+
+        // 공격 쿨타임 체크
+        if (Time.time >= lastAttackTime + attackCooldown)
+        {
+            StartCoroutine(PerformAttackRoutine());
+        }
+    }
+
+    private IEnumerator PerformAttackRoutine()
+    {
+        isAttacking = true;
+        lastAttackTime = Time.time;
+
+        // TODO: 미라 공격 애니메이션 실행 시 주석 해제
+        // GetComponent<Animator>()?.SetTrigger("Attack");
+
+        Debug.Log("[MonsterAI] 미라가 공격을 시작합니다!");
+
+        // 실제 타격이 발생하는 프레임까지 대기
+        yield return new WaitForSeconds(attackHitDelay);
+
+        // 타격 순간 플레이어가 사거리 내에 있고 살아있는지 검증
+        if (targetPlayer != null && Vector3.Distance(transform.position, targetPlayer.position) <= attackRange + 0.5f)
+        {
+            if (playerHP != null && !playerHP.isDead)
+            {
+                playerHP.TakeDamage(attackDamage);
+            }
+        }
+
+        // 후속 모션 대기
+        yield return new WaitForSeconds(0.3f);
+
+        isAttacking = false;
     }
 
     private void SetRandomDestination()
     {
-        // 20% 확률로 U턴/주변 수색, 80% 확률로 미로 전체 먼 거리 순찰
         bool isUturnOrLocal = Random.value < 0.2f;
         float halfX = mazeSize.x * 0.5f;
         float halfY = mazeSize.y * 0.5f;
@@ -134,13 +244,11 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
             if (isUturnOrLocal)
             {
-                // [U턴/주변 수색] 현재 위치 주변에서 좁게 무작위 선택
                 Vector3 randomDir = Random.insideUnitSphere * minWanderDistance;
                 targetPos = transform.position + randomDir;
             }
             else
             {
-                // [전역 탐색] 미로 전체 범위 내에서 무작위 목적지 선택
                 targetPos = new Vector3(
                     Random.Range(-halfX, halfX),
                     0f,
@@ -151,7 +259,6 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
             NavMeshHit hit;
             if (NavMesh.SamplePosition(targetPos, out hit, 5f, NavMesh.AllAreas))
             {
-                // 전역 탐색일 때는 최소 이동 거리(minWanderDistance) 이상 떨어진 곳만 지정
                 if (!isUturnOrLocal && Vector3.Distance(transform.position, hit.position) < minWanderDistance)
                 {
                     continue;
@@ -169,11 +276,18 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
         float distanceToPlayer = Vector3.Distance(transform.position, targetPlayer.position);
 
-        if (currentState == AIState.Wander && distanceToPlayer <= detectRange)
+        // 1. 공격 사거리 진입 -> Attack
+        if (distanceToPlayer <= attackRange)
+        {
+            currentState = AIState.Attack;
+        }
+        // 2. 공격 사거리 밖이지만 감지 범위 이내 -> Chase
+        else if (distanceToPlayer <= detectRange)
         {
             currentState = AIState.Chase;
         }
-        else if (currentState == AIState.Chase && distanceToPlayer > loseTargetRange)
+        // 3. 포기 거리 벗어남 -> Wander
+        else if (distanceToPlayer > loseTargetRange && currentState == AIState.Chase)
         {
             currentState = AIState.Wander;
             wanderTimer = wanderInterval;
@@ -183,10 +297,16 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
     private void OnDrawGizmosSelected()
     {
+        // 감지 거리 (노랑)
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, detectRange);
 
+        // 포기 거리 (빨강)
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, loseTargetRange);
+
+        // 공격 사거리 (파랑)
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }

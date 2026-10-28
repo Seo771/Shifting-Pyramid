@@ -5,7 +5,7 @@ The game uses a 3D grid-based maze inside a pyramid.
 
 The maze is generated at game start and partially changes during gameplay.
 
-Physical grid positions do not move. Ordinary corridor tiles change their directional wall states. Treasure Rooms and Special Rooms will use manually authored 3x3 prefabs.
+Physical grid positions do not move. Ordinary corridor tiles change their directional wall states. Curse Jar Rooms and Special Rooms will use manually authored 3x3 prefabs.
 
 Status: room-aware generation and rendering are implemented. Authored 3x3 prefabs must be assigned to the new settings fields. Runtime maze changes are still unimplemented. See `../Docs/RoomPrefabSetup.md` for setup.
 
@@ -50,7 +50,7 @@ Dynamic:
 - N/S/E/W walls
 
 ### 3x3 Room Representation
-One Treasure Room or Special Room prefab occupies nine grid cells. Its floor, walls, doors, and interior are authored directly in Unity; ordinary tile prefabs are not spawned inside its footprint.
+One Curse Jar Room or Special Room prefab occupies nine grid cells. Its floor, walls, doors, and interior are authored directly in Unity; ordinary tile prefabs are not spawned inside its footprint.
 
 Use a center-floor pivot and a footprint of `3 * tileSize` on each horizontal axis (30x30 with the current tile size of 10).
 
@@ -79,7 +79,7 @@ Implemented 3x3-room flow:
 
 DFS treats each room center as one visited node and traverses its declared entrances. After carving, every authored entrance is opened. Multiple entrances can create loops, so the combined map is not required to remain a perfect maze.
 
-Room fitting is a geometric constraint, not just a count of available cells. Rooms are placed inside the outer corridor boundary with at least one ordinary cell between footprints. Placement retries up to 128 times and reports a configuration error on failure. The current asset uses 15x15 with five Treasure Rooms and two Special Rooms. Rotation and non-unit room root scale are not supported.
+Room fitting is a geometric constraint, not just a count of available cells. Rooms are placed inside the outer corridor boundary with at least one ordinary cell between footprints. Placement retries up to 128 times and reports a configuration error on failure. The current asset uses 15x15 with five Curse Jar Rooms and two Special Rooms. Rotation and non-unit room root scale are not supported.
 
 ## 6. Runtime Maze Change Candidates
 
@@ -118,13 +118,13 @@ Both methods remain active candidates. Final choice should come from playtesting
 Avoid changing:
 - player current tile
 - player safety radius
-- entire Treasure Room footprints and their entrance connections
+- entire Curse Jar Room footprints and their entrance connections
 - Exit
 - entire fixed Special Room footprints and their entrance connections, if a fixed-room policy is selected
 - mummy current tile / safety radius
 - other protected critical tiles
 
-Currently both Treasure Room and Special Room footprints are marked protected at initial generation. The future changer must also preserve the required entrance connections.
+Currently both Curse Jar Room and Special Room footprints are marked protected at initial generation. The future changer must also preserve the required entrance connections.
 
 Exact protection radius is not finalized.
 
@@ -143,13 +143,13 @@ When regenerating a 3x3 region:
 ## 9. Path Validation
 Recommended: BFS.
 
-Current BFS operates on tile wall data. Room registration opens internal grid connections under the all-interior-cells-connected assumption, so BFS also supports starts inside a room. Only declared boundary entrances can be carved. For treasure objectives, reaching a room assumes its treasure interaction point is accessible. Physical prefab walls/colliders must match this assumption; locked-door state is not yet modeled.
+Current BFS operates on tile wall data. Room registration opens internal grid connections under the all-interior-cells-connected assumption, so BFS also supports starts inside a room. Only declared boundary entrances can be carved. For curse jar objectives, reaching a room assumes its curse jar interaction point is accessible. Physical prefab walls/colliders must match this assumption; locked-door state is not yet modeled.
 
 A* may be used where useful, but BFS is enough for reachability checks.
 
 Minimum validation:
 - Player -> Exit path exists
-- Player -> all remaining required Treasure Rooms are reachable
+- Player -> all remaining required Curse Jar Rooms are reachable
 - Player is not trapped
 - Mummy is not completely isolated
 

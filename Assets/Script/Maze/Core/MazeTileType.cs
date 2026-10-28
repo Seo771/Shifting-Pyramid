@@ -7,7 +7,7 @@ namespace ShiftingPyramid.Maze.Core
     public enum MazeTileType
     {
         Normal,
-        TreasureRoom,
+        CurseJarRoom,
         Exit,
         SpecialRoom
     }

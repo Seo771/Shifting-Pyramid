@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ShiftingPyramid.Maze.View
 {
-    /// <summary>게임 중 일반 통로를 주기적으로 변경하고 벽 표시를 갱신한다.</summary>
+    /// <summary>게임 중 특수방과 일반 통로를 주기적으로 변경한다.</summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(MazeTestBootstrapper))]
     public class MazeRuntimeChangeController : MonoBehaviour
@@ -12,6 +12,7 @@ namespace ShiftingPyramid.Maze.View
         [SerializeField] private Transform mummy;
 
         private readonly MazeRegionChanger changer = new MazeRegionChanger();
+        private readonly SpecialRoomReplacer roomReplacer = new SpecialRoomReplacer();
         private MazeTestBootstrapper bootstrapper;
         private MazeGrid activeGrid;
         private float timeUntilChange;
@@ -57,9 +58,18 @@ namespace ShiftingPyramid.Maze.View
 
             // 같은 미로 시드에서는 변경 순서도 재현할 수 있게 시드를 나눠 쓴다.
             var seed = unchecked(bootstrapper.CurrentSeed + ++changeCount);
-            if (changer.ChangeRegions(grid, settings.MazeChangeRegionSize,
+            MazeRoom removedRoom = null;
+            MazeRoom addedRoom = null;
+            var roomChanged = bootstrapper.CurrentRoomTemplates != null
+                && roomReplacer.TryReplace(grid, bootstrapper.CurrentRoomTemplates,
+                    playerCoordinate, settings.PlayerSafeRadius, mummyCoordinate,
+                    settings.MummySafeRadius, out removedRoom, out addedRoom, seed);
+            var regionsChanged = changer.ChangeRegions(grid, settings.MazeChangeRegionSize,
                 settings.MazeChangeRegionCount, playerCoordinate, settings.PlayerSafeRadius,
-                mummyCoordinate, settings.MummySafeRadius, seed).Count > 0)
+                mummyCoordinate, settings.MummySafeRadius, unchecked(seed + 1)).Count > 0;
+            if (roomChanged)
+                renderer.ApplyRoomReplacement(grid, removedRoom, addedRoom, bootstrapper.CurrentRoomPrefabs);
+            if (roomChanged || regionsChanged)
                 renderer.Refresh(grid);
         }
     }

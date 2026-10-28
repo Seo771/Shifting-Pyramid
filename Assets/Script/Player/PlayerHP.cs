@@ -23,11 +23,10 @@ public class PlayerHP : MonoBehaviour
         // 체력이 0 이하가 되면 사망 상태로 전환
         if (currentHealth <= 0f && !isDead)
         {
-            currentHealth = 0f;
-            isDead = true;
-            Debug.Log("플레이어가 사망했습니다!");
+            Die();
         }
 
+        // 테스트용 키 (K 누르면 데미지)
         if (Input.GetKeyDown(KeyCode.K))
         {
             TakeDamage(20f);
@@ -40,5 +39,27 @@ public class PlayerHP : MonoBehaviour
 
         currentHealth -= damageAmount;
         Debug.Log($"[데미지 받음] 현재 체력: {currentHealth}");
+
+        if (currentHealth <= 0f && !isDead)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        currentHealth = 0f;
+        isDead = true;
+        Debug.Log("플레이어가 사망했습니다!");
+
+        // GameManager에 사망 알림 ➔ 탈출 실패(onDefeat) 이벤트 실행!
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetPlayerDead();
+        }
+        else
+        {
+            Debug.LogWarning("GameManager 인스턴스를 찾을 수 없습니다.");
+        }
     }
 }

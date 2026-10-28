@@ -20,7 +20,7 @@ namespace ShiftingPyramid.Maze.View
 
         private readonly Dictionary<MazeCoordinate, MazeTileView> tileViews = new Dictionary<MazeCoordinate, MazeTileView>();
         private readonly Dictionary<MazeCoordinate, Vector3> tilePositions = new Dictionary<MazeCoordinate, Vector3>();
-        private readonly List<GameObject> roomObjects = new List<GameObject>();
+        private readonly Dictionary<MazeRoom, MazeRoomView> roomViews = new Dictionary<MazeRoom, MazeRoomView>();
 
         public float TileSize => tileSize;
         public event Action GeometryChanged;
@@ -48,6 +48,24 @@ namespace ShiftingPyramid.Maze.View
             return grid.Contains(coordinate);
         }
 
+        // 타일 사이 이동량까지 유지해 UI가 끊기지 않게 움직인다.
+        public bool TryGetContinuousGridPosition(Vector3 worldPosition, MazeGrid grid, out Vector2 position)
+        {
+            position = default;
+            if (grid == null || tileSize <= 0f) return false;
+            var local = GetTileRoot().InverseTransformPoint(worldPosition);
+            position = new Vector2(
+                local.x / tileSize + (centerOnOrigin ? (grid.Width - 1) * 0.5f : 0f),
+                local.z / tileSize + (centerOnOrigin ? (grid.Height - 1) * 0.5f : 0f));
+            return true;
+        }
+
+        public Vector2 GetGridDirection(Vector3 worldDirection)
+        {
+            var local = GetTileRoot().InverseTransformDirection(worldDirection);
+            return new Vector2(local.x, local.z);
+        }
+
         public void ValidateConfiguration()
         {
             if (tilePrefab == null)
@@ -56,7 +74,7 @@ namespace ShiftingPyramid.Maze.View
                 throw new InvalidOperationException("MazeRenderer: Tile Size must be positive.");
         }
 
-        // roomPrefabs는 생성 단계에서 선택한 목록이며 Room.TemplateIndex와 대응한다.
+        // roomPrefabs는 방 종류 카탈로그이며 Room.TemplateIndex와 대응한다.
         public void Build(MazeGrid grid, MazeBalanceSettings settings, int? seed = null,
             IReadOnlyList<MazeRoomView> roomPrefabs = null)
         {
@@ -75,21 +93,12 @@ namespace ShiftingPyramid.Maze.View
 
                 var prefab = tile.TileType == MazeTileType.Exit && settings != null && settings.ExitRoomPrefab != null
                     ? settings.ExitRoomPrefab : tilePrefab;
-                var view = Instantiate(prefab, GetTileRoot());
-                view.transform.localPosition = tilePositions[tile.Coordinate];
-                view.name = $"MazeTile_{tile.Coordinate.X}_{tile.Coordinate.Y}";
-                view.Apply(tile);
-                tileViews.Add(tile.Coordinate, view);
+                AddTileView(tile, prefab);
             }
 
             foreach (var room in grid.Rooms)
             {
-                var view = Instantiate(roomPrefabs[room.TemplateIndex], GetTileRoot());
-                view.transform.localPosition = GetLocalPosition(room.Center, grid.Width, grid.Height);
-                view.transform.localRotation = Quaternion.Euler(0f, room.RotationQuarterTurns * 90f, 0f);
-                view.name = $"MazeRoom_{room.Template.TileType}_{room.Origin.X}_{room.Origin.Y}";
-                view.Initialize(room);
-                roomObjects.Add(view.gameObject);
+                AddRoomView(room, roomPrefabs[room.TemplateIndex]);
             }
 
             GeometryChanged?.Invoke();
@@ -106,16 +115,67 @@ namespace ShiftingPyramid.Maze.View
             GeometryChanged?.Invoke();
         }
 
+        // 변경된 두 방 영역만 교체하고, GeometryChanged는 뒤따르는 Refresh에서 한 번 알린다.
+        public void ApplyRoomReplacement(MazeGrid grid, MazeRoom removed, MazeRoom added,
+            IReadOnlyList<MazeRoomView> roomPrefabs)
+        {
+            if (grid == null || removed == null || added == null)
+                throw new ArgumentNullException(nameof(grid), "Room replacement needs a grid and both rooms.");
+            if (roomPrefabs == null || added.TemplateIndex < 0
+                || added.TemplateIndex >= roomPrefabs.Count || roomPrefabs[added.TemplateIndex] == null)
+                throw new InvalidOperationException("MazeRenderer: replacement room has no matching prefab.");
+            if (!roomViews.TryGetValue(removed, out var oldView))
+                throw new InvalidOperationException("MazeRenderer: the removed room view was not found.");
+            foreach (var cell in removed.Cells)
+                if (!tilePositions.ContainsKey(cell) || tileViews.ContainsKey(cell))
+                    throw new InvalidOperationException("MazeRenderer: removed room footprint is inconsistent.");
+            foreach (var cell in added.Cells)
+                if (!tilePositions.ContainsKey(cell) || !tileViews.ContainsKey(cell))
+                    throw new InvalidOperationException("MazeRenderer: new room footprint is inconsistent.");
+
+            roomViews.Remove(removed);
+            RemoveGeneratedObject(oldView.gameObject);
+            foreach (var cell in removed.Cells)
+                AddTileView(grid.GetTile(cell), tilePrefab);
+
+            foreach (var cell in added.Cells)
+            {
+                var view = tileViews[cell];
+                tileViews.Remove(cell);
+                RemoveGeneratedObject(view.gameObject);
+            }
+            AddRoomView(added, roomPrefabs[added.TemplateIndex]);
+        }
+
         public void Clear()
         {
             foreach (var view in tileViews.Values)
                 if (view != null) RemoveGeneratedObject(view.gameObject);
-            foreach (var room in roomObjects)
-                if (room != null) RemoveGeneratedObject(room);
+            foreach (var view in roomViews.Values)
+                if (view != null) RemoveGeneratedObject(view.gameObject);
 
             tileViews.Clear();
             tilePositions.Clear();
-            roomObjects.Clear();
+            roomViews.Clear();
+        }
+
+        private void AddTileView(MazeTile tile, MazeTileView prefab)
+        {
+            var view = Instantiate(prefab, GetTileRoot());
+            view.transform.localPosition = tilePositions[tile.Coordinate];
+            view.name = $"MazeTile_{tile.Coordinate.X}_{tile.Coordinate.Y}";
+            view.Apply(tile);
+            tileViews.Add(tile.Coordinate, view);
+        }
+
+        private void AddRoomView(MazeRoom room, MazeRoomView prefab)
+        {
+            var view = Instantiate(prefab, GetTileRoot());
+            view.transform.localPosition = tilePositions[room.Center];
+            view.transform.localRotation = Quaternion.Euler(0f, room.RotationQuarterTurns * 90f, 0f);
+            view.name = $"MazeRoom_{room.Template.TileType}_{room.Origin.X}_{room.Origin.Y}";
+            view.Initialize(room);
+            roomViews.Add(room, view);
         }
 
         private void RemoveGeneratedObject(GameObject generated)
