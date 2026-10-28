@@ -1580,17 +1580,12 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5002820860667492557, guid: 4de9301a20950fa4eba69a9f199a5334, type: 3}
   m_PrefabInstance: {fileID: 5548985536700288955}
   m_PrefabAsset: {fileID: 0}
-<<<<<<< Updated upstream
 --- !u!1001 &8382879261866678948
-=======
---- !u!1001 &5668570249483553648
->>>>>>> Stashed changes
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-<<<<<<< Updated upstream
     m_TransformParent: {fileID: 1864320385664982222}
     m_Modifications:
     - target: {fileID: 1646458513994043355, guid: b4f18f4830dd46f469af13481784dab5, type: 3}
@@ -1641,7 +1636,17 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 594ea882c5a793440b60ff72d896021e, type: 2}
-=======
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b4f18f4830dd46f469af13481784dab5, type: 3}
+--- !u!1001 &5668570249483553648
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 3657319903718494075}
     m_Modifications:
     - target: {fileID: 3763164853841861241, guid: 2fa6be46c81c7fe459c9b54658d64e80, type: 3}
@@ -1704,14 +1709,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_irontorch_003_AmbienceFX
       objectReference: {fileID: 0}
->>>>>>> Stashed changes
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
-<<<<<<< Updated upstream
-  m_SourcePrefab: {fileID: 100100000, guid: b4f18f4830dd46f469af13481784dab5, type: 3}
-=======
   m_SourcePrefab: {fileID: 100100000, guid: 2fa6be46c81c7fe459c9b54658d64e80, type: 3}
 --- !u!4 &8832610985143046409 stripped
 Transform:
@@ -1789,11 +1790,9 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2fa6be46c81c7fe459c9b54658d64e80, type: 3}
 --- !u!4 &4688808843825571914 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3763164853841861241, guid: 2fa6be46c81c7fe459c9b54658d64e80, type: 3}
   m_PrefabInstance: {fileID: 8442152197832340019}
   m_PrefabAsset: {fileID: 0}
->>>>>>> Stashed changes
