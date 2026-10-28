@@ -48,6 +48,24 @@ namespace ShiftingPyramid.Maze.View
             return grid.Contains(coordinate);
         }
 
+        // 타일 사이 이동량까지 유지해 UI가 끊기지 않게 움직인다.
+        public bool TryGetContinuousGridPosition(Vector3 worldPosition, MazeGrid grid, out Vector2 position)
+        {
+            position = default;
+            if (grid == null || tileSize <= 0f) return false;
+            var local = GetTileRoot().InverseTransformPoint(worldPosition);
+            position = new Vector2(
+                local.x / tileSize + (centerOnOrigin ? (grid.Width - 1) * 0.5f : 0f),
+                local.z / tileSize + (centerOnOrigin ? (grid.Height - 1) * 0.5f : 0f));
+            return true;
+        }
+
+        public Vector2 GetGridDirection(Vector3 worldDirection)
+        {
+            var local = GetTileRoot().InverseTransformDirection(worldDirection);
+            return new Vector2(local.x, local.z);
+        }
+
         public void ValidateConfiguration()
         {
             if (tilePrefab == null)

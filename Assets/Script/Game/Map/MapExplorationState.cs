@@ -24,6 +24,7 @@ namespace ShiftingPyramid.Game.Map
 
         public int Width { get; }
         public int Height { get; }
+        public event Action<MazeCoordinate> TileChanged;
 
         public bool IsExplored(MazeCoordinate coordinate)
         {
@@ -34,6 +35,7 @@ namespace ShiftingPyramid.Game.Map
         {
             if (!Contains(coordinate) || explored[coordinate.X, coordinate.Y]) return false;
             explored[coordinate.X, coordinate.Y] = true;
+            TileChanged?.Invoke(coordinate);
             return true;
         }
 
@@ -67,6 +69,8 @@ namespace ShiftingPyramid.Game.Map
                 explored[coordinate.X, coordinate.Y] = false;
                 changed.Add(coordinate);
             }
+
+            foreach (var coordinate in changed) TileChanged?.Invoke(coordinate);
 
             return changed.AsReadOnly();
         }

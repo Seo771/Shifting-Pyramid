@@ -1,3 +1,4 @@
+using System;
 using ShiftingPyramid.Maze.Core;
 using ShiftingPyramid.Maze.View;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace ShiftingPyramid.Game.Map
 
         public MapExplorationState State => bootstrapper != null && bootstrapper.IsMazeReady
             && ReferenceEquals(stateGrid, bootstrapper.CurrentGrid) ? state : null;
+        public event Action<MapExplorationState> StateChanged;
 
         private void OnEnable()
         {
@@ -37,6 +39,7 @@ namespace ShiftingPyramid.Game.Map
             if (grid == null) return;
             stateGrid = grid;
             state = new MapExplorationState(grid);
+            StateChanged?.Invoke(state);
         }
     }
 }
