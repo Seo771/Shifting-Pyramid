@@ -30,6 +30,9 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     private float wanderTimer;
     private float lastAttackTime;
     private bool isAttacking = false;
+    private bool isFrozen;
+    private Coroutine attackCoroutine;
+    private Coroutine freezeCoroutine;
     private Vector3 lastStimulusPosition;
     private bool investigationDestinationPending;
     private PlayerHP playerHP; // PlayerHP 연동
@@ -60,6 +63,15 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
     private void Update()
     {
+        if (isFrozen)
+        {
+            if (agent != null && agent.isOnNavMesh)
+            {
+                agent.isStopped = true;
+            }
+            return;
+        }
+
         // 미로 생성/변경 중에는 NavMesh가 잠시 없을 수 있다.
         if (!TryPrepareAgent()) return;
 
@@ -200,8 +212,51 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
         // 공격 쿨타임 체크
         if (Time.time >= lastAttackTime + attackCooldown)
         {
-            StartCoroutine(PerformAttackRoutine());
+            attackCoroutine = StartCoroutine(PerformAttackRoutine());
         }
+    }
+
+    public void FreezeForDuration(float duration)
+    {
+        if (!isActiveAndEnabled || duration <= 0f)
+        {
+            return;
+        }
+
+        if (freezeCoroutine != null)
+        {
+            StopCoroutine(freezeCoroutine);
+        }
+
+        freezeCoroutine = StartCoroutine(FreezeRoutine(duration));
+    }
+
+    private IEnumerator FreezeRoutine(float duration)
+    {
+        isFrozen = true;
+        isAttacking = false;
+
+        if (attackCoroutine != null)
+        {
+            StopCoroutine(attackCoroutine);
+            attackCoroutine = null;
+        }
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+            agent.ResetPath();
+        }
+
+        yield return new WaitForSeconds(duration);
+
+        isFrozen = false;
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+        }
+
+        freezeCoroutine = null;
     }
 
     private IEnumerator PerformAttackRoutine()

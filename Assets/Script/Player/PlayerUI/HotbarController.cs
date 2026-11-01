@@ -136,7 +136,9 @@ public class HotbarController : MonoBehaviour
         }
 
         // 소비형(ItemType) 처리
-        if (item.itemType == ItemData.ItemType.Recovery || item.itemType == ItemData.ItemType.Purify)
+        if (item.itemType == ItemData.ItemType.Recovery ||
+            item.itemType == ItemData.ItemType.Purify ||
+            item.itemType == ItemData.ItemType.Freeze)
         {
             if (useCoroutine != null)
             {
@@ -246,6 +248,10 @@ public class HotbarController : MonoBehaviour
                 Debug.Log($"[Hotbar] 정화 사용: 미라화 -{item.purifyAmount}");
             }
         }
+        else if (item.itemType == ItemData.ItemType.Freeze)
+        {
+            ApplyFreezeEffect(item.freezeDuration);
+        }
 
         if (slot != null)
         {
@@ -281,12 +287,30 @@ public class HotbarController : MonoBehaviour
                 Debug.Log($"[Hotbar] 즉시 정화 사용: 미라화 -{item.purifyAmount}");
             }
         }
+        else if (item.itemType == ItemData.ItemType.Freeze)
+        {
+            ApplyFreezeEffect(item.freezeDuration);
+        }
 
         if (slot != null)
         {
             slot.ClearSlot();
             ShowHotbar();
         }
+    }
+
+    private void ApplyFreezeEffect(float duration)
+    {
+        MonsterAI[] enemies = Object.FindObjectsByType<MonsterAI>(FindObjectsSortMode.None);
+        foreach (MonsterAI enemy in enemies)
+        {
+            if (enemy != null)
+            {
+                enemy.FreezeForDuration(duration);
+            }
+        }
+
+        Debug.Log($"[Hotbar] 광역 빙결 적용: 적 {enemies.Length}마리, {duration:0.##}초");
     }
 
     public void SelectSlot(int index)
