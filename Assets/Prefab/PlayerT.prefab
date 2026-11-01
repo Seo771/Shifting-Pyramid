@@ -208,10 +208,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractor
   interactionRange: 2
-  interactionRadius: 0.1
   interactionMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  interactionUI: {fileID: 0}
+  uiVerticalOffset: 0.5
 --- !u!114 &6305335534788067644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -224,6 +225,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ab346c4a5568b143be6729ce5d47f67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mummification
+  mummificationText: {fileID: 0}
   increaseRatePerSecond: 1
   currentMummification: 0
   onMummificationChanged:
@@ -382,5 +384,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73fa7945add7d3642b8526a64f3ad9b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MouseLook
-  mouseSensitivity: 100
+  mouseSensitivity: 300
   playerBody: {fileID: 8010034990369437996}
