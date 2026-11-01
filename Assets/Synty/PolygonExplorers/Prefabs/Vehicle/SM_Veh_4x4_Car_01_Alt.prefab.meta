@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 4914d23c6d054804eaf73af5c33ede75
+timeCreated: 1538683171
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 128996
+  packageName: POLYGON - Explorer Pack - Art by Synty
+  packageVersion: 1.4.2
+  assetPath: Assets/Synty/PolygonExplorers/Prefabs/Vehicle/SM_Veh_4x4_Car_01_Alt.prefab
+  uploadId: 975888

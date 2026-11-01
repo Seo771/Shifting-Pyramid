@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b20417c38d179d84d80c6a7d06de4dc9
+timeCreated: 1502231164
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 128996
+  packageName: POLYGON - Explorer Pack - Art by Synty
+  packageVersion: 1.4.2
+  assetPath: Assets/Synty/PolygonExplorers/Materials/FX/FX_01_Emmision.mat
+  uploadId: 975888

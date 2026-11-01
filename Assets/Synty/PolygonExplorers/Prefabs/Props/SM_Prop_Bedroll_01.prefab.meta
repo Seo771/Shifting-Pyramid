@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 41ae195c2ab44b94599d08ebc87752b4
+timeCreated: 1537498711
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 128996
+  packageName: POLYGON - Explorer Pack - Art by Synty
+  packageVersion: 1.4.2
+  assetPath: Assets/Synty/PolygonExplorers/Prefabs/Props/SM_Prop_Bedroll_01.prefab
+  uploadId: 975888

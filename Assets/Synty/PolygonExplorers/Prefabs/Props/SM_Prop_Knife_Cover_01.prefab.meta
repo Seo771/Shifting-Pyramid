@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 096ea40a5c7a73342bac52f5679832b2
+timeCreated: 1537498726
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 128996
+  packageName: POLYGON - Explorer Pack - Art by Synty
+  packageVersion: 1.4.2
+  assetPath: Assets/Synty/PolygonExplorers/Prefabs/Props/SM_Prop_Knife_Cover_01.prefab
+  uploadId: 975888
