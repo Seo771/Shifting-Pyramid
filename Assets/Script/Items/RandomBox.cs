@@ -42,6 +42,20 @@ public class RandomBox : MonoBehaviour, IInteractable
             return;
         }
 
+        if (reward.itemType == ItemData.ItemType.PassiveSpeed)
+        {
+            PlayerMovement player = FindFirstObjectByType<PlayerMovement>();
+            if (player == null)
+            {
+                Debug.LogWarning($"[{nameof(RandomBox)}] PlayerMovement를 찾을 수 없어 패시브 아이템을 지급하지 못했습니다.", this);
+                return;
+            }
+
+            player.AddPassiveItem(reward);
+            Debug.Log($"[{nameof(RandomBox)}] 패시브 아이템 '{reward.itemName}'을(를) 획득했습니다.", this);
+            return;
+        }
+
         HotbarController hotbar = FindFirstObjectByType<HotbarController>();
         if (hotbar == null)
         {

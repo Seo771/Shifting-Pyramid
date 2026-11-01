@@ -1,10 +1,14 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
     [Header("이동 설정")]
     public float moveSpeed = 5f;
     public float runSpeedMultiplier = 1.8f;
+
+    [Header("패시브 아이템")]
+    public List<ItemData> passiveItems = new List<ItemData>();
 
     [Header("중력 설정")]
     public float gravity = -9.81f;
@@ -22,6 +26,18 @@ public class PlayerMovement : MonoBehaviour
         controller = GetComponent<CharacterController>();
         stamina = GetComponent<PlayerStamina>();
         health = GetComponent<PlayerHP>();
+    }
+
+    public void AddPassiveItem(ItemData item)
+    {
+        if (item == null || item.itemType != ItemData.ItemType.PassiveSpeed)
+        {
+            return;
+        }
+
+        passiveItems.Add(item);
+        moveSpeed += item.speedBoostAmount;
+        Debug.Log($"[PlayerMovement] 패시브 아이템 '{item.itemName}' 획득: 이동 속도 +{item.speedBoostAmount}", this);
     }
 
     void Update()
