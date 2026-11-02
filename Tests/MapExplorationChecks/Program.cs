@@ -10,6 +10,7 @@ internal static class Program
         var grid = new MazeGrid(7, 7);
         var start = MazeCoordinate.Zero;
         var east = new MazeCoordinate(1, 0);
+        var untouched = new MazeCoordinate(0, 1);
         var state = new MapExplorationState(grid);
         var notified = 0;
         state.TileChanged += _ => notified++;
@@ -19,16 +20,18 @@ internal static class Program
         Assert(!state.Reveal(new MazeCoordinate(-1, 0)), "Outside cells cannot be revealed.");
         Assert(state.Reveal(start) && !state.Reveal(start), "Reveal occurs once per cell.");
         Assert(state.Reveal(east), "A second cell can be revealed.");
-        Assert(notified == 2, "Only new discoveries notify the map view.");
+        Assert(state.Reveal(untouched), "An unrelated cell can be revealed.");
+        Assert(notified == 3, "Only new discoveries notify the map view.");
         Assert(state.Reconcile(grid).Count == 0, "Unchanged grid keeps exploration.");
-        Assert(notified == 2, "Unchanged geometry does not refresh map tiles.");
+        Assert(notified == 3, "Unchanged geometry does not refresh map tiles.");
 
         grid.SetConnection(start, MazeDirection.East, true);
         var changed = state.Reconcile(grid);
         Assert(changed.Count == 2 && changed.Contains(start) && changed.Contains(east),
             "A shared wall invalidates both cells.");
         Assert(!state.IsExplored(start) && !state.IsExplored(east), "Changed cells are hidden.");
-        Assert(notified == 4, "Only changed cells notify the map view.");
+        Assert(state.IsExplored(untouched), "Unchanged cells keep their exploration record.");
+        Assert(notified == 5, "Only changed cells notify the map view.");
         Assert(!state.TryGetKnownTile(start, out _), "Invalidated structure stays hidden.");
         Assert(state.Reconcile(grid).Count == 0, "Repeated reconciliation is stable.");
         Assert(state.Reveal(start) && state.TryGetKnownTile(start, out var known)
