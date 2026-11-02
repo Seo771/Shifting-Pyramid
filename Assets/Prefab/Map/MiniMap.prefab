@@ -144,6 +144,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.Map.MapDiscoveryTracker
   bootstrapper: {fileID: 0}
   floorProbeDistance: 0.75
+  airborneProbeDistance: 2.25
 --- !u!114 &2049251882483509222
 MonoBehaviour:
   m_ObjectHideFlags: 0
