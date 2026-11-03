@@ -1822,7 +1822,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMazeSpawner
   playerPrefab: {fileID: 0}
-  existingPlayer: {fileID: 0}
+  existingPlayer: {fileID: 837316819}
   spawnHeight: 1.25
 --- !u!1 &564499375
 GameObject:
