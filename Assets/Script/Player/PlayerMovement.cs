@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -10,12 +10,14 @@ public class PlayerMovement : MonoBehaviour
     [Header("패시브 아이템")]
     public List<ItemData> passiveItems = new List<ItemData>();
 
-    [Header("중력 설정")]
-    public float gravity = -9.81f;
+    [Header("중력 및 점프 설정")]
+    public float gravity = -20f;
+    public float jumpHeight = 1.5f;
     private Vector3 velocity;
+    private bool isJumping = false;
 
-    [Header("점프 설정")]
-    public float jumpHeight = 1.5f; // 내가 뛰어오르고 싶은 높이 (미터 단위)
+    [Header("애니메이션 설정")]
+    public Animator animator;
 
     private CharacterController controller;
     private PlayerStamina stamina;
@@ -26,31 +28,41 @@ public class PlayerMovement : MonoBehaviour
         controller = GetComponent<CharacterController>();
         stamina = GetComponent<PlayerStamina>();
         health = GetComponent<PlayerHP>();
+
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
     }
 
+    // PassiveSpeed 아이템 획득 시 이동 속도 증가
     public void AddPassiveItem(ItemData item)
     {
         if (item == null || item.itemType != ItemData.ItemType.PassiveSpeed)
-        {
             return;
-        }
 
         passiveItems.Add(item);
         moveSpeed += item.speedBoostAmount;
+
         Debug.Log($"[PlayerMovement] 패시브 아이템 '{item.itemName}' 획득: 이동 속도 +{item.speedBoostAmount}", this);
     }
 
     void Update()
     {
-        if (health != null && health.isDead) return;
-
-        // 1. 접지 판정
-        if (controller.isGrounded && velocity.y < 0)
+        // 사망 시 이동 및 이동 애니메이션 정지
+        if (health != null && health.isDead)
         {
-            velocity.y = -2f; // 땅에 착지 시 y속도 리셋
+            if (animator != null)
+                animator.SetFloat("Speed", 0f);
+            return;
         }
 
-        // 2. WASD 키 입력
+        // 1. 지면 감지 및 착지 처리
+        if (controller.isGrounded && velocity.y <= 0f)
+        {
+            velocity.y = -2f;
+            isJumping = false;
+        }
+
+        // 2. WASD 이동 입력
         float horizontal = 0f;
         float vertical = 0f;
 
@@ -59,39 +71,65 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKey(KeyCode.W)) vertical += 1f;
         if (Input.GetKey(KeyCode.S)) vertical -= 1f;
 
-        bool isMoving = (horizontal != 0 || vertical != 0);
+        bool isMoving = horizontal != 0f || vertical != 0f;
+        bool isShiftPressed = Input.GetKey(KeyCode.LeftShift);
 
-        // 3. 달리기 & 스테미나
-        bool isRunning = Input.GetKey(KeyCode.LeftShift) && isMoving && stamina != null && stamina.CanRun();
+        // 3. 달리기 및 스태미나 처리
+        bool canRunStamina = stamina != null && stamina.CanRun();
+        bool isRunning = isShiftPressed && isMoving && canRunStamina;
 
         if (stamina != null)
         {
-            if (isRunning) stamina.DrainStamina();
-            else stamina.RegenerateStamina();
+            if (isRunning)
+            {
+                stamina.DrainStamina();
+
+                // 스태미나 소모 직후 탈진 상태인지 재검사
+                if (!stamina.CanRun())
+                    isRunning = false;
+            }
+            else if (!isShiftPressed)
+            {
+                // Shift를 누르고 있는 동안에는 스태미나 회복을 막음
+                stamina.RegenerateStamina();
+            }
         }
 
+        // 4. 최종 이동 속도 및 방향 계산
         float currentSpeed = moveSpeed;
-        if (isRunning) currentSpeed *= runSpeedMultiplier;
+        if (isRunning)
+            currentSpeed *= runSpeedMultiplier;
 
-        // 4. 수평 이동 방향 계산 (플레이어가 바라보는 방향 기준)
-        Vector3 moveDirection = (transform.right * horizontal + transform.forward * vertical).normalized;
+        Vector3 moveDirection =
+            (transform.right * horizontal + transform.forward * vertical).normalized;
 
-        // ----------------------------------------------------
-        // 5. 점프 처리 (스페이스바 + 땅에 닿아있을 때만)
-        // ----------------------------------------------------
-        if (Input.GetKeyDown(KeyCode.Space) && controller.isGrounded)
+        // 5. 점프 처리
+        if (Input.GetButtonDown("Jump") && controller.isGrounded && !isJumping)
         {
-            // 원하는 높이(jumpHeight)만큼 점프하기 위한 y축 속도 계산
+            isJumping = true;
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+
+            if (animator != null)
+            {
+                animator.ResetTrigger("Jump");
+                animator.SetTrigger("Jump");
+            }
         }
 
-        // 6. 중력 누적
+        // 6. 중력 적용 및 이동 실행
         velocity.y += gravity * Time.deltaTime;
-
-        // 7. 수평 이동 + 수직(점프/중력) 이동합성
-        Vector3 finalMove = (moveDirection * currentSpeed) + new Vector3(0f, velocity.y, 0f);
-
-        // 8. 최종 이동 실행
+        Vector3 finalMove = moveDirection * currentSpeed + new Vector3(0f, velocity.y, 0f);
         controller.Move(finalMove * Time.deltaTime);
+
+        // 7. 이동 애니메이션 파라미터 전달
+        if (animator != null)
+        {
+            float targetAnimationSpeed = 0f;
+
+            if (isMoving)
+                targetAnimationSpeed = isRunning ? 2f : 1f;
+
+            animator.SetFloat("Speed", targetAnimationSpeed);
+        }
     }
 }
