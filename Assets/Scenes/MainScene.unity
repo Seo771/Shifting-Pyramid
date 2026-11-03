@@ -1488,6 +1488,7 @@ GameObject:
   - component: {fileID: 552856202}
   - component: {fileID: 552856201}
   - component: {fileID: 552856200}
+  - component: {fileID: 2147000004}
   m_Layer: 5
   m_Name: UI Canvas
   m_TagString: Untagged
@@ -5201,6 +5202,24 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 710100000000000002, guid: 73ec8f8e8c00419b90b172d92356e2cb, type: 3}
   m_PrefabInstance: {fileID: 2147000001}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2147000003 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 710100000000000001, guid: 73ec8f8e8c00419b90b172d92356e2cb, type: 3}
+  m_PrefabInstance: {fileID: 2147000001}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2147000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 552856199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75da07bc612e42cf871d1a384887d21a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.Map.MapScreenController
+  fullMap: {fileID: 2147000003}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
