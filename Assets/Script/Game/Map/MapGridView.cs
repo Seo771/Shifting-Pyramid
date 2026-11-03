@@ -23,6 +23,7 @@ namespace ShiftingPyramid.Game.Map
         private void OnEnable()
         {
             if (stateConnector == null) stateConnector = GetComponentInParent<MapStateConnector>();
+            if (stateConnector == null) stateConnector = FindFirstObjectByType<MapStateConnector>();
             if (stateConnector != null) stateConnector.StateChanged += Bind;
             Bind(stateConnector != null ? stateConnector.State : null);
         }
