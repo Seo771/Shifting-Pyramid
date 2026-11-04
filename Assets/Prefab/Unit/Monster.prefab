@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1740192209705094367}
   - component: {fileID: 7492877091619450747}
   - component: {fileID: 2635190381252254409}
-  - component: {fileID: 1840486960045491486}
+  - component: {fileID: 6583889571665384486}
   m_Layer: 0
   m_Name: Monster
   m_TagString: Untagged
@@ -138,7 +138,7 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &1840486960045491486
+--- !u!114 &6583889571665384486
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -147,17 +147,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 5375418706542552686}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35020602f2dffdf4e88f5d8998140472, type: 3}
+  m_Script: {fileID: 11500000, guid: 5b3b6a9820861fd4d851af6ac1ab40ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterAI
   currentState: 0
-  wanderInterval: 5
+  animator: {fileID: 0}
+  speedParameter: Speed
+  lookAroundTrigger: LookAround
+  attackLeftTrigger: AttackLeft
+  attackRightTrigger: AttackRight
+  attack2Trigger: Attack2
+  lookAroundInterval: 8
+  lookAroundChance: 0.35
+  lookAroundDuration: 2.5
+  wanderInterval: 4
   minWanderDistance: 10
   mazeSize: {x: 30, y: 30}
   targetPlayer: {fileID: 0}
-  detectRange: 7
-  loseTargetRange: 10
-  attackRange: 3
-  attackCooldown: 3
+  detectRange: 8
+  loseTargetRange: 12
+  attackRange: 2
+  attackCooldown: 2
   attackDamage: 20
   attackHitDelay: 0.5
