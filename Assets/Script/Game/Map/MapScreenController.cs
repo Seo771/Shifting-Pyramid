@@ -16,6 +16,7 @@ namespace ShiftingPyramid.Game.Map
         private bool previousCursorVisible;
 
         public bool IsOpen => isOpen;
+        public static bool IsInputBlocked { get; private set; }
 
         private void Awake()
         {
@@ -58,6 +59,7 @@ namespace ShiftingPyramid.Game.Map
             previousLockState = Cursor.lockState;
             previousCursorVisible = Cursor.visible;
             isOpen = true;
+            IsInputBlocked = true;
             fullMap.SetActive(true);
             Time.timeScale = 0f;
             Cursor.lockState = CursorLockMode.None;
@@ -68,6 +70,7 @@ namespace ShiftingPyramid.Game.Map
         {
             if (!isOpen) return;
             isOpen = false;
+            IsInputBlocked = false;
             if (fullMap != null) fullMap.SetActive(false);
             // 맵을 열기 전의 시간과 커서 상태만 복원한다.
             Time.timeScale = previousTimeScale;

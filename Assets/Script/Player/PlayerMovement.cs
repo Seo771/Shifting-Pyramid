@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ShiftingPyramid.Game.Map;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -47,6 +48,12 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        if (MapScreenController.IsInputBlocked)
+        {
+            if (animator != null) animator.SetFloat("Speed", 0f);
+            return;
+        }
+
         // 사망 시 이동 및 이동 애니메이션 정지
         if (health != null && health.isDead)
         {

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using ShiftingPyramid.Game.Map;
 
 // PlayerInteractor
 // - 주변의 IInteractable 감지
@@ -42,6 +43,12 @@ public class PlayerInteractor : MonoBehaviour
 
     private void Update()
     {
+        if (MapScreenController.IsInputBlocked)
+        {
+            HideInteractionUI();
+            return;
+        }
+
         CleanUpNulls();
 
         // 가장 가까운 상호작용 대상 찾기

@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+using ShiftingPyramid.Game.Map;
+
 public class MouseLook : MonoBehaviour
 {
     [Header("마우스 감도")]
@@ -19,7 +21,7 @@ public class MouseLook : MonoBehaviour
     // ★ Update 대신 LateUpdate를 사용하여 플레이어 이동이 완전히 끝난 후 카메라 갱신
     void LateUpdate()
     {
-        if (playerBody == null) return;
+        if (playerBody == null || MapScreenController.IsInputBlocked) return;
 
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;

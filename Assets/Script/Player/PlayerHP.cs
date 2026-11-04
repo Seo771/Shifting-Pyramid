@@ -25,12 +25,6 @@ public class PlayerHP : MonoBehaviour
         {
             Die();
         }
-
-        // 테스트용 키 (K 누르면 데미지)
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            TakeDamage(20f);
-        }
     }
 
     public void TakeDamage(float damageAmount)

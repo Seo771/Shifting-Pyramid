@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ShiftingPyramid.Game.Map;
 
 [RequireComponent(typeof(CanvasGroup))]
 public class HotbarController : MonoBehaviour
@@ -50,6 +51,8 @@ public class HotbarController : MonoBehaviour
 
     void Update()
     {
+        if (MapScreenController.IsInputBlocked) return;
+
         bool inputDetected = false;
 
         for (int i = 0; i < slots.Count; i++)
@@ -123,6 +126,7 @@ public class HotbarController : MonoBehaviour
     // 현재 선택된 슬롯의 아이템을 사용합니다. 데이터 중심 방식(ItemData)으로 처리합니다.
     public void UseCurrentSlot()
     {
+        if (MapScreenController.IsInputBlocked) return;
         if (hotbarSlots.Count == 0) return;
 
         HotbarSlot slot = hotbarSlots[currentSlotIndex];
@@ -213,7 +217,8 @@ public class HotbarController : MonoBehaviour
 
         while (elapsed < duration)
         {
-            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.F))
+            if (!MapScreenController.IsInputBlocked
+                && (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.F)))
             {
                 Debug.Log("[Hotbar] 사용 취소됨");
                 useCoroutine = null;
