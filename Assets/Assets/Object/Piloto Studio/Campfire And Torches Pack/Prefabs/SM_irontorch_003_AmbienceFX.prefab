@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2626265589909643542}
   - component: {fileID: 7781917853780623736}
   - component: {fileID: 4729001515460647467}
+  - component: {fileID: 1291785955588869793}
   m_Layer: 0
   m_Name: SM_irontorch_003_AmbienceFX
   m_TagString: Untagged
@@ -126,6 +127,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34f14a165b3bf0c48b1bc17712997220, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+--- !u!114 &1291785955588869793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4571895601050599619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40c31d0280abf214b9eec59c55b4d898, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  lightRange: 8
+  lightIntensity: 2
+  lightColor: {r: 1, g: 0.55, b: 0.2, a: 1}
+  useFlicker: 1
+  flickerSpeed: 8
+  flickerAmount: 0.2
 --- !u!1 &8360689585231699195
 GameObject:
   m_ObjectHideFlags: 0
