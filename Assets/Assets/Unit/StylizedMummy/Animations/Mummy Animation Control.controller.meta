@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6736b31d52622c84188bea505f09dd1b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 256840
+  packageName: Stylized Mummy
+  packageVersion: 1.0
+  assetPath: Assets/StylizedMummy/Animations/Mummy Animation Control.controller
+  uploadId: 589823

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: edfed3e18dc39224fbdb9ae9fc12324e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 256840
+  packageName: Stylized Mummy
+  packageVersion: 1.0
+  assetPath: Assets/StylizedMummy/Materials/M_BlackMummy.mat
+  uploadId: 589823

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d3d68c1ec0c585849bb59452dc41377b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 256840
+  packageName: Stylized Mummy
+  packageVersion: 1.0
+  assetPath: Assets/StylizedMummy/Materials/M_GreenMummy.mat
+  uploadId: 589823
