@@ -23,7 +23,10 @@ public class RandomBox : MonoBehaviour, IInteractable
     [SerializeField]
     private bool isOpened;
 
+    private ItemData selectedReward;
+
     public bool IsOpened => isOpened;
+    public event Action<RandomBox> Opened;
 
     public void Interact()
     {
@@ -32,10 +35,8 @@ public class RandomBox : MonoBehaviour, IInteractable
             return;
         }
 
-        // 상호작용을 시작한 순간 열린 상태로 만들어 중복 상호작용을 차단합니다.
-        isOpened = true;
-
-        ItemData reward = SelectReward();
+        // 지급 실패 후 다시 열어도 같은 보상이 나오게 한다.
+        ItemData reward = selectedReward ?? (selectedReward = SelectReward());
         if (reward == null)
         {
             Debug.LogWarning($"[{nameof(RandomBox)}] 유효한 당첨 아이템을 선택하지 못했습니다.", this);
@@ -53,6 +54,7 @@ public class RandomBox : MonoBehaviour, IInteractable
 
             player.AddPassiveItem(reward);
             Debug.Log($"[{nameof(RandomBox)}] 패시브 아이템 '{reward.itemName}'을(를) 획득했습니다.", this);
+            CompleteOpening();
             return;
         }
 
@@ -66,11 +68,20 @@ public class RandomBox : MonoBehaviour, IInteractable
         if (hotbar.AddItemToHotbar(reward))
         {
             Debug.Log($"[{nameof(RandomBox)}] '{reward.itemName}' 아이템을 획득했습니다.", this);
+            CompleteOpening();
         }
         else
         {
             Debug.LogWarning($"[{nameof(RandomBox)}] 핫바가 가득 차 '{reward.itemName}' 아이템을 지급하지 못했습니다.", this);
         }
+    }
+
+    private void CompleteOpening()
+    {
+        // 열린 BOX는 충돌과 상호작용 대상에서 제외한다.
+        isOpened = true;
+        gameObject.SetActive(false);
+        Opened?.Invoke(this);
     }
 
     private ItemData SelectReward()
