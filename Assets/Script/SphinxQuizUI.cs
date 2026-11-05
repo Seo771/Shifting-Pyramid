@@ -12,15 +12,16 @@ public class SphinxQuizUI : MonoBehaviour
     [SerializeField] private TMP_InputField answerInput;
     [SerializeField] private TMP_Text timerText;
 
-    private void Awake()
+    private void Start()
     {
-        HideQuiz();
-
-        // InputField에서 엔터(EndEdit)를 눌렀을 때 실행될 이벤트 등록
+        // Start 시점에 InputField 이벤트 안전하게 등록
         if (answerInput != null)
         {
-            answerInput.onEndEdit.AddListener(OnInputSubmit);
+            // onSubmit은 Enter(Return/KeypadEnter) 키를 눌렀을 때 실행되는 TMP 전용 이벤트입니다.
+            answerInput.onSubmit.AddListener(OnInputSubmit);
         }
+
+        HideQuiz();
     }
 
     public void ShowQuiz(string question)
@@ -30,7 +31,8 @@ public class SphinxQuizUI : MonoBehaviour
         if (answerInput != null)
         {
             answerInput.text = "";
-            answerInput.ActivateInputField(); // 바로 입력 가능하게 포커스
+            answerInput.Select();
+            answerInput.ActivateInputField(); // 바로 입력 가능하게 포커스 지정
         }
     }
 
@@ -45,16 +47,15 @@ public class SphinxQuizUI : MonoBehaviour
             timerText.text = $"남은 시간: {Mathf.CeilToInt(seconds)}초";
     }
 
-    // 엔터 입력 시 호출되는 내부 메서드
+    // 엔터 입력 시 실행되는 제출 메서드
     private void OnInputSubmit(string text)
     {
-        // Enter 키를 눌러서 끝낸 경우에만 제출 처리
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        // 빈 문자열 제출 방지
+        if (string.IsNullOrWhiteSpace(text)) return;
+
+        if (roomController != null)
         {
-            if (roomController != null)
-            {
-                roomController.SubmitAnswer(text);
-            }
+            roomController.SubmitAnswer(text);
         }
     }
 }
