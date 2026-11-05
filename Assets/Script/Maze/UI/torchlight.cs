@@ -38,8 +38,6 @@ public class TorchLight : MonoBehaviour
         torchLight.enabled = true;
 
         baseIntensity = lightIntensity;
-
-        Debug.Log($"{name}: Torch Light 생성 완료");
     }
 
     void Update()

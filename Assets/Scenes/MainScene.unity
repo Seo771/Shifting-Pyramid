@@ -1336,6 +1336,7 @@ GameObject:
   - component: {fileID: 487055576}
   - component: {fileID: 487055577}
   - component: {fileID: 487055578}
+  - component: {fileID: 487055579}
   m_Layer: 0
   m_Name: MazeTestBootstrapper
   m_TagString: Untagged
@@ -1423,6 +1424,27 @@ MonoBehaviour:
   obstructionMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &487055579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 487055573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cd420c524104a6d898d5e975940da22, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.Torch.MazeTorchPlacementController
+  bootstrapper: {fileID: 487055575}
+  torchPrefab: {fileID: 4571895601050599619, guid: 2fa6be46c81c7fe459c9b54658d64e80, type: 3}
+  maximumTorches: 15
+  minimumTileDistance: 3
+  wallInset: 0.5
+  mountHeight: 7
+  torchScale: 2.5
+  boxClearance: 2
+  lightRange: 16
 --- !u!1 &508168075
 GameObject:
   m_ObjectHideFlags: 0
@@ -5313,6 +5335,18 @@ PrefabInstance:
       propertyPath: mummificationText
       value: 
       objectReference: {fileID: 57028265}
+    - target: {fileID: 8010034990369437996, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8010034990369437996, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8010034990369437996, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8010034990369437996, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.70024
