@@ -29,6 +29,7 @@ public class PlayerHP : MonoBehaviour
 
     public void TakeDamage(float damageAmount)
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsGameFinished) return;
         if (isDead) return;
 
         currentHealth -= damageAmount;

@@ -15,6 +15,7 @@ public class CurseJar : MonoBehaviour, IInteractable
     // 실제 수집 처리
     private void Collect()
     {
+        if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameManager.GameState.Playing) return;
         if (isCollected) return; // 중복 방지
         isCollected = true;
 

@@ -52,9 +52,10 @@ namespace ShiftingPyramid.Game.Map
             closeButton = null;
         }
 
-        private void OpenMap()
+        public void OpenMap()
         {
             if (isOpen || fullMap == null) return;
+            if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameManager.GameState.Playing) return;
             previousTimeScale = Time.timeScale;
             previousLockState = Cursor.lockState;
             previousCursorVisible = Cursor.visible;
@@ -73,9 +74,10 @@ namespace ShiftingPyramid.Game.Map
             IsInputBlocked = false;
             if (fullMap != null) fullMap.SetActive(false);
             // 맵을 열기 전의 시간과 커서 상태만 복원한다.
-            Time.timeScale = previousTimeScale;
-            Cursor.lockState = previousLockState;
-            Cursor.visible = previousCursorVisible;
+            var finished = GameManager.Instance != null && GameManager.Instance.IsGameFinished;
+            Time.timeScale = finished ? 0f : previousTimeScale;
+            Cursor.lockState = finished ? CursorLockMode.None : previousLockState;
+            Cursor.visible = finished || previousCursorVisible;
         }
     }
 }

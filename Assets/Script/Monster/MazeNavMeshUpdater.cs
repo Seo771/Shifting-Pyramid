@@ -37,18 +37,30 @@ public class MazeNavMeshUpdater : MonoBehaviour
             return;
         }
         bootstrapper.Updates.NavigationUpdating += RebuildNavMesh;
+        bootstrapper.Updates.Preparing += SuspendMonsters;
         if (bootstrapper.IsMazeReady) RebuildNavMesh(bootstrapper.CurrentGrid, null);
     }
 
     private void OnDisable()
     {
         if (bootstrapper != null) bootstrapper.Updates.NavigationUpdating -= RebuildNavMesh;
+        if (bootstrapper != null) bootstrapper.Updates.Preparing -= SuspendMonsters;
         bootstrapper = null;
     }
 
     private void RebuildNavMesh(MazeGrid grid, MazeChangeSet changes)
     {
+        // 늦게 활성화된 Updater도 기존 Agent를 안전하게 재등록한다.
+        SuspendMonsters(grid, changes);
         Physics.SyncTransforms();
         navMeshSurface.BuildNavMesh();
+        foreach (var monster in FindObjectsByType<MonsterAI>(FindObjectsSortMode.None))
+            if (monster.isActiveAndEnabled) monster.RefreshMazeNavigation(bootstrapper);
+    }
+
+    private void SuspendMonsters(MazeGrid grid, MazeChangeSet changes)
+    {
+        foreach (var monster in FindObjectsByType<MonsterAI>(FindObjectsSortMode.None))
+            if (monster.isActiveAndEnabled) monster.SuspendMazeNavigation(bootstrapper);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-using ShiftingPyramid.Game.Map;
+using ShiftingPyramid.Game;
 
 public class MouseLook : MonoBehaviour
 {
@@ -14,6 +14,7 @@ public class MouseLook : MonoBehaviour
 
     void Start()
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsGameFinished) return;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -21,7 +22,7 @@ public class MouseLook : MonoBehaviour
     // ★ Update 대신 LateUpdate를 사용하여 플레이어 이동이 완전히 끝난 후 카메라 갱신
     void LateUpdate()
     {
-        if (playerBody == null || MapScreenController.IsInputBlocked) return;
+        if (playerBody == null || GameplayInput.IsBlocked) return;
 
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;

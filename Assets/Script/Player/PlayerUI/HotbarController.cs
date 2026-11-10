@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using ShiftingPyramid.Game.Map;
+using ShiftingPyramid.Game;
 
 [RequireComponent(typeof(CanvasGroup))]
 public class HotbarController : MonoBehaviour
@@ -26,6 +26,7 @@ public class HotbarController : MonoBehaviour
     // 사용 중인 아이템 지연 처리 관련
     private Coroutine useCoroutine;
     private HotbarSlot pendingSlot;
+    public bool IsUsingItem => useCoroutine != null;
 
     [Header("사용 지연 설정 (기본)")]
     [Tooltip("기본 사용 시간(초). ItemData.useDuration이 0이면 이 값 사용")]
@@ -51,7 +52,8 @@ public class HotbarController : MonoBehaviour
 
     void Update()
     {
-        if (MapScreenController.IsInputBlocked) return;
+        if (GameManager.Instance != null && GameManager.Instance.IsGameFinished) CancelUse();
+        if (GameplayInput.IsBlocked) return;
 
         bool inputDetected = false;
 
@@ -126,7 +128,7 @@ public class HotbarController : MonoBehaviour
     // 현재 선택된 슬롯의 아이템을 사용합니다. 데이터 중심 방식(ItemData)으로 처리합니다.
     public void UseCurrentSlot()
     {
-        if (MapScreenController.IsInputBlocked) return;
+        if (GameplayInput.IsBlocked) return;
         if (hotbarSlots.Count == 0) return;
 
         HotbarSlot slot = hotbarSlots[currentSlotIndex];
@@ -192,16 +194,19 @@ public class HotbarController : MonoBehaviour
         }
     }
 
-    private void CancelUse()
+    public void CancelUse()
     {
-        if (useCoroutine == null) return;
-        StopCoroutine(useCoroutine);
+        if (useCoroutine != null) StopCoroutine(useCoroutine);
+        ResetUseState();
+    }
+
+    private void ResetUseState()
+    {
         useCoroutine = null;
         pendingSlot = null;
         if (useProgressGroup != null) useProgressGroup.alpha = 0f;
         if (useProgressSlider != null) useProgressSlider.value = 0f;
         if (useProgressText != null) useProgressText.text = "";
-        Debug.Log("[Hotbar] 사용 취소 처리됨");
     }
 
     private IEnumerator UseConsumableRoutine(ItemData item, HotbarSlot slot, float duration)
@@ -217,13 +222,16 @@ public class HotbarController : MonoBehaviour
 
         while (elapsed < duration)
         {
-            if (!MapScreenController.IsInputBlocked
+            if (GameManager.Instance != null && GameManager.Instance.IsGameFinished)
+            {
+                ResetUseState();
+                yield break;
+            }
+            if (!GameplayInput.IsBlocked
                 && (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.F)))
             {
                 Debug.Log("[Hotbar] 사용 취소됨");
-                useCoroutine = null;
-                pendingSlot = null;
-                if (useProgressGroup != null) useProgressGroup.alpha = 0f;
+                ResetUseState();
                 yield break;
             }
 
@@ -234,6 +242,11 @@ public class HotbarController : MonoBehaviour
         }
 
         // 사용 완료: 데이터 기반 효과 적용
+        if (GameManager.Instance != null && GameManager.Instance.IsGameFinished)
+        {
+            ResetUseState();
+            yield break;
+        }
         if (item.itemType == ItemData.ItemType.Recovery)
         {
             var playerHP = Object.FindFirstObjectByType<PlayerHP>();

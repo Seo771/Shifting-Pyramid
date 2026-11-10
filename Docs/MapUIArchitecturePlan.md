@@ -1,5 +1,7 @@
 # 맵 UI 아키텍처 설계
 
+종료/재시작의 현재 기준은 [게임 흐름](GameFlow.md)을 따른다. 플레이어 입력은 `GameplayInput.IsBlocked`에서 지도와 게임 상태를 함께 확인한다. 결과 화면이 뜨면 지도를 먼저 닫고 결과 화면이 시간/커서를 소유하며, 종료 후 맵 닫기로 게임이 재개되지 않는다.
+
 현재 갱신 순서는 [미로 생명주기](MazeLifecycle.md)를 따른다. `MapFloor`는 GUID를 유지한 공용 `Game.World.MazeFloor`로 이동했다. 지도는 `GeometryChanged` 대신 후처리 완료 후의 `MazeChanged`에서 변경 좌표만 대조한다. 아래의 이전 이벤트·타입 설명은 이 기준으로 읽는다.
 
 ## 1. 범위와 결정

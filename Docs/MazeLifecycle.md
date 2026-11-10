@@ -31,10 +31,10 @@
 
 프리팹이 준비된 후 `MazeUpdatePipeline`의 다음 단계를 동기적으로 실행한다.
 
-1. `Preparing`: 이전 횃불을 제거해 상자 배치의 물리 검사에서 제외.
+1. `Preparing`: 이전 횃불을 제거해 상자 배치의 물리 검사에서 제외하고, 미라 Agent를 일시 중지.
 2. `ContentsUpdating`: 일반 길목 상자 생성 또는 재배치.
 3. `DecorationsUpdating`: 상자 배치가 끝난 위치를 고려해 횃불 재배치.
-4. `NavigationUpdating`: 물리 Transform 동기화 후 NavMesh 생성.
+4. `NavigationUpdating`: 물리 Transform 동기화 후 NavMesh 생성 및 미라 Agent 재등록.
 
 모든 단계가 끝난 뒤에만 `IsMazeReady = true`가 된다. 전체 재생성은 `MazeReady`로 새 지도 상태를 만들고, 부분 변경은 `MazeChanged(grid, changes)`로 기존 지도 상태를 갱신한다. 이벤트를 구독한 순서와 `LateUpdate`에 단계 간 순서를 맡기지 않는다.
 
@@ -61,10 +61,20 @@
 
 상자 전체 배치 검토, 횃불 재생성, NavMesh 전체 빌드는 유지한다. 추가 최적화는 Unity Profiler로 비용을 측정한 뒤 진행한다.
 
+## 미라 Agent 준비와 복구
+
+- `Assets/Prefab/Unit/Monster.prefab`의 `NavMeshAgent`는 **비활성으로 저장하는 것이 정상**이다. 씬 로드 시 아직 NavMesh가 없는데 Agent가 먼저 생성되는 경고를 방지한다.
+- `MonsterAI`는 최초 비활성 Agent를 준비 대기로 기록한다. 미로가 있으면 준비 완료 전에는 행동하지 않으며, 고정 NavMesh만 있는 테스트 씬에서는 유효한 위치가 생긴 뒤 스스로 등록한다.
+- `MazeNavMeshUpdater`는 준비 단계에서 미라 경로와 예약된 타격을 취소하고 Agent를 비활성화한다. NavMesh를 다시 만든 후 각 미라를 자신의 Agent Type/Area Mask에 맞는 가까운 지점에 등록한다. 샘플링 반경은 `MonsterAI.navigationSnapDistance`(기본 3)다.
+- 가까운 위치를 찾지 못하면 Agent를 켜거나 먼 곳으로 강제 이동시키지 않고 대기한다. 이후 재시도할 수 있다. 연결된 미로가 준비되지 않은 동안 공격 피해를 적용하지 않는다.
+- 취소된 공격 상태는 다시 거리 판단을 할 수 있게 추적으로 돌리고, 수색 중이었다면 목적지를 다시 요청한다. 이미 등록된 Agent를 다른 코드에서 수동 비활성화한 경우에는 임의로 다시 켜지 않는다.
+- 빙결 상태와 코루틴은 재등록으로 초기화하지 않는다. 재등록 시 빙결 중이면 정지 상태를 유지하며, 원래 지속 시간이 끝나면 이동 제한을 해제한다.
+- 여러 미로가 공존하는 씬에서는 `MonsterAI.Maze Bootstrapper`를 명시한다. 미지정 시 활성 Bootstrapper를 자동 탐색하며 다른 미로에 바인딩된 미라는 갱신하지 않는다.
+
 ## 검증
 
 - `Tests/MazeCoreChecks`: 기존 생성·회전·변경·교체·보호·도달성·롤백 검사와 변경 좌표, 후처리 순서, 재진입/실패, 다중 캐릭터 보호 검사.
 - `Tests/MapExplorationChecks`: 탐험 상태와 증분 변경 좌표 기반 지도 무효화 검사.
 - `Assets/Editor/MazeLifecycleSmokeCheck.cs`의 배치 전용 검사로 MainScene 헤드리스 Play Mode를 실행했다. 초기 생성, 상자/단지 획득, 부분 변경 시 개봉 상태·진행도·지도 객체 유지, 전체 재생성, 설정/방 참조 실패 시 원본 보존, 후처리 실패 후 복구, Missing Script 부재, 각 단계의 실제 NavMesh 시작점→출구 경로를 통과했다. 씬과 설정 에셋은 저장하지 않고 복제 설정만 사용한다. 실행법은 `../Tests/README.md`에 있다.
-- 미라 프리팹의 끊어진 `MonsterAI` 스크립트 GUID를 현재 코드로 복구했다. 다만 처음 씬 로드 시 아직 NavMesh가 없어 발생하는 Agent 초기화 경고는 남아 있다. 최종 NavMesh 생성과 출구 경로 검사는 통과하며, 초기 미라 배치/활성화 시점 정리에서 다룬다.
+- 미라 프리팹의 끊어진 `MonsterAI` 스크립트 GUID를 현재 코드로 복구했고, 초기 Agent 활성화 경고도 제거했다. 강화한 헤드리스 검사는 모든 활성 미라의 준비 완료, 수동 Agent 비활성화 보존, 변경/실패/복구 중 빙결 유지와 자연 해제, 재생성 후 실제 Agent 위치 이동(0.1 이상), 초기화 경고 부재까지 통과했다. 이동 확인은 AI 목적지 갱신을 잠시 막고 Agent 자체를 확인하는 짧은 검사이며 장시간 추적 AI 검사는 아니다.
 - 헤드리스 검사는 렌더링/애니메이션 품질, 직접 조작, 횃불 시각적 겹침, 미라의 장시간 이동, 프레임 성능을 검증하지 않는다. 이 항목은 수동 Play Mode와 Profiler로 확인해야 한다.

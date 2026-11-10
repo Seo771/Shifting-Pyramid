@@ -6,6 +6,7 @@ public class ItemObject : MonoBehaviour, IInteractable
 
     public void Interact()
     {
+        if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameManager.GameState.Playing) return;
         if (itemData == null)
         {
             Debug.LogWarning($"[{nameof(ItemObject)}] 아이템 데이터가 비어 있습니다.", this);

@@ -1778,6 +1778,7 @@ GameObject:
   - component: {fileID: 562330938}
   - component: {fileID: 562330937}
   - component: {fileID: 562330939}
+  - component: {fileID: 562330940}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1831,6 +1832,24 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+--- !u!114 &562330940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 562330936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6c694069d584f64a5ff1c47d27298ae, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.GameSessionController
+  victoryPanel: {fileID: 471479867}
+  defeatPanel: {fileID: 1845083409}
+  resultControlsParent: {fileID: 2060076323}
+  resultFont: {fileID: 11400000, guid: 581e31547c66a0e4897857233b95b64f, type: 2}
+  restartButton: {fileID: 0}
+  quitButton: {fileID: 0}
 --- !u!4 &562330938
 Transform:
   m_ObjectHideFlags: 0

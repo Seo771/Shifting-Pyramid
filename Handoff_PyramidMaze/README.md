@@ -23,6 +23,8 @@ This capstone is a 3D pyramid maze game where:
 - traps are modular game content
 
 ## Current Implementation
+The end-of-run pause, result UI, and fresh-scene restart are implemented in `GameSessionController`; see [Game flow](../Docs/GameFlow.md). A map-only rebuild is not a new game.
+
 The current lifecycle, preservation rules, and ordered box/torch/NavMesh updates are documented in [Maze lifecycle](../Docs/MazeLifecycle.md). That document supersedes older event-order descriptions in the handoff/design documents.
 
 The code reserves 3x3 room footprints first, generates corridors with room-aware randomized DFS, connects every declared entrance, places the exit, and validates room/exit reachability with BFS. Runtime corridor changes and validated special-room replacements are implemented.

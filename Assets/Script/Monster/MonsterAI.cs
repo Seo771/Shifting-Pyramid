@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using ShiftingPyramid.Maze.View;
 
 public class MonsterAI : MonoBehaviour, ISensoryReceiver
 {
@@ -26,6 +27,10 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     [SerializeField] private float attackDamage = 20f;      // 공격 데미지
     [SerializeField] private float attackHitDelay = 0.5f;   // 공격 모션 중 실제 타격이 들어가는 시간
 
+    [Header("미로 내비게이션")]
+    [SerializeField] private MazeTestBootstrapper mazeBootstrapper;
+    [SerializeField, Min(0.1f)] private float navigationSnapDistance = 3f;
+
     private NavMeshAgent agent;
     private float wanderTimer;
     private float lastAttackTime;
@@ -36,10 +41,19 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     private Vector3 lastStimulusPosition;
     private bool investigationDestinationPending;
     private PlayerHP playerHP; // PlayerHP 연동
+    private bool awaitingNavigation;
+
+    private bool IsMazeAvailable => mazeBootstrapper == null || mazeBootstrapper.IsMazeReady;
+    private bool HasBoundAgent => agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh;
+    public bool IsNavigationReady => IsMazeAvailable && HasBoundAgent;
+    public bool IsFrozen => isFrozen;
 
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        // 생성형 미로용 프리팹은 Agent를 꺼 둔 채 로드한다.
+        awaitingNavigation = agent != null && !agent.enabled;
+        if (mazeBootstrapper == null) mazeBootstrapper = FindFirstObjectByType<MazeTestBootstrapper>();
     }
 
     private void Start()
@@ -63,9 +77,19 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
     private void Update()
     {
+        if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameManager.GameState.Playing)
+        {
+            StopActions();
+            return;
+        }
+        if (!IsMazeAvailable)
+        {
+            if (HasBoundAgent) agent.isStopped = true;
+            return;
+        }
         if (isFrozen)
         {
-            if (agent != null && agent.isOnNavMesh)
+            if (HasBoundAgent)
             {
                 agent.isStopped = true;
             }
@@ -150,11 +174,75 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
     private bool TryPrepareAgent()
     {
-        if (agent == null || !agent.isActiveAndEnabled) return false;
+        if (!IsMazeAvailable || agent == null || !gameObject.activeInHierarchy) return false;
+        if (!agent.enabled) return awaitingNavigation && TryAttachAgent();
         if (agent.isOnNavMesh) return true;
 
-        if (!NavMesh.SamplePosition(transform.position, out var hit, 3f, agent.areaMask)) return false;
+        if (!NavMesh.SamplePosition(transform.position, out var hit, navigationSnapDistance, NavigationFilter())) return false;
         return agent.Warp(hit.position) && agent.isOnNavMesh;
+    }
+
+    // 준비 단계에서 멈추고 기존 경로와 타격 예약을 취소한다. 수동 비활성 Agent는 유지한다.
+    public void SuspendMazeNavigation(MazeTestBootstrapper source)
+    {
+        if (!BindMaze(source) || agent == null) return;
+        awaitingNavigation |= agent.enabled;
+        agent.enabled = false;
+        if (attackCoroutine != null) StopCoroutine(attackCoroutine);
+        attackCoroutine = null;
+        isAttacking = false;
+        if (currentState == AIState.Attack) currentState = AIState.Chase;
+        if (currentState == AIState.Investigate) investigationDestinationPending = true;
+    }
+
+    public void StopActions()
+    {
+        if (attackCoroutine != null) StopCoroutine(attackCoroutine);
+        attackCoroutine = null;
+        isAttacking = false;
+        if (!HasBoundAgent) return;
+        if (agent.hasPath) agent.ResetPath();
+        agent.isStopped = true;
+    }
+
+    // NavMesh 생성이 끝난 뒤에만 호출한다. 빙결 상태와 남은 지속 시간은 보존한다.
+    public void RefreshMazeNavigation(MazeTestBootstrapper source)
+    {
+        if (!BindMaze(source) || !awaitingNavigation) return;
+        if (!TryAttachAgent())
+            Debug.LogWarning($"[MonsterAI] '{name}' is waiting for a navigable spawn position.", this);
+    }
+
+    private bool BindMaze(MazeTestBootstrapper source)
+    {
+        if (source == null) return false;
+        if (mazeBootstrapper == null) mazeBootstrapper = source;
+        return mazeBootstrapper == source;
+    }
+
+    private NavMeshQueryFilter NavigationFilter()
+    {
+        return new NavMeshQueryFilter { agentTypeID = agent.agentTypeID, areaMask = agent.areaMask };
+    }
+
+    private bool TryAttachAgent()
+    {
+        if (agent == null || !isActiveAndEnabled
+            || !NavMesh.SamplePosition(transform.position, out var hit, navigationSnapDistance, NavigationFilter()))
+            return false;
+
+        // 비활성 상태에서 먼저 옮겨야 NavMesh가 없는 위치에서 활성화되는 경고를 피한다.
+        transform.position = hit.position;
+        agent.enabled = true;
+        if (!agent.isOnNavMesh)
+        {
+            agent.enabled = false;
+            return false;
+        }
+        awaitingNavigation = false;
+        agent.ResetPath();
+        agent.isStopped = isFrozen;
+        return true;
     }
 
     #region AI 상태별 로직
@@ -242,7 +330,7 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
             attackCoroutine = null;
         }
 
-        if (agent != null && agent.isOnNavMesh)
+        if (HasBoundAgent)
         {
             agent.isStopped = true;
             agent.ResetPath();
@@ -251,7 +339,7 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
         yield return new WaitForSeconds(duration);
 
         isFrozen = false;
-        if (agent != null && agent.isOnNavMesh)
+        if (HasBoundAgent)
         {
             agent.isStopped = false;
         }
@@ -273,7 +361,9 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
         yield return new WaitForSeconds(attackHitDelay);
 
         // 타격 순간 플레이어가 사거리 내에 있고 살아있는지 검증
-        if (targetPlayer != null && Vector3.Distance(transform.position, targetPlayer.position) <= attackRange + 0.5f)
+        if ((GameManager.Instance == null || GameManager.Instance.CurrentState == GameManager.GameState.Playing)
+            && IsNavigationReady && !isFrozen && targetPlayer != null
+            && Vector3.Distance(transform.position, targetPlayer.position) <= attackRange + 0.5f)
         {
             if (playerHP != null && !playerHP.isDead)
             {

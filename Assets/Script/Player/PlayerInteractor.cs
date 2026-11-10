@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using ShiftingPyramid.Game.Map;
+using ShiftingPyramid.Game;
 
 // PlayerInteractor
 // - 주변의 IInteractable 감지
@@ -43,7 +43,7 @@ public class PlayerInteractor : MonoBehaviour
 
     private void Update()
     {
-        if (MapScreenController.IsInputBlocked)
+        if (GameplayInput.IsBlocked)
         {
             HideInteractionUI();
             return;

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using ShiftingPyramid.Game.Map;
+using ShiftingPyramid.Game;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -48,7 +48,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (MapScreenController.IsInputBlocked)
+        if (GameplayInput.IsBlocked)
         {
             if (animator != null) animator.SetFloat("Speed", 0f);
             return;

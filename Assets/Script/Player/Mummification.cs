@@ -52,6 +52,7 @@ public class Mummification : MonoBehaviour
     /// </summary>
     public void DecreaseMummification(float amount)
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsGameFinished) return;
         if (isMummified) return; // 이미 미라화 상태면 감소 불가(설계상)
 
         currentMummification -= amount;
@@ -65,6 +66,7 @@ public class Mummification : MonoBehaviour
     /// </summary>
     public void IncreaseMummification(float amount)
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsGameFinished) return;
         if (isMummified) return;
 
         currentMummification += amount;

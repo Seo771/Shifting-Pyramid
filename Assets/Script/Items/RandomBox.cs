@@ -30,6 +30,7 @@ public class RandomBox : MonoBehaviour, IInteractable
 
     public void Interact()
     {
+        if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameManager.GameState.Playing) return;
         if (isOpened)
         {
             return;

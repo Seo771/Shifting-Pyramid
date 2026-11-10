@@ -22,11 +22,19 @@ namespace ShiftingPyramid.EditorChecks
         private static int settledFrames;
         private static int unexpectedErrors;
         private static bool expectedError;
+        private static int agentInitializationWarnings;
+        private static NavMeshAgent movingAgent;
+        private static Vector3 movementStart;
+        private static DateTime movementDeadline;
+        private static MonsterAI freezeProbe;
 
         public static void Run()
         {
             if (!Application.isBatchMode)
                 throw new InvalidOperationException("Run this check in batch mode in a separate editor process.");
+            var monsterPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/Unit/Monster.prefab");
+            Assert(monsterPrefab != null && !monsterPrefab.GetComponent<NavMeshAgent>().enabled,
+                "Generated-maze monster prefab must load with its agent disabled.");
             EditorSceneManager.OpenScene("Assets/Scenes/MainScene.unity");
             SessionState.SetBool(PendingKey, true);
             Resume();
@@ -46,6 +54,9 @@ namespace ShiftingPyramid.EditorChecks
 
         private static void CaptureError(string message, string trace, LogType type)
         {
+            if (message.IndexOf("Failed to create agent", StringComparison.OrdinalIgnoreCase) >= 0
+                || message.IndexOf("Failed to place agent", StringComparison.OrdinalIgnoreCase) >= 0)
+                agentInitializationWarnings++;
             if (!expectedError && (type == LogType.Error || type == LogType.Exception || type == LogType.Assert))
                 unexpectedErrors++;
         }
@@ -56,12 +67,26 @@ namespace ShiftingPyramid.EditorChecks
             {
                 Assert(DateTime.UtcNow < deadline, "Timed out waiting for MainScene to become ready.");
                 if (!EditorApplication.isPlaying || EditorApplication.isCompiling) return;
+                if (movingAgent != null)
+                {
+                    if (Vector3.Distance(movementStart, movingAgent.transform.position) > 0.1f && !freezeProbe.IsFrozen)
+                    {
+                        var thawedAgent = freezeProbe.GetComponent<NavMeshAgent>();
+                        Assert(freezeProbe.IsNavigationReady && !thawedAgent.isStopped,
+                            "A preserved freeze must expire and release the rebound agent.");
+                        Assert(unexpectedErrors == 0 && agentInitializationWarnings == 0,
+                            $"Unexpected errors: {unexpectedErrors}; agent initialization warnings: {agentInitializationWarnings}.");
+                        Finish(0, "PASS: Unity MainScene lifecycle, agent readiness/freeze/recovery, actual navigation movement and no initialization warnings.");
+                    }
+                    else Assert(DateTime.UtcNow < movementDeadline, "Registered agent did not move after rebuilding.");
+                    return;
+                }
                 var bootstrapper = Object.FindFirstObjectByType<MazeTestBootstrapper>();
                 if (bootstrapper == null || !bootstrapper.IsMazeReady || ++settledFrames < 3) return;
                 Time.timeScale = 0f;
                 CheckLifecycle(bootstrapper);
                 Assert(unexpectedErrors == 0, $"Unexpected Unity errors: {unexpectedErrors}. See the log.");
-                Finish(0, "PASS: Unity MainScene generation, collection, partial changes, rebuild, failure recovery and NavMesh.");
+                BeginMovementCheck(bootstrapper);
             }
             catch (Exception exception)
             {
@@ -87,6 +112,14 @@ namespace ShiftingPyramid.EditorChecks
                 .Any(item => item.name.StartsWith("Torch_")), "MainScene must place torches.");
             CheckNavigation(bootstrapper);
 
+            var manualProbe = Object.FindObjectsByType<MonsterAI>(FindObjectsSortMode.None).First();
+            var manualAgent = manualProbe.GetComponent<NavMeshAgent>();
+            manualAgent.enabled = false;
+            manualProbe.SuspendMazeNavigation(bootstrapper);
+            manualProbe.RefreshMazeNavigation(bootstrapper);
+            Assert(!manualAgent.enabled, "Navigation refresh must respect a manually disabled agent.");
+            manualAgent.enabled = true;
+
             // 런타임 복제본만 수정하며 프로젝트 설정 에셋을 저장하지 않는다.
             var settings = Object.Instantiate(bootstrapper.Settings);
             settings.hideFlags = HideFlags.DontSave;
@@ -105,6 +138,11 @@ namespace ShiftingPyramid.EditorChecks
 
             var changer = bootstrapper.GetComponent<MazeRuntimeChangeController>();
             Assert(changer != null, "Runtime change controller is required in MainScene.");
+            var frozenMonster = Object.FindObjectsByType<MonsterAI>(FindObjectsSortMode.None)
+                .First(monster => monster.isActiveAndEnabled);
+            freezeProbe = frozenMonster;
+            // 검사는 일시정지 상태라 재생성 중에는 이 짧은 빙결도 유지되어야 한다.
+            frozenMonster.FreezeForDuration(0.2f);
             var changed = false;
             for (var attempt = 0; attempt < 3 && !changed; attempt++) changed = changer.TryChangeNow();
             Assert(changed, "No runtime change succeeded: " + changer.LastChangeMessage);
@@ -112,6 +150,8 @@ namespace ShiftingPyramid.EditorChecks
             Assert(ReferenceEquals(mapState, map.State), "Partial change must keep exploration state identity.");
             Assert(box.IsOpened && !box.gameObject.activeSelf, "Partial change must not respawn an opened box.");
             Assert(GameManager.Instance.CollectedCurseJarCount == collected, "Partial change must preserve collection count.");
+            Assert(frozenMonster.IsFrozen && frozenMonster.GetComponent<NavMeshAgent>().isStopped,
+                "Rebinding navigation must preserve an active freeze.");
             CheckNavigation(bootstrapper);
 
             bootstrapper.RebuildMaze();
@@ -163,9 +203,15 @@ namespace ShiftingPyramid.EditorChecks
             finally { expectedError = false; bootstrapper.Updates.DecorationsUpdating -= fail; }
             Assert(!bootstrapper.IsMazeReady && !bootstrapper.Updates.IsUpdating,
                 "Post-processing failure must not publish readiness or leave a reentry lock.");
+            Assert(Object.FindObjectsByType<MonsterAI>(FindObjectsSortMode.None)
+                .Where(monster => monster.isActiveAndEnabled)
+                .All(monster => !monster.GetComponent<NavMeshAgent>().enabled),
+                "Agents must remain disabled if post-processing fails before navigation.");
             bootstrapper.RebuildMaze();
             Assert(bootstrapper.IsMazeReady, "Full rebuild must recover after a post-processing failure.");
             CheckNavigation(bootstrapper);
+            Assert(frozenMonster.IsFrozen && frozenMonster.GetComponent<NavMeshAgent>().isStopped,
+                "Full rebuild and failure recovery must not clear the freeze timer.");
         }
 
         private static void CheckNavigation(MazeTestBootstrapper bootstrapper)
@@ -183,6 +229,27 @@ namespace ShiftingPyramid.EditorChecks
             Assert(NavMesh.CalculatePath(start.position, end.position, NavMesh.AllAreas, path)
                 && path.status == NavMeshPathStatus.PathComplete,
                 "Actual prefab/NavMesh route from start to exit must be complete.");
+            var monsters = Object.FindObjectsByType<MonsterAI>(FindObjectsSortMode.None)
+                .Where(monster => monster.isActiveAndEnabled).ToArray();
+            Assert(monsters.Length > 0 && monsters.All(monster => monster.IsNavigationReady),
+                "Every active monster must be registered on the completed NavMesh.");
+        }
+
+        private static void BeginMovementCheck(MazeTestBootstrapper bootstrapper)
+        {
+            var monster = Object.FindObjectsByType<MonsterAI>(FindObjectsSortMode.None)
+                .First(item => item.isActiveAndEnabled && !item.IsFrozen);
+            movingAgent = monster.GetComponent<NavMeshAgent>();
+            movementStart = monster.transform.position;
+            // AI 목적지 갱신만 막고 실제 Agent 이동은 정상 프레임에서 확인한다.
+            monster.enabled = false;
+            var exit = bootstrapper.CurrentGrid.Tiles.First(tile => tile.TileType == MazeTileType.Exit);
+            bootstrapper.Renderer.TryGetTileWorldPosition(exit.Coordinate, out var destination);
+            Assert(NavMesh.SamplePosition(destination, out var hit, 5f, NavMesh.AllAreas), "Movement target is navigable.");
+            movingAgent.isStopped = false;
+            Assert(movingAgent.SetDestination(hit.position), "Agent must accept a destination after rebuilding.");
+            movementDeadline = DateTime.UtcNow.AddSeconds(10);
+            Time.timeScale = 1f;
         }
 
         private static void SetObject(Object target, string field, Object value)

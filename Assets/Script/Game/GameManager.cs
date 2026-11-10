@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
 
     public event Action<int, int> OnCurseJarChanged;
     public event Action OnExitUnlocked;
+    public event Action<GameState> OnStateChanged;
 
     // 에디터 및 외부에서 쉽게 접근 가능한 저주 단지 개수 변수 (요구사항)
     [Tooltip("획득한 저주 단지의 개수")]
@@ -65,10 +66,15 @@ public class GameManager : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        // 플레이어/설정/결과 UI가 씬에 속하므로 세션 매니저도 씬과 함께 교체한다.
     }
 
-    // 새 게임 시작 또는 재시작 시 필요한 값을 초기화한다.
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
+    // 씬 시작의 규칙 상태만 초기화한다. 완전 재시작은 GameSessionController의 씬 재로딩을 사용한다.
     public void StartGame()
     {
         collectedCurseJarCount = 0;
@@ -79,6 +85,7 @@ public class GameManager : MonoBehaviour
         // 외부 요구사항: 공개된 curseJarCount 변수도 동기화
         curseJarCount = 0;
 
+        OnStateChanged?.Invoke(CurrentState);
         OnCurseJarChanged?.Invoke(collectedCurseJarCount, RequiredCurseJarCount);
         if (hasUnlockedExit)
         {
@@ -157,6 +164,7 @@ public class GameManager : MonoBehaviour
         if (CurrentState == GameState.Playing && hasReachedExit && IsExitUnlocked)
         {
             CurrentState = GameState.Victory;
+            OnStateChanged?.Invoke(CurrentState);
             onVictory?.Invoke();
         }
     }
@@ -167,6 +175,7 @@ public class GameManager : MonoBehaviour
         if (CurrentState == GameState.Playing && isPlayerDead)
         {
             CurrentState = GameState.Defeat;
+            OnStateChanged?.Invoke(CurrentState);
             onDefeat?.Invoke();
         }
     }
