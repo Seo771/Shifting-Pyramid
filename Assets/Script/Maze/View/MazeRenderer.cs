@@ -128,20 +128,8 @@ namespace ShiftingPyramid.Maze.View
         public void ApplyRoomReplacement(MazeGrid grid, MazeRoom removed, MazeRoom added,
             IReadOnlyList<MazeRoomView> roomPrefabs)
         {
-            if (grid == null || removed == null || added == null)
-                throw new ArgumentNullException(nameof(grid), "Room replacement needs a grid and both rooms.");
-            if (roomPrefabs == null || added.TemplateIndex < 0
-                || added.TemplateIndex >= roomPrefabs.Count || roomPrefabs[added.TemplateIndex] == null)
-                throw new InvalidOperationException("MazeRenderer: replacement room has no matching prefab.");
-            if (!roomViews.TryGetValue(removed, out var oldView))
-                throw new InvalidOperationException("MazeRenderer: the removed room view was not found.");
-            foreach (var cell in removed.Cells)
-                if (!tilePositions.ContainsKey(cell) || tileViews.ContainsKey(cell))
-                    throw new InvalidOperationException("MazeRenderer: removed room footprint is inconsistent.");
-            foreach (var cell in added.Cells)
-                if (!tilePositions.ContainsKey(cell) || !tileViews.ContainsKey(cell))
-                    throw new InvalidOperationException("MazeRenderer: new room footprint is inconsistent.");
-
+            ValidateRoomReplacement(grid, removed, added, roomPrefabs);
+            var oldView = roomViews[removed];
             roomViews.Remove(removed);
             RemoveGeneratedObject(oldView.gameObject);
             foreach (var cell in removed.Cells)
@@ -154,6 +142,29 @@ namespace ShiftingPyramid.Maze.View
                 RemoveGeneratedObject(view.gameObject);
             }
             AddRoomView(added, roomPrefabs[added.TemplateIndex]);
+        }
+
+        // 데이터를 확정하기 전에 호출할 수 있는, 표시를 바꾸지 않는 사전 검증.
+        public void ValidateRoomReplacement(MazeGrid grid, MazeRoom removed, MazeRoom added,
+            IReadOnlyList<MazeRoomView> roomPrefabs)
+        {
+            if (grid == null || removed == null || added == null)
+                throw new ArgumentNullException(nameof(grid), "Room replacement needs a grid and both rooms.");
+            if (roomPrefabs == null || added.TemplateIndex < 0
+                || added.TemplateIndex >= roomPrefabs.Count || roomPrefabs[added.TemplateIndex] == null)
+                throw new InvalidOperationException("MazeRenderer: replacement room has no matching prefab.");
+            if (!roomViews.TryGetValue(removed, out var oldView) || oldView == null)
+                throw new InvalidOperationException("MazeRenderer: the removed room view was not found.");
+            if (!grid.TryGetRoom(added.Center, out var proposedRoom) || !ReferenceEquals(proposedRoom, added))
+                throw new InvalidOperationException("MazeRenderer: proposed room is not in the replacement grid.");
+            foreach (var cell in removed.Cells)
+                if (!tilePositions.ContainsKey(cell) || tileViews.ContainsKey(cell)
+                    || grid.TryGetRoom(cell, out _))
+                    throw new InvalidOperationException("MazeRenderer: removed room footprint is inconsistent.");
+            foreach (var cell in added.Cells)
+                if (!tilePositions.ContainsKey(cell) || !tileViews.TryGetValue(cell, out var view) || view == null
+                    || !grid.TryGetRoom(cell, out var owner) || !ReferenceEquals(owner, added))
+                    throw new InvalidOperationException("MazeRenderer: new room footprint is inconsistent.");
         }
 
         public void Clear()

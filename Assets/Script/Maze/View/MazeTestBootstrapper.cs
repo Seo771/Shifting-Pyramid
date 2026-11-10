@@ -124,6 +124,11 @@ namespace ShiftingPyramid.Maze.View
             if (proposedGrid == null || proposedGrid.Width != currentGrid.Width
                 || proposedGrid.Height != currentGrid.Height)
                 throw new ArgumentException("Partial changes must keep the current grid dimensions.");
+            if ((removedRoom == null) != (addedRoom == null))
+                throw new ArgumentException("Room replacement requires both removed and added rooms.");
+            // 표시 참조 오류는 격자를 덮어쓰기 전에 발견해야 한다.
+            if (removedRoom != null)
+                mazeRenderer.ValidateRoomReplacement(proposedGrid, removedRoom, addedRoom, currentRoomPrefabs);
             isApplyingUpdate = true;
             try
             {

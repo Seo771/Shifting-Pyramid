@@ -147,7 +147,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5375418706542552686}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b3b6a9820861fd4d851af6ac1ab40ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 35020602f2dffdf4e88f5d8998140472, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterAI
   currentState: 0
