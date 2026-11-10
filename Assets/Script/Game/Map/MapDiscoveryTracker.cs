@@ -1,6 +1,7 @@
 using ShiftingPyramid.Maze.Core;
 using ShiftingPyramid.Maze.View;
 using UnityEngine;
+using ShiftingPyramid.Game.World;
 
 namespace ShiftingPyramid.Game.Map
 {
@@ -117,7 +118,7 @@ namespace ShiftingPyramid.Game.Map
 
             var floorHit = floorHits[closestIndex];
             if (floorHit.normal.y < MinimumFloorNormalY
-                || floorHit.collider.GetComponent<MapFloor>() == null
+                || floorHit.collider.GetComponent<MazeFloor>() == null
                 || !renderer.TryGetCoordinate(floorHit.point, grid, out var floorCoordinate)
                 || !floorCoordinate.Equals(coordinate)) return;
 

@@ -105,12 +105,21 @@ namespace ShiftingPyramid.Maze.View
         }
 
         // 방 내부와 문은 프리팹이 관리한다. 여기서는 일반 통로 벽만 갱신한다.
-        public void Refresh(MazeGrid grid)
+        public void Refresh(MazeGrid grid, IReadOnlyList<MazeCoordinate> changedCells = null)
         {
             if (grid == null) return;
-            foreach (var tile in grid.Tiles)
-                if (tileViews.TryGetValue(tile.Coordinate, out var view) && view != null)
-                    view.Apply(tile);
+            if (changedCells == null)
+            {
+                foreach (var tile in grid.Tiles)
+                    if (tileViews.TryGetValue(tile.Coordinate, out var view) && view != null)
+                        view.Apply(tile);
+            }
+            else
+            {
+                foreach (var cell in changedCells)
+                    if (tileViews.TryGetValue(cell, out var view) && view != null)
+                        view.Apply(grid.GetTile(cell));
+            }
 
             GeometryChanged?.Invoke();
         }

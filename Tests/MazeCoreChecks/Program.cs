@@ -12,6 +12,7 @@ internal static class Program
 
     private static void Main()
     {
+        LifecycleChecks.Run();
         VerifyRotations();
         var observedRotations = new HashSet<int>();
         for (var seed = 0; seed < 250; seed++)

@@ -15,7 +15,8 @@ namespace ShiftingPyramid.Maze.RuntimeChange
 
         public IReadOnlyList<MazeCoordinate> ChangeRegions(MazeGrid grid, int regionSize, int regionCount,
             MazeCoordinate playerCoordinate, int playerSafeRadius, MazeCoordinate? mummyCoordinate,
-            int mummySafeRadius, int? seed = null)
+            int mummySafeRadius, int? seed = null,
+            IReadOnlyList<MazeProtectedArea> additionalProtectedAreas = null)
         {
             if (regionCount < 1) throw new ArgumentOutOfRangeException(nameof(regionCount));
 
@@ -24,7 +25,8 @@ namespace ShiftingPyramid.Maze.RuntimeChange
             for (var i = 0; i < regionCount; i++)
             {
                 if (!TryChange(grid, regionSize, playerCoordinate, playerSafeRadius,
-                    mummyCoordinate, mummySafeRadius, out var origin, random.Next(), changed))
+                    mummyCoordinate, mummySafeRadius, out var origin, random.Next(), changed,
+                    additionalProtectedAreas))
                     break;
                 changed.Add(origin);
             }
@@ -34,7 +36,8 @@ namespace ShiftingPyramid.Maze.RuntimeChange
         public bool TryChange(MazeGrid grid, int regionSize, MazeCoordinate playerCoordinate,
             int playerSafeRadius, MazeCoordinate? mummyCoordinate, int mummySafeRadius,
             out MazeCoordinate changedOrigin, int? seed = null,
-            IReadOnlyList<MazeCoordinate> excludedRegionOrigins = null)
+            IReadOnlyList<MazeCoordinate> excludedRegionOrigins = null,
+            IReadOnlyList<MazeProtectedArea> additionalProtectedAreas = null)
         {
             if (grid == null) throw new ArgumentNullException(nameof(grid));
             if (regionSize < 1 || regionSize % 2 == 0)
@@ -80,7 +83,7 @@ namespace ShiftingPyramid.Maze.RuntimeChange
                 if (overlaps) continue;
 
                 var mutable = GetMutableCells(grid, origin, regionSize, playerCoordinate,
-                    playerSafeRadius, mummyCoordinate, mummySafeRadius);
+                    playerSafeRadius, mummyCoordinate, mummySafeRadius, additionalProtectedAreas);
                 var edges = GetInternalEdges(grid, mutable);
                 if (edges.Count == 0) continue;
 
@@ -103,7 +106,8 @@ namespace ShiftingPyramid.Maze.RuntimeChange
         }
 
         private static List<MazeCoordinate> GetMutableCells(MazeGrid grid, MazeCoordinate origin,
-            int size, MazeCoordinate player, int playerRadius, MazeCoordinate? mummy, int mummyRadius)
+            int size, MazeCoordinate player, int playerRadius, MazeCoordinate? mummy, int mummyRadius,
+            IReadOnlyList<MazeProtectedArea> additionalProtectedAreas)
         {
             var cells = new List<MazeCoordinate>();
             for (var x = origin.X; x < origin.X + size; x++)
@@ -113,7 +117,8 @@ namespace ShiftingPyramid.Maze.RuntimeChange
                     var tile = grid.GetTile(coordinate);
                     if (tile.IsProtected || tile.TileType != MazeTileType.Normal
                         || IsInSafeArea(coordinate, player, playerRadius)
-                        || mummy.HasValue && IsInSafeArea(coordinate, mummy.Value, mummyRadius))
+                        || mummy.HasValue && IsInSafeArea(coordinate, mummy.Value, mummyRadius)
+                        || MazeProtectedArea.Contains(additionalProtectedAreas, coordinate))
                         continue;
                     cells.Add(coordinate);
                 }

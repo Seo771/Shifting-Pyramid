@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using ShiftingPyramid.Game.Map;
+using ShiftingPyramid.Game.World;
 using ShiftingPyramid.Maze.Core;
 using ShiftingPyramid.Maze.View;
 using UnityEngine;
@@ -21,7 +21,6 @@ namespace ShiftingPyramid.Game.Box
         [SerializeField] private LayerMask obstructionMask = ~0;
 
         private readonly List<PlacedBox> placed = new List<PlacedBox>();
-        private MazeRenderer subscribedRenderer;
         private MazeGrid activeGrid;
         private Transform boxRoot;
         private int changeCount;
@@ -37,8 +36,7 @@ namespace ShiftingPyramid.Game.Box
         {
             if (bootstrapper == null) bootstrapper = FindFirstObjectByType<MazeTestBootstrapper>();
             if (bootstrapper == null) return;
-            bootstrapper.MazeReady += HandleMazeReady;
-            SubscribeRenderer();
+            bootstrapper.Updates.ContentsUpdating += HandleUpdate;
             if (bootstrapper.IsMazeReady && bootstrapper.CurrentGrid != null)
             {
                 if (ReferenceEquals(activeGrid, bootstrapper.CurrentGrid)) ReconcileBoxes(false);
@@ -49,9 +47,7 @@ namespace ShiftingPyramid.Game.Box
 
         private void OnDisable()
         {
-            if (bootstrapper != null) bootstrapper.MazeReady -= HandleMazeReady;
-            if (subscribedRenderer != null) subscribedRenderer.GeometryChanged -= HandleGeometryChanged;
-            subscribedRenderer = null;
+            if (bootstrapper != null) bootstrapper.Updates.ContentsUpdating -= HandleUpdate;
         }
 
         private void OnDestroy()
@@ -63,7 +59,6 @@ namespace ShiftingPyramid.Game.Box
         {
             ClearBoxes();
             if (grid == null || boxPrefab == null || targetCount == 0 || bootstrapper.Renderer == null) return;
-            SubscribeRenderer();
             if (!boxPrefab.TryGetComponent(out BoxCollider boxCollider))
             {
                 Debug.LogWarning("BOX 프리팹 루트에 BoxCollider가 필요합니다.", this);
@@ -188,7 +183,7 @@ namespace ShiftingPyramid.Game.Box
                     Vector3.down, tileSize * 2f, ~0, QueryTriggerInteraction.Ignore);
                 foreach (var hit in hits)
                 {
-                    if (hit.collider.GetComponent<MapFloor>() == null
+                    if (hit.collider.GetComponent<MazeFloor>() == null
                         || !renderer.TryGetCoordinate(hit.point, grid, out var floorCoordinate)
                         || !floorCoordinate.Equals(coordinate)) continue;
 
@@ -203,7 +198,7 @@ namespace ShiftingPyramid.Game.Box
                         candidateRotation, obstructionMask, QueryTriggerInteraction.Ignore);
                     var blocked = false;
                     foreach (var overlap in overlaps)
-                        if (overlap.GetComponent<MapFloor>() == null)
+                        if (overlap.GetComponent<MazeFloor>() == null)
                         {
                             blocked = true;
                             break;
@@ -234,14 +229,15 @@ namespace ShiftingPyramid.Game.Box
             return true;
         }
 
-        private void HandleGeometryChanged()
+        private void HandleUpdate(MazeGrid grid, MazeChangeSet changes)
         {
-            ReconcileBoxes(true);
+            if (changes.IsFullRebuild || !ReferenceEquals(activeGrid, grid)) HandleMazeReady(grid);
+            else ReconcileBoxes(true);
         }
 
         private void ReconcileBoxes(bool geometryChanged)
         {
-            if (bootstrapper == null || !bootstrapper.IsMazeReady
+            if (bootstrapper == null || (!bootstrapper.IsMazeReady && !bootstrapper.Updates.IsUpdating)
                 || !ReferenceEquals(activeGrid, bootstrapper.CurrentGrid))
             {
                 if (boxRoot != null) boxRoot.gameObject.SetActive(false);
@@ -326,15 +322,6 @@ namespace ShiftingPyramid.Game.Box
             item.Instance.name = $"Box_{item.Coordinate.X}_{item.Coordinate.Y}";
             item.Instance.gameObject.SetActive(true);
             Physics.SyncTransforms();
-        }
-
-        private void SubscribeRenderer()
-        {
-            var renderer = bootstrapper != null ? bootstrapper.Renderer : null;
-            if (ReferenceEquals(subscribedRenderer, renderer)) return;
-            if (subscribedRenderer != null) subscribedRenderer.GeometryChanged -= HandleGeometryChanged;
-            subscribedRenderer = renderer;
-            if (subscribedRenderer != null) subscribedRenderer.GeometryChanged += HandleGeometryChanged;
         }
 
         private static void Shuffle(List<MazeCoordinate> coordinates, System.Random random)

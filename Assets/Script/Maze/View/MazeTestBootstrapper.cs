@@ -23,12 +23,15 @@ namespace ShiftingPyramid.Maze.View
         private MazeGrid currentGrid;
         private IReadOnlyList<MazeRoomTemplate> currentRoomTemplates;
         private IReadOnlyList<MazeRoomView> currentRoomPrefabs;
+        private bool isApplyingUpdate;
         public MazeGrid CurrentGrid => currentGrid;
         public IReadOnlyList<MazeRoomTemplate> CurrentRoomTemplates => currentRoomTemplates;
         public IReadOnlyList<MazeRoomView> CurrentRoomPrefabs => currentRoomPrefabs;
         public int CurrentSeed { get; private set; }
         public bool IsMazeReady { get; private set; }
+        public MazeUpdatePipeline Updates { get; } = new MazeUpdatePipeline();
         public event Action<MazeGrid> MazeReady;
+        public event Action<MazeGrid, MazeChangeSet> MazeChanged;
         public MazeBalanceSettings Settings => settings;
         public MazeRenderer Renderer => mazeRenderer;
         public Transform PlayerTransform => playerSpawner != null ? playerSpawner.PlayerTransform : null;
@@ -40,6 +43,20 @@ namespace ShiftingPyramid.Maze.View
 
         [ContextMenu("Build Test Maze")]
         public void BuildTestMaze()
+        {
+            RebuildMaze();
+        }
+
+        // 맵 전체 재생성이다. 체력/인벤토리/승패 초기화는 새 게임 기능의 책임이다.
+        public void RebuildMaze()
+        {
+            if (isApplyingUpdate || Updates.IsUpdating) return;
+            isApplyingUpdate = true;
+            try { RebuildInternal(); }
+            finally { isApplyingUpdate = false; }
+        }
+
+        private void RebuildInternal()
         {
             if (mazeRenderer == null) mazeRenderer = FindFirstObjectByType<MazeRenderer>();
             if (mazeRenderer == null)
@@ -72,6 +89,10 @@ namespace ShiftingPyramid.Maze.View
                 if (!new MazePathValidator().AreReachable(grid, MazeCoordinate.Zero, targets))
                     throw new InvalidOperationException("An exit or room is unreachable.");
 
+                if (playerSpawner == null) playerSpawner = FindFirstObjectByType<PlayerMazeSpawner>();
+                if (playerSpawner == null || !playerSpawner.HasPlayerSource)
+                    throw new InvalidOperationException("Assign an existing player or player prefab before rebuilding.");
+
                 // 새 표시가 만들어지는 동안에는 이전 미로를 준비 완료로 노출하지 않는다.
                 IsMazeReady = false;
                 mazeRenderer.Build(grid, settings, seed, prefabs);
@@ -79,9 +100,9 @@ namespace ShiftingPyramid.Maze.View
                 currentRoomTemplates = catalog.AsReadOnly();
                 currentRoomPrefabs = prefabs.AsReadOnly();
                 CurrentSeed = seed;
-                if (playerSpawner == null) playerSpawner = FindFirstObjectByType<PlayerMazeSpawner>();
                 if (playerSpawner == null || !playerSpawner.SpawnAtStart(mazeRenderer)) return;
 
+                Updates.Apply(grid, MazeChangeSet.Full(grid));
                 IsMazeReady = true;
                 readyGrid = grid;
             }
@@ -94,11 +115,37 @@ namespace ShiftingPyramid.Maze.View
             if (readyGrid != null) MazeReady?.Invoke(readyGrid);
         }
 
+        // 데이터 검증을 통과한 부분 변경만 표시하고 후처리한다.
+        public void ApplyRuntimeChange(MazeGrid proposedGrid, MazeChangeSet changes,
+            MazeRoom removedRoom, MazeRoom addedRoom)
+        {
+            if (!IsMazeReady || isApplyingUpdate || Updates.IsUpdating || changes == null || changes.IsFullRebuild)
+                throw new InvalidOperationException("Partial changes require a ready maze.");
+            if (proposedGrid == null || proposedGrid.Width != currentGrid.Width
+                || proposedGrid.Height != currentGrid.Height)
+                throw new ArgumentException("Partial changes must keep the current grid dimensions.");
+            isApplyingUpdate = true;
+            try
+            {
+                IsMazeReady = false;
+                currentGrid.CopyFrom(proposedGrid);
+                if (removedRoom != null)
+                    mazeRenderer.ApplyRoomReplacement(currentGrid, removedRoom, addedRoom, currentRoomPrefabs);
+                mazeRenderer.Refresh(currentGrid, changes.Cells);
+                Updates.Apply(currentGrid, changes);
+                IsMazeReady = true;
+                MazeChanged?.Invoke(currentGrid, changes);
+            }
+            finally { isApplyingUpdate = false; }
+        }
+
         private List<MazeRoomView> SelectRoomPrefabs(List<MazeRoomTemplate> templates,
             List<int> templateIndexes, List<MazeRoomTemplate> catalog, int seed)
         {
             var selected = new List<MazeRoomView>();
             if (settings == null) return selected;
+            if (settings.ExitRoomPrefab == null)
+                throw new InvalidOperationException("Assign Exit Room Prefab in MazeBalanceSettings before playing.");
             if (settings.CurseJarRoomCount < 0 || settings.SpecialRoomCount < 0)
                 throw new ArgumentException("Room counts cannot be negative.");
 

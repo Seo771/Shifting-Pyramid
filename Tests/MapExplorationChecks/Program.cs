@@ -7,6 +7,17 @@ internal static class Program
 {
     private static void Main()
     {
+        var incrementalGrid = new MazeGrid(3, 3);
+        var incrementalState = new MapExplorationState(incrementalGrid);
+        incrementalState.Reveal(MazeCoordinate.Zero);
+        incrementalState.Reveal(new MazeCoordinate(2, 2));
+        var incrementalBefore = incrementalGrid.Clone();
+        incrementalGrid.SetConnection(MazeCoordinate.Zero, MazeDirection.East, true);
+        var delta = MazeChangeSet.Between(incrementalBefore, incrementalGrid);
+        Assert(incrementalState.Reconcile(incrementalGrid, delta.Cells).Count == 2,
+            "Incremental reconciliation updates both sides of changed walls.");
+        Assert(incrementalState.IsExplored(new MazeCoordinate(2, 2))
+            && !incrementalState.IsExplored(MazeCoordinate.Zero), "Unchanged exploration survives incremental updates.");
         var grid = new MazeGrid(7, 7);
         var start = MazeCoordinate.Zero;
         var east = new MazeCoordinate(1, 0);

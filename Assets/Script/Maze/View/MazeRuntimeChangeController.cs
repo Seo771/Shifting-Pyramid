@@ -1,6 +1,7 @@
 using ShiftingPyramid.Maze.Core;
 using ShiftingPyramid.Maze.RuntimeChange;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace ShiftingPyramid.Maze.View
 {
@@ -17,6 +18,7 @@ namespace ShiftingPyramid.Maze.View
         private MazeGrid activeGrid;
         private float timeUntilChange;
         private int changeCount;
+        public int LastChangedRegionCount { get; private set; }
 
         public int SecondsRemaining => activeGrid == null
             ? -1 : Mathf.CeilToInt(Mathf.Max(0f, timeUntilChange));
@@ -32,7 +34,7 @@ namespace ShiftingPyramid.Maze.View
             var settings = bootstrapper.Settings;
             var renderer = bootstrapper.Renderer;
             var player = bootstrapper.PlayerTransform;
-            if (grid == null || settings == null || renderer == null || player == null) return;
+            if (!bootstrapper.IsMazeReady || grid == null || settings == null || renderer == null || player == null) return;
 
             if (!ReferenceEquals(activeGrid, grid))
             {
@@ -45,32 +47,46 @@ namespace ShiftingPyramid.Maze.View
                 && GameManager.Instance.CurrentState != GameManager.GameState.Playing) return;
             if (!renderer.TryGetCoordinate(player.position, grid, out var playerCoordinate)) return;
 
-            MazeCoordinate? mummyCoordinate = null;
-            if (mummy != null)
-            {
-                if (!renderer.TryGetCoordinate(mummy.position, grid, out var coordinate)) return;
-                mummyCoordinate = coordinate;
-            }
-
             timeUntilChange -= Time.deltaTime;
             if (timeUntilChange > 0f) return;
             timeUntilChange = settings.MazeChangeInterval;
 
+            // 모든 활성 미라를 보호한다. 기존 Inspector 참조도 계속 지원한다.
+            var protectedAreas = new List<MazeProtectedArea>();
+            foreach (var monster in FindObjectsByType<MonsterAI>(FindObjectsSortMode.None))
+                if (monster.isActiveAndEnabled && !AddProtectedArea(monster.transform, grid, renderer,
+                    settings.MummySafeRadius, protectedAreas)) return;
+            if (mummy != null && !AddProtectedArea(mummy, grid, renderer,
+                settings.MummySafeRadius, protectedAreas)) return;
+
             // 같은 미로 시드에서는 변경 순서도 재현할 수 있게 시드를 나눠 쓴다.
             var seed = unchecked(bootstrapper.CurrentSeed + ++changeCount);
+            // 계산 중 예외가 나도 플레이 중인 격자는 바뀌지 않도록 계획을 분리한다.
+            var proposed = grid.Clone();
             MazeRoom removedRoom = null;
             MazeRoom addedRoom = null;
             var roomChanged = bootstrapper.CurrentRoomTemplates != null
-                && roomReplacer.TryReplace(grid, bootstrapper.CurrentRoomTemplates,
-                    playerCoordinate, settings.PlayerSafeRadius, mummyCoordinate,
-                    settings.MummySafeRadius, out removedRoom, out addedRoom, seed);
-            var regionsChanged = changer.ChangeRegions(grid, settings.MazeChangeRegionSize,
+                && roomReplacer.TryReplace(proposed, bootstrapper.CurrentRoomTemplates,
+                    playerCoordinate, settings.PlayerSafeRadius, null,
+                    settings.MummySafeRadius, out removedRoom, out addedRoom, seed, protectedAreas);
+            var regions = changer.ChangeRegions(proposed, settings.MazeChangeRegionSize,
                 settings.MazeChangeRegionCount, playerCoordinate, settings.PlayerSafeRadius,
-                mummyCoordinate, settings.MummySafeRadius, unchecked(seed + 1)).Count > 0;
-            if (roomChanged)
-                renderer.ApplyRoomReplacement(grid, removedRoom, addedRoom, bootstrapper.CurrentRoomPrefabs);
-            if (roomChanged || regionsChanged)
-                renderer.Refresh(grid);
+                null, settings.MummySafeRadius, unchecked(seed + 1), protectedAreas);
+            LastChangedRegionCount = regions.Count;
+            if (roomChanged || regions.Count > 0)
+                bootstrapper.ApplyRuntimeChange(proposed, MazeChangeSet.Between(grid, proposed), removedRoom, addedRoom);
+        }
+
+        private bool AddProtectedArea(Transform character, MazeGrid grid, MazeRenderer renderer,
+            int radius, List<MazeProtectedArea> areas)
+        {
+            if (!renderer.TryGetCoordinate(character.position, grid, out var cell))
+            {
+                Debug.LogWarning($"Maze change skipped: '{character.name}' is outside the maze.", this);
+                return false;
+            }
+            areas.Add(new MazeProtectedArea(cell, radius));
+            return true;
         }
     }
 }

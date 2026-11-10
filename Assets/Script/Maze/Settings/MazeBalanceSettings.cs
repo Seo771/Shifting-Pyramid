@@ -66,6 +66,11 @@ namespace ShiftingPyramid.Maze.Settings
             {
                 mazeChangeRegionSize += 1;
             }
+            var regionArea = (long)mazeChangeRegionSize * mazeChangeRegionSize;
+            var mazeArea = (long)mazeWidth * mazeHeight;
+            if (regionArea > 0 && mazeChangeRegionCount * regionArea > mazeArea)
+                Debug.LogWarning("Maze change region count exceeds the non-overlapping area budget. "
+                    + "The requested number of regions cannot all change in one cycle.", this);
         }
     }
 }

@@ -16,7 +16,8 @@ namespace ShiftingPyramid.Maze.RuntimeChange
 
         public bool TryReplace(MazeGrid grid, IReadOnlyList<MazeRoomTemplate> catalog,
             MazeCoordinate player, int playerSafeRadius, MazeCoordinate? mummy, int mummySafeRadius,
-            out MazeRoom removedRoom, out MazeRoom addedRoom, int? seed = null)
+            out MazeRoom removedRoom, out MazeRoom addedRoom, int? seed = null,
+            IReadOnlyList<MazeProtectedArea> additionalProtectedAreas = null)
         {
             if (grid == null) throw new ArgumentNullException(nameof(grid));
             if (catalog == null) throw new ArgumentNullException(nameof(catalog));
@@ -36,7 +37,8 @@ namespace ShiftingPyramid.Maze.RuntimeChange
             var removable = new List<MazeRoom>();
             foreach (var room in grid.Rooms)
                 if (room.Template.TileType == MazeTileType.SpecialRoom
-                    && IsSafeRoom(room, player, playerSafeRadius, mummy, mummySafeRadius))
+                    && IsSafeRoom(room, player, playerSafeRadius, mummy, mummySafeRadius,
+                        additionalProtectedAreas))
                     removable.Add(room);
             if (removable.Count == 0) return false;
 
@@ -49,7 +51,7 @@ namespace ShiftingPyramid.Maze.RuntimeChange
             foreach (var oldRoom in removable)
             {
                 var candidates = GetCandidates(grid, oldRoom, catalog, specialIndexes,
-                    player, playerSafeRadius, mummy, mummySafeRadius);
+                    player, playerSafeRadius, mummy, mummySafeRadius, additionalProtectedAreas);
                 Shuffle(candidates, random);
                 // 종류가 둘 이상이면 다른 프리팹을 우선 시도한다.
                 for (var pass = 0; pass < 2; pass++)
@@ -84,14 +86,16 @@ namespace ShiftingPyramid.Maze.RuntimeChange
 
         private static List<(MazeRoom Room, int TemplateIndex)> GetCandidates(MazeGrid grid,
             MazeRoom oldRoom, IReadOnlyList<MazeRoomTemplate> catalog, List<int> specialIndexes,
-            MazeCoordinate player, int playerRadius, MazeCoordinate? mummy, int mummyRadius)
+            MazeCoordinate player, int playerRadius, MazeCoordinate? mummy, int mummyRadius,
+            IReadOnlyList<MazeProtectedArea> additionalProtectedAreas)
         {
             var candidates = new List<(MazeRoom Room, int TemplateIndex)>();
             for (var x = 1; x + MazeRoom.Size < grid.Width; x++)
                 for (var y = 1; y + MazeRoom.Size < grid.Height; y++)
                 {
                     var origin = new MazeCoordinate(x, y);
-                    if (!CanUseFootprint(grid, oldRoom, origin, player, playerRadius, mummy, mummyRadius))
+                    if (!CanUseFootprint(grid, oldRoom, origin, player, playerRadius, mummy, mummyRadius,
+                        additionalProtectedAreas))
                         continue;
                     foreach (var index in specialIndexes)
                         for (var turn = 0; turn < 4; turn++)
@@ -104,7 +108,8 @@ namespace ShiftingPyramid.Maze.RuntimeChange
         }
 
         private static bool CanUseFootprint(MazeGrid grid, MazeRoom oldRoom, MazeCoordinate origin,
-            MazeCoordinate player, int playerRadius, MazeCoordinate? mummy, int mummyRadius)
+            MazeCoordinate player, int playerRadius, MazeCoordinate? mummy, int mummyRadius,
+            IReadOnlyList<MazeProtectedArea> additionalProtectedAreas)
         {
             for (var x = origin.X; x < origin.X + MazeRoom.Size; x++)
                 for (var y = origin.Y; y < origin.Y + MazeRoom.Size; y++)
@@ -114,7 +119,8 @@ namespace ShiftingPyramid.Maze.RuntimeChange
                     if (tile.IsProtected || tile.TileType != MazeTileType.Normal
                         || cell.Equals(MazeCoordinate.Zero)
                         || IsInSafeArea(cell, player, playerRadius + 1)
-                        || mummy.HasValue && IsInSafeArea(cell, mummy.Value, mummyRadius + 1))
+                        || mummy.HasValue && IsInSafeArea(cell, mummy.Value, mummyRadius + 1)
+                        || MazeProtectedArea.Contains(additionalProtectedAreas, cell, 1))
                         return false;
                 }
 
@@ -143,11 +149,12 @@ namespace ShiftingPyramid.Maze.RuntimeChange
         }
 
         private static bool IsSafeRoom(MazeRoom room, MazeCoordinate player, int playerRadius,
-            MazeCoordinate? mummy, int mummyRadius)
+            MazeCoordinate? mummy, int mummyRadius, IReadOnlyList<MazeProtectedArea> additionalProtectedAreas)
         {
             foreach (var cell in room.Cells)
                 if (IsInSafeArea(cell, player, playerRadius + 1)
-                    || mummy.HasValue && IsInSafeArea(cell, mummy.Value, mummyRadius + 1))
+                    || mummy.HasValue && IsInSafeArea(cell, mummy.Value, mummyRadius + 1)
+                    || MazeProtectedArea.Contains(additionalProtectedAreas, cell, 1))
                     return false;
             return true;
         }

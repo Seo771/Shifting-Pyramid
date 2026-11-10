@@ -1,5 +1,7 @@
 # 일반 길목 BOX 배치 설계
 
+현재 갱신 순서는 [미로 생명주기](MazeLifecycle.md)를 따른다. 상자는 `GeometryChanged`/`MazeReady` 구독 대신 파이프라인의 `ContentsUpdating` 단계에서 처리한다. 바닥 표식은 공용 `Game.World.MazeFloor`이며, 횃불 제거 후 상자를 배치하고 이후 횃불·NavMesh를 갱신한다.
+
 상태: 최초 배치와 미로 변경 후 재배치 코드 구현, Play Mode 검증 대기. 이 문서는 랜덤 아이템 BOX의 자동 배치와 미로 변경 시 수명 규칙을 정한다. 횃불 배치는 별도 설계로 다룬다.
 
 ## 목표

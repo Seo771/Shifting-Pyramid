@@ -52,16 +52,17 @@ namespace ShiftingPyramid.Game.Map
             return false;
         }
 
-        public IReadOnlyList<MazeCoordinate> Reconcile(MazeGrid grid)
+        public IReadOnlyList<MazeCoordinate> Reconcile(MazeGrid grid,
+            IReadOnlyList<MazeCoordinate> changedCells = null)
         {
             if (grid == null) throw new ArgumentNullException(nameof(grid));
             if (grid.Width != Width || grid.Height != Height)
                 throw new ArgumentException("A new maze needs a new exploration state.", nameof(grid));
 
             var changed = new List<MazeCoordinate>();
-            foreach (var tile in grid.Tiles)
+            var candidates = changedCells ?? GetAllCells(grid);
+            foreach (var coordinate in candidates)
             {
-                var coordinate = tile.Coordinate;
                 var next = MapTileSignature.Capture(grid, coordinate);
                 if (signatures[coordinate.X, coordinate.Y].Equals(next)) continue;
 
@@ -73,6 +74,13 @@ namespace ShiftingPyramid.Game.Map
             foreach (var coordinate in changed) TileChanged?.Invoke(coordinate);
 
             return changed.AsReadOnly();
+        }
+
+        private static IReadOnlyList<MazeCoordinate> GetAllCells(MazeGrid grid)
+        {
+            var cells = new List<MazeCoordinate>();
+            foreach (var tile in grid.Tiles) cells.Add(tile.Coordinate);
+            return cells;
         }
 
         private bool Contains(MazeCoordinate coordinate)

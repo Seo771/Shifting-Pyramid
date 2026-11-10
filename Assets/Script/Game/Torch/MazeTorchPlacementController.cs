@@ -21,11 +21,9 @@ namespace ShiftingPyramid.Game.Torch
         [SerializeField, Min(0.1f)] private float lightRange = 16f;
 
         private readonly List<MazeCoordinate> occupiedCells = new List<MazeCoordinate>();
-        private MazeRenderer subscribedRenderer;
         private MazeGrid activeGrid;
         private Transform torchRoot;
         private int changeCount;
-        private bool needsRebuild;
 
         private readonly struct WallCandidate
         {
@@ -43,48 +41,30 @@ namespace ShiftingPyramid.Game.Torch
         {
             if (bootstrapper == null) bootstrapper = FindFirstObjectByType<MazeTestBootstrapper>();
             if (bootstrapper == null) return;
-            bootstrapper.MazeReady += HandleMazeReady;
-            SubscribeRenderer();
+            bootstrapper.Updates.Preparing += PrepareForUpdate;
+            bootstrapper.Updates.DecorationsUpdating += HandleUpdate;
             if (bootstrapper.IsMazeReady && bootstrapper.CurrentGrid != null)
-                HandleMazeReady(bootstrapper.CurrentGrid);
+                HandleUpdate(bootstrapper.CurrentGrid, MazeChangeSet.Full(bootstrapper.CurrentGrid));
         }
 
         private void OnDisable()
         {
-            if (bootstrapper != null) bootstrapper.MazeReady -= HandleMazeReady;
-            if (subscribedRenderer != null) subscribedRenderer.GeometryChanged -= HandleGeometryChanged;
-            subscribedRenderer = null;
+            if (bootstrapper != null) bootstrapper.Updates.Preparing -= PrepareForUpdate;
+            if (bootstrapper != null) bootstrapper.Updates.DecorationsUpdating -= HandleUpdate;
             ClearTorches();
         }
 
-        private void HandleMazeReady(MazeGrid grid)
+        private void PrepareForUpdate(MazeGrid grid, MazeChangeSet changes)
         {
+            // 이전 횃불의 콜라이더가 새 상자 배치를 막지 않게 먼저 제거한다.
+            ClearTorches();
+        }
+
+        private void HandleUpdate(MazeGrid grid, MazeChangeSet changes)
+        {
+            if (changes.IsFullRebuild || !ReferenceEquals(activeGrid, grid)) changeCount = 0;
+            else changeCount++;
             activeGrid = grid;
-            changeCount = 0;
-            SubscribeRenderer();
-            needsRebuild = grid != null;
-        }
-
-        private void HandleGeometryChanged()
-        {
-            // 초기 Build 신호는 MazeReady보다 먼저 오므로 사용하지 않는다.
-            if (bootstrapper == null || !bootstrapper.IsMazeReady
-                || !ReferenceEquals(activeGrid, bootstrapper.CurrentGrid))
-            {
-                if (torchRoot != null) torchRoot.gameObject.SetActive(false);
-                return;
-            }
-            changeCount++;
-            needsRebuild = true;
-        }
-
-        private void LateUpdate()
-        {
-            if (!needsRebuild) return;
-            needsRebuild = false;
-            if (bootstrapper == null || !bootstrapper.IsMazeReady
-                || !ReferenceEquals(activeGrid, bootstrapper.CurrentGrid)) return;
-            // BOX의 GeometryChanged 처리와 플레이어 배치가 끝난 뒤 검사한다.
             RebuildTorches();
         }
 
@@ -171,15 +151,6 @@ namespace ShiftingPyramid.Game.Torch
             if (outward.sqrMagnitude < 0.001f) return false;
             outward.Normalize();
             return true;
-        }
-
-        private void SubscribeRenderer()
-        {
-            var renderer = bootstrapper != null ? bootstrapper.Renderer : null;
-            if (ReferenceEquals(subscribedRenderer, renderer)) return;
-            if (subscribedRenderer != null) subscribedRenderer.GeometryChanged -= HandleGeometryChanged;
-            subscribedRenderer = renderer;
-            if (subscribedRenderer != null) subscribedRenderer.GeometryChanged += HandleGeometryChanged;
         }
 
         private void ClearTorches()

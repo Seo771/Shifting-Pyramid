@@ -496,7 +496,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1ff45ed0c7834a7788231274e6cbc68e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.Map.MapFloor
+  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.World.MazeFloor
 --- !u!1 &5372361578671057617
 GameObject:
   m_ObjectHideFlags: 0

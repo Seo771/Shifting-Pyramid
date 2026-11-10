@@ -6,6 +6,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
+    <Compile Include="LifecycleChecks.cs" />
+    <Compile Include="../../Assets/Script/Maze/View/MazeUpdatePipeline.cs" />
     <Compile Include="../../Assets/Script/Maze/Core/*.cs" />
     <Compile Include="../../Assets/Script/Maze/Generation/*.cs" />
     <Compile Include="../../Assets/Script/Maze/Validation/*.cs" />
