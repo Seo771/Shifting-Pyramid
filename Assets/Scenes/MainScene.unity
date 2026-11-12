@@ -1420,7 +1420,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.Box.MazeBoxPlacementController
   bootstrapper: {fileID: 487055575}
-  boxPrefab: {fileID: 1882996555621934544, guid: 3e4be70286f5d3a4ab6aae9898fca67c, type: 3}
+  boxPrefab: {fileID: 1616974227831062848, guid: 8dc8576cbc6992a4281a86b57e749454, type: 3}
   targetCount: 6
   startExclusionDistance: 3
   minimumBoxDistance: 4

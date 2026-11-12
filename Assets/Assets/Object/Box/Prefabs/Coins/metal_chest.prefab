@@ -13,6 +13,18 @@ PrefabInstance:
       value: 37
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ae07d30327baa6a48b02f0e5ea576859, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ae07d30327baa6a48b02f0e5ea576859, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ae07d30327baa6a48b02f0e5ea576859, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ae07d30327baa6a48b02f0e5ea576859, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0
       objectReference: {fileID: 0}
@@ -52,6 +64,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ae07d30327baa6a48b02f0e5ea576859, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ae07d30327baa6a48b02f0e5ea576859, type: 3}
       propertyPath: m_Name
       value: metal_chest
@@ -59,5 +75,95 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ae07d30327baa6a48b02f0e5ea576859, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1616974227831062848}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ae07d30327baa6a48b02f0e5ea576859, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7229405142587561293}
   m_SourcePrefab: {fileID: 100100000, guid: ae07d30327baa6a48b02f0e5ea576859, type: 3}
+--- !u!1 &8722302149508742889 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: ae07d30327baa6a48b02f0e5ea576859, type: 3}
+  m_PrefabInstance: {fileID: 8487805657621529528}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1616974227831062848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8722302149508742889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e633fa84b133a346b93edc4d6fed7d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RandomBox
+  itemEntries:
+  - itemData:
+      itemName: Recovery
+      itemIcon: {fileID: 21300000, guid: c8db1b0a9c81ccd4b8dba349465e89b8, type: 3}
+      itemPrefab: {fileID: 4538946318508835908, guid: 559d30fd7f93de64b835b7fd14c54bc3, type: 3}
+      itemType: 1
+      useDuration: 3
+      healAmount: 10
+      purifyAmount: 0
+      freezeDuration: 0
+      speedBoostAmount: 0
+    probability: 25
+  - itemData:
+      itemName: Purify
+      itemIcon: {fileID: 21300000, guid: 5d4f7f8c18c81b14499cfb251e39af08, type: 3}
+      itemPrefab: {fileID: 7292935266891179130, guid: 8d4d73492ff647d49b1e0e455c73cc06, type: 3}
+      itemType: 2
+      useDuration: 3
+      healAmount: 0
+      purifyAmount: 10
+      freezeDuration: 0
+      speedBoostAmount: 0
+    probability: 25
+  - itemData:
+      itemName: Freeze
+      itemIcon: {fileID: 21300000, guid: 9a9815bdf5e311646bdc4e9bf0f5b8a7, type: 3}
+      itemPrefab: {fileID: 4221970176716550466, guid: abbdfd7582eb34e44b59d1ee40ac1bf4, type: 3}
+      itemType: 3
+      useDuration: 0
+      healAmount: 0
+      purifyAmount: 0
+      freezeDuration: 3
+      speedBoostAmount: 0
+    probability: 25
+  - itemData:
+      itemName: Speed
+      itemIcon: {fileID: 21300000, guid: b54b0a2f37657794c943f3f14f3750e1, type: 3}
+      itemPrefab: {fileID: 4221970176716550466, guid: cc50027d9be2bd144b87935c32f4827c, type: 3}
+      itemType: 4
+      useDuration: 0
+      healAmount: 0
+      purifyAmount: 0
+      freezeDuration: 0
+      speedBoostAmount: 3
+    probability: 25
+  isOpened: 0
+--- !u!65 &7229405142587561293
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8722302149508742889}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.8848504, y: 0.7434266, z: 0.66571224}
+  m_Center: {x: 0, y: 0, z: -0.006180823}
