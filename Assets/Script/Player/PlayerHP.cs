@@ -41,6 +41,15 @@ public class PlayerHP : MonoBehaviour
         }
     }
 
+    public void Heal(float healAmount)
+    {
+        if (GameManager.Instance != null && GameManager.Instance.IsGameFinished) return;
+        if (isDead) return;
+
+        currentHealth += healAmount;
+        currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
+        Debug.Log($"[체력 회복] +{healAmount} ➔ 현재 체력: {currentHealth}");
+    }
     private void Die()
     {
         currentHealth = 0f;
