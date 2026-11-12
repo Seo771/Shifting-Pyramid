@@ -485,6 +485,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &308031939 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ff9ec3b6de585dd47ae29b5fea47f7b5, type: 3}
+  m_PrefabInstance: {fileID: 1308277960}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &337855126
 GameObject:
   m_ObjectHideFlags: 0
@@ -1412,7 +1417,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 828899c35acc435fb656820e8c5f299a, type: 3}
-  m_Name: ''
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.Box.MazeBoxPlacementController
   bootstrapper: {fileID: 487055575}
   boxPrefab: {fileID: 1882996555621934544, guid: 3e4be70286f5d3a4ab6aae9898fca67c, type: 3}
@@ -1434,7 +1439,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6cd420c524104a6d898d5e975940da22, type: 3}
-  m_Name: ''
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.Torch.MazeTorchPlacementController
   bootstrapper: {fileID: 487055575}
   torchPrefab: {fileID: 4571895601050599619, guid: 2fa6be46c81c7fe459c9b54658d64e80, type: 3}
@@ -1832,24 +1837,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
---- !u!114 &562330940
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 562330936}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c6c694069d584f64a5ff1c47d27298ae, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.GameSessionController
-  victoryPanel: {fileID: 471479867}
-  defeatPanel: {fileID: 1845083409}
-  resultControlsParent: {fileID: 2060076323}
-  resultFont: {fileID: 11400000, guid: 581e31547c66a0e4897857233b95b64f, type: 2}
-  restartButton: {fileID: 0}
-  quitButton: {fileID: 0}
 --- !u!4 &562330938
 Transform:
   m_ObjectHideFlags: 0
@@ -1880,6 +1867,24 @@ MonoBehaviour:
   playerPrefab: {fileID: 0}
   existingPlayer: {fileID: 837316819}
   spawnHeight: 1.25
+--- !u!114 &562330940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 562330936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6c694069d584f64a5ff1c47d27298ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.GameSessionController
+  victoryPanel: {fileID: 471479867}
+  defeatPanel: {fileID: 1845083409}
+  resultControlsParent: {fileID: 2060076323}
+  resultFont: {fileID: 11400000, guid: 581e31547c66a0e4897857233b95b64f, type: 2}
+  restartButton: {fileID: 0}
+  quitButton: {fileID: 0}
 --- !u!1 &564499375
 GameObject:
   m_ObjectHideFlags: 0
@@ -3010,8 +3015,7 @@ PrefabInstance:
       propertyPath: m_Name
       value: Monster
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 6583889571665384486, guid: ea5e80538ff5769438a49035a8f59a58, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -3047,6 +3051,8 @@ MonoBehaviour:
   attackCooldown: 2
   attackDamage: 20
   attackHitDelay: 0.5
+  mazeBootstrapper: {fileID: 0}
+  navigationSnapDistance: 3
 --- !u!1 &1014796559
 GameObject:
   m_ObjectHideFlags: 0
@@ -4005,15 +4011,27 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 1804055951}
     m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: ff9ec3b6de585dd47ae29b5fea47f7b5, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ff9ec3b6de585dd47ae29b5fea47f7b5, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ff9ec3b6de585dd47ae29b5fea47f7b5, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ff9ec3b6de585dd47ae29b5fea47f7b5, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ff9ec3b6de585dd47ae29b5fea47f7b5, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ff9ec3b6de585dd47ae29b5fea47f7b5, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4025,15 +4043,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ff9ec3b6de585dd47ae29b5fea47f7b5, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ff9ec3b6de585dd47ae29b5fea47f7b5, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ff9ec3b6de585dd47ae29b5fea47f7b5, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ff9ec3b6de585dd47ae29b5fea47f7b5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -4055,6 +4073,10 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 6736b31d52622c84188bea505f09dd1b, type: 2}
+    - target: {fileID: 5866666021909216657, guid: ff9ec3b6de585dd47ae29b5fea47f7b5, type: 3}
+      propertyPath: m_WarningMessage
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4544,6 +4566,87 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1788697483}
   m_CullTransparentMesh: 1
+--- !u!1 &1804055949
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1804055951}
+  - component: {fileID: 1804055950}
+  - component: {fileID: 1804055952}
+  m_Layer: 0
+  m_Name: MON
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1804055950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1804055949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35020602f2dffdf4e88f5d8998140472, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterAI
+  currentState: 0
+  wanderInterval: 4
+  minWanderDistance: 10
+  mazeSize: {x: 30, y: 30}
+  targetPlayer: {fileID: 0}
+  detectRange: 8
+  loseTargetRange: 12
+  attackRange: 2
+  attackCooldown: 2
+  attackDamage: 20
+  attackHitDelay: 0.5
+  mazeBootstrapper: {fileID: 0}
+  navigationSnapDistance: 3
+--- !u!4 &1804055951
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1804055949}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.46, y: 1, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 308031939}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!195 &1804055952
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1804055949}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.4
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0.2
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 1.85
+  m_BaseOffset: 1
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &1845083409
 GameObject:
   m_ObjectHideFlags: 0
@@ -5350,6 +5453,10 @@ PrefabInstance:
       propertyPath: interactionUI
       value: 
       objectReference: {fileID: 508168075}
+    - target: {fileID: 6249938931979631762, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.375
+      objectReference: {fileID: 0}
     - target: {fileID: 6305335534788067644, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
       propertyPath: mummificationText
       value: 
@@ -5372,7 +5479,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8010034990369437996, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.03899
+      value: 1.46
       objectReference: {fileID: 0}
     - target: {fileID: 8010034990369437996, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
       propertyPath: m_LocalPosition.z
@@ -5422,5 +5529,5 @@ SceneRoots:
   - {fileID: 111608268}
   - {fileID: 562330938}
   - {fileID: 7056273034525622598}
-  - {fileID: 1308277960}
   - {fileID: 883513018}
+  - {fileID: 1804055951}

@@ -32,6 +32,8 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     [SerializeField, Min(0.1f)] private float navigationSnapDistance = 3f;
 
     private NavMeshAgent agent;
+    private Animator animator;
+    private static readonly int SpeedHash = Animator.StringToHash("Speed");
     private float wanderTimer;
     private float lastAttackTime;
     private bool isAttacking = false;
@@ -51,6 +53,8 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        // Animator가 MON의 자식 모델에 있어도 찾을 수 있도록 자식까지 검색한다.
+        animator = GetComponentInChildren<Animator>(true);
         // 생성형 미로용 프리팹은 Agent를 꺼 둔 채 로드한다.
         awaitingNavigation = agent != null && !agent.enabled;
         if (mazeBootstrapper == null) mazeBootstrapper = FindFirstObjectByType<MazeTestBootstrapper>();
@@ -60,6 +64,23 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     {
         wanderTimer = wanderInterval;
         FindPlayer();
+    }
+
+    // NavMesh Agent의 실제 이동 속도를 Blend Tree의 Speed 파라미터에 전달한다.
+    private void UpdateAnimatorMovement()
+    {
+        if (animator == null) return;
+
+        float moveSpeed = 0f;
+        if (agent != null && agent.enabled && agent.isOnNavMesh && !agent.isStopped)
+        {
+            moveSpeed = agent.velocity.magnitude;
+        }
+
+        // 미세한 물리 흔들림으로 Idle/Walk가 반복 전환되는 것을 방지한다.
+        if (moveSpeed < 0.05f) moveSpeed = 0f;
+
+        animator.SetFloat(SpeedHash, moveSpeed, 0.1f, Time.deltaTime);
     }
 
     private void FindPlayer()
@@ -77,6 +98,8 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
     private void Update()
     {
+        UpdateAnimatorMovement();
+
         if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameManager.GameState.Playing)
         {
             StopActions();
