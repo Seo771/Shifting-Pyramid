@@ -375,8 +375,26 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
         isAttacking = true;
         lastAttackTime = Time.time;
 
-        // TODO: 미라 공격 애니메이션 실행 시 주석 해제
-        // GetComponent<Animator>()?.SetTrigger("Attack");
+        // 공격 애니메이션 3종 중 하나를 무작위로 실행
+        if (animator != null)
+        {
+            int randomAttack = Random.Range(0, 3);
+
+            switch (randomAttack)
+            {
+                case 0:
+                    animator.SetTrigger("AttackLeft");
+                    break;
+
+                case 1:
+                    animator.SetTrigger("AttackRight");
+                    break;
+
+                case 2:
+                    animator.SetTrigger("Attack2");
+                    break;
+            }
+        }
 
         Debug.Log("[MonsterAI] 미라가 공격을 시작합니다!");
 
