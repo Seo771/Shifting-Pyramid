@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 33166924505242321}
   - component: {fileID: 5073270933731229677}
   - component: {fileID: 4624928499086355185}
+  - component: {fileID: 8216905386183195123}
   m_Layer: 0
   m_Name: Sphinhx
   m_TagString: Untagged
@@ -661,7 +662,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.63, z: 10.09}
-  m_LocalScale: {x: 12, y: 1, z: 8}
+  m_LocalScale: {x: 12, y: 1, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1864320385664982222}
@@ -1376,6 +1377,96 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &5733217432415244829
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6565488305598545177}
+  - component: {fileID: 6063397085610955749}
+  - component: {fileID: 1887080412062933384}
+  m_Layer: 0
+  m_Name: DoorVisual
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6565488305598545177
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5733217432415244829}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 14.75, z: 0}
+  m_LocalScale: {x: 9, y: 10, z: 0.5}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3080367138310681881}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &6063397085610955749
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5733217432415244829}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &1887080412062933384
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5733217432415244829}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &5818479134217481753
 GameObject:
   m_ObjectHideFlags: 0
@@ -1502,6 +1593,57 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ff45ed0c7834a7788231274e6cbc68e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.World.MazeFloor
+--- !u!1 &6050681532184765843
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3080367138310681881}
+  - component: {fileID: 2598242668129823486}
+  m_Layer: 0
+  m_Name: Door
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3080367138310681881
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6050681532184765843}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 14.75}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6565488305598545177}
+  - {fileID: 8680384025467124066}
+  m_Father: {fileID: 1864320385664982222}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2598242668129823486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6050681532184765843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab52043b8a782034b8f8894a09740da0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SphinxDoorController
+  doorVisual: {fileID: 6565488305598545177}
+  passageBlocker: {fileID: 6810056179338127576}
+  openPosition: {x: 0, y: 14.75, z: 0}
+  closedPosition: {x: 0, y: 4.75, z: 0}
+  moveDuration: 2
 --- !u!1 &6329724647641472874
 GameObject:
   m_ObjectHideFlags: 0
@@ -1707,8 +1849,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 32
+  m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1864,6 +2006,59 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &7894135786752719932
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8680384025467124066}
+  - component: {fileID: 6810056179338127576}
+  m_Layer: 0
+  m_Name: PassageBlocker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8680384025467124066
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7894135786752719932}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 4.75, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3080367138310681881}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &6810056179338127576
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7894135786752719932}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 9, y: 10, z: 0.5}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7897435374037114361
 GameObject:
   m_ObjectHideFlags: 0
@@ -1904,6 +2099,7 @@ Transform:
   - {fileID: 1203909285978394992}
   - {fileID: 98406076515181485}
   - {fileID: 3826288283200397474}
+  - {fileID: 3080367138310681881}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6803074361362427213
@@ -1932,6 +2128,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SphinxRoomController
   quizUI: {fileID: 8768651544660031926}
+  doorController: {fileID: 2598242668129823486}
   timeLimit: 10
   penaltyMummificationAmount: 25
   rewardChestPrefab: {fileID: 1828746841897986727, guid: 3e4be70286f5d3a4ab6aae9898fca67c, type: 3}
@@ -1943,12 +2140,23 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   riddleList:
-  - question: "1\uBC88 \uBB38\uC81C: 1\uC744 \uC785\uB825\uD558\uC138\uC694"
-    answer: 1
-  - question: "2\uBC88 \uBB38\uC81C: 2\uB97C \uC785\uB825\uD558\uC138\uC694"
-    answer: 2
-  - question: "3\uBC88 \uBB38\uC81C: 3\uC744 \uC785\uB825\uD558\uC138\uC694"
-    answer: 3
+  - question: "\ucc28\uac00 \ub2e4\ub2c8\uc9c0 \uc54a\ub294 \ub098\ub77c\ub294?"
+    answer: "\uc778\ub3c4"
+    alternativeAnswers: []
+  - question: "\uce7c\uc774 \uc815\uc0c9\ud558\uba74?"
+    answer: "\uac80\uc815\uc0c9"
+    alternativeAnswers: []
+  - question: "\ubc18\uc131\ubb38\uc744 \uc601\uc5b4\ub85c \ud558\uba74?"
+    answer: "\uae00\ub85c\ubc8c"
+    alternativeAnswers:
+    - "global"
+  - question: "\ud5c8\uc218\uc544\ube44\uc758 \uc544\ub4e4 \uc774\ub984\uc740?"
+    answer: "\ud5c8\uc218"
+    alternativeAnswers: []
+  - question: "\ud654\uc7a5\uc2e4\uc5d0\uc11c \ubc29\uae08 \ub098\uc628 \uc0ac\ub78c\uc740?"
+    answer: "\uc77c\ubcf8\uc0ac\ub78c"
+    alternativeAnswers:
+    - "\uc77c\ubcf8\uc778"
 --- !u!1 &8354393869690831359
 GameObject:
   m_ObjectHideFlags: 0
@@ -2210,8 +2418,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 32
+  m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -2312,7 +2520,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -80}
-  m_SizeDelta: {x: 400, y: 60}
+  m_SizeDelta: {x: 560, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8284286907721608895
 CanvasRenderer:
@@ -2409,7 +2617,7 @@ MonoBehaviour:
   m_HideSoftKeyboard: 0
   m_CharacterValidation: 0
   m_RegexValue: 
-  m_GlobalPointSize: 14
+  m_GlobalPointSize: 32
   m_CharacterLimit: 0
   m_OnEndEdit:
     m_PersistentCalls:
@@ -2920,3 +3128,16 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3763164853841861241, guid: 2fa6be46c81c7fe459c9b54658d64e80, type: 3}
   m_PrefabInstance: {fileID: 8442152197832340019}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8216905386183195123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 46197283180092941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8470ddcda42943b6b1f2928ca45c9921, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SphinxInteractable
+  roomController: {fileID: 4127893225393223287}

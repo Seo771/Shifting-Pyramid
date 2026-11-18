@@ -10,7 +10,7 @@ public class EntranceTrigger : MonoBehaviour
         {
             if (roomController != null)
             {
-                roomController.StartQuiz();
+                roomController.EnterRoom();
             }
         }
     }
