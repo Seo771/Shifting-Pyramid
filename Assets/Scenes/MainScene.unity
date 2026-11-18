@@ -5466,8 +5466,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 508168075}
     - target: {fileID: 6249938931979631762, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6249938931979631762, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.375
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 6305335534788067644, guid: ad6c9a8f2f2617741a56d6946edcd0b7, type: 3}
       propertyPath: mummificationText
