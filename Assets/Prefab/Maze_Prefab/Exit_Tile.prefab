@@ -28,8 +28,8 @@ Transform:
   m_GameObject: {fileID: 863683106316553541}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.75, y: 4.75, z: -4.75}
-  m_LocalScale: {x: 0.5, y: 10, z: 0.5}
+  m_LocalPosition: {x: 4.75, y: 7, z: -4.75}
+  m_LocalScale: {x: 0.5, y: 15, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1826444298881417150}
@@ -140,8 +140,8 @@ Transform:
   m_GameObject: {fileID: 1464282661272234251}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.75, y: 4.75, z: -4.75}
-  m_LocalScale: {x: 0.5, y: 10, z: 0.5}
+  m_LocalPosition: {x: -4.75, y: 7, z: -4.75}
+  m_LocalScale: {x: 0.5, y: 15, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1826444298881417150}
@@ -287,8 +287,8 @@ Transform:
   m_GameObject: {fileID: 4458485622507623190}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 4.75, z: -4.75}
-  m_LocalScale: {x: 9, y: 10, z: 0.5}
+  m_LocalPosition: {x: 0, y: 7, z: -4.75}
+  m_LocalScale: {x: 9, y: 15, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3356407945655442230}
@@ -496,7 +496,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1ff45ed0c7834a7788231274e6cbc68e, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.World.MazeFloor
 --- !u!1 &5372361578671057617
 GameObject:
@@ -526,8 +526,8 @@ Transform:
   m_GameObject: {fileID: 5372361578671057617}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.75, y: 4.75, z: 4.75}
-  m_LocalScale: {x: 0.5, y: 10, z: 0.5}
+  m_LocalPosition: {x: 4.75, y: 7, z: 4.75}
+  m_LocalScale: {x: 0.5, y: 15, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1826444298881417150}
@@ -733,8 +733,8 @@ Transform:
   m_GameObject: {fileID: 5626685013691551112}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.75, y: 4.75, z: 0}
-  m_LocalScale: {x: 0.5, y: 10, z: 9}
+  m_LocalPosition: {x: -4.75, y: 7, z: 0}
+  m_LocalScale: {x: 0.5, y: 15, z: 9}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 29740832465242531}
@@ -846,8 +846,8 @@ Transform:
   m_GameObject: {fileID: 5694745645799368535}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 4.75, z: 4.75}
-  m_LocalScale: {x: 9, y: 10, z: 0.5}
+  m_LocalPosition: {x: 0, y: 7, z: 4.75}
+  m_LocalScale: {x: 9, y: 15, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5590569930400180561}
@@ -959,8 +959,8 @@ Transform:
   m_GameObject: {fileID: 7023578386048093162}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.75, y: 4.75, z: 0}
-  m_LocalScale: {x: 0.5, y: 10, z: 9}
+  m_LocalPosition: {x: 4.75, y: 7, z: 0}
+  m_LocalScale: {x: 0.5, y: 15, z: 9}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 9042810214222066351}
@@ -1072,8 +1072,8 @@ Transform:
   m_GameObject: {fileID: 7298919356666771191}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.75, y: 4.75, z: 4.75}
-  m_LocalScale: {x: 0.5, y: 10, z: 0.5}
+  m_LocalPosition: {x: -4.75, y: 7, z: 4.75}
+  m_LocalScale: {x: 0.5, y: 15, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1826444298881417150}
@@ -1184,7 +1184,7 @@ Transform:
   m_GameObject: {fileID: 8286512376912602156}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 10, z: 0}
+  m_LocalPosition: {x: 0, y: 14.7, z: 0}
   m_LocalScale: {x: 10, y: 0.5, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1223,7 +1223,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: cc90ef10232fd5c43aa10d48fbf16e29, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
