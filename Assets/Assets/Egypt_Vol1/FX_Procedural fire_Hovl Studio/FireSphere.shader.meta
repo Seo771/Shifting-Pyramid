@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 1d4a9c916d62a324e90c32798caf3f13
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures:
+  - _MainTex: {fileID: 2800000, guid: 5228a04ef529d2641937cab585cc1a02, type: 3}
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 227195
+  packageName: Stylized Egyptian Interior Vol1
+  packageVersion: 1.0
+  assetPath: Assets/Egypt_Vol1/FX_Procedural fire_Hovl Studio/FireSphere.shader
+  uploadId: 515504

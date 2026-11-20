@@ -1255,8 +1255,8 @@ Transform:
   m_GameObject: {fileID: 5733217432415244829}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 14.75, z: 0}
-  m_LocalScale: {x: 9, y: 10, z: 0.5}
+  m_LocalPosition: {x: 0, y: 21.79, z: 0}
+  m_LocalScale: {x: 9, y: 15, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3080367138310681881}
@@ -1294,7 +1294,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 6df54827953222a43ab8b1b8f263d2d6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1444,6 +1444,57 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ff45ed0c7834a7788231274e6cbc68e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShiftingPyramid.Game.World.MazeFloor
+--- !u!1 &6050681532184765843
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3080367138310681881}
+  - component: {fileID: 2598242668129823486}
+  m_Layer: 0
+  m_Name: Door
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3080367138310681881
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6050681532184765843}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 14.75}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6565488305598545177}
+  - {fileID: 8680384025467124066}
+  m_Father: {fileID: 1864320385664982222}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2598242668129823486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6050681532184765843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab52043b8a782034b8f8894a09740da0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SphinxDoorController
+  doorVisual: {fileID: 6565488305598545177}
+  passageBlocker: {fileID: 6810056179338127576}
+  openPosition: {x: 0, y: 14.75, z: 0}
+  closedPosition: {x: 0, y: 4.75, z: 0}
+  moveDuration: 2
 --- !u!1 &6277921339210336540
 GameObject:
   m_ObjectHideFlags: 0
@@ -1954,6 +2005,59 @@ Transform:
   - {fileID: 3974432089508417757}
   m_Father: {fileID: 1864320385664982222}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7894135786752719932
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8680384025467124066}
+  - component: {fileID: 6810056179338127576}
+  m_Layer: 0
+  m_Name: PassageBlocker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8680384025467124066
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7894135786752719932}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 4.75, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3080367138310681881}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &6810056179338127576
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7894135786752719932}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 9, y: 10, z: 0.5}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7897435374037114361
 GameObject:
   m_ObjectHideFlags: 0
@@ -1994,6 +2098,7 @@ Transform:
   - {fileID: 98406076515181485}
   - {fileID: 3826288283200397474}
   - {fileID: 3525441526927905805}
+  - {fileID: 3080367138310681881}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6803074361362427213
@@ -2034,23 +2139,23 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   riddleList:
-  - question: "\ucc28\uac00 \ub2e4\ub2c8\uc9c0 \uc54a\ub294 \ub098\ub77c\ub294?"
-    answer: "\uc778\ub3c4"
+  - question: "\uCC28\uAC00 \uB2E4\uB2C8\uC9C0 \uC54A\uB294 \uB098\uB77C\uB294?"
+    answer: "\uC778\uB3C4"
     alternativeAnswers: []
-  - question: "\uce7c\uc774 \uc815\uc0c9\ud558\uba74?"
-    answer: "\uac80\uc815\uc0c9"
+  - question: "\uCE7C\uC774 \uC815\uC0C9\uD558\uBA74?"
+    answer: "\uAC80\uC815\uC0C9"
     alternativeAnswers: []
-  - question: "\ubc18\uc131\ubb38\uc744 \uc601\uc5b4\ub85c \ud558\uba74?"
-    answer: "\uae00\ub85c\ubc8c"
+  - question: "\uBC18\uC131\uBB38\uC744 \uC601\uC5B4\uB85C \uD558\uBA74?"
+    answer: "\uAE00\uB85C\uBC8C"
     alternativeAnswers:
-    - "global"
-  - question: "\ud5c8\uc218\uc544\ube44\uc758 \uc544\ub4e4 \uc774\ub984\uc740?"
-    answer: "\ud5c8\uc218"
+    - global
+  - question: "\uD5C8\uC218\uC544\uBE44\uC758 \uC544\uB4E4 \uC774\uB984\uC740?"
+    answer: "\uD5C8\uC218"
     alternativeAnswers: []
-  - question: "\ud654\uc7a5\uc2e4\uc5d0\uc11c \ubc29\uae08 \ub098\uc628 \uc0ac\ub78c\uc740?"
-    answer: "\uc77c\ubcf8\uc0ac\ub78c"
+  - question: "\uD654\uC7A5\uC2E4\uC5D0\uC11C \uBC29\uAE08 \uB098\uC628 \uC0AC\uB78C\uC740?"
+    answer: "\uC77C\uBCF8\uC0AC\uB78C"
     alternativeAnswers:
-    - "\uc77c\ubcf8\uc778"
+    - "\uC77C\uBCF8\uC778"
 --- !u!1 &8354393869690831359
 GameObject:
   m_ObjectHideFlags: 0
@@ -2824,13 +2929,58 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8904130700716005248, guid: 5dfd72c81fed9574b83b42e9efa3aba3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8216905386183195123}
+    - targetCorrespondingSourceObject: {fileID: 8904130700716005248, guid: 5dfd72c81fed9574b83b42e9efa3aba3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8216905386183195124}
   m_SourcePrefab: {fileID: 100100000, guid: 5dfd72c81fed9574b83b42e9efa3aba3, type: 3}
 --- !u!4 &3525441526927905805 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8131815507295964474, guid: 5dfd72c81fed9574b83b42e9efa3aba3, type: 3}
   m_PrefabInstance: {fileID: 4627133595290523959}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4298460236039229111 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8904130700716005248, guid: 5dfd72c81fed9574b83b42e9efa3aba3, type: 3}
+  m_PrefabInstance: {fileID: 4627133595290523959}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8216905386183195123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4298460236039229111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8470ddcda42943b6b1f2928ca45c9921, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SphinxInteractable
+  roomController: {fileID: 4127893225393223287}
+--- !u!65 &8216905386183195124
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4298460236039229111}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.006, y: 0.006, z: 0.005}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &6753032793501858985
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2909,16 +3059,3 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3763164853841861241, guid: 2fa6be46c81c7fe459c9b54658d64e80, type: 3}
   m_PrefabInstance: {fileID: 6753032793501858985}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &8216905386183195123
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 46197283180092941}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8470ddcda42943b6b1f2928ca45c9921, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SphinxInteractable
-  roomController: {fileID: 4127893225393223287}
