@@ -7,6 +7,9 @@ public class SphinxRoomController : MonoBehaviour
     [Header("UI 연동")]
     [SerializeField] private SphinxQuizUI quizUI;
 
+    [Header("출입문")]
+    [SerializeField] private SphinxDoorController doorController;
+
     [Header("제한시간 설정")]
     [SerializeField] private float timeLimit = 10f;
 
@@ -30,6 +33,9 @@ public class SphinxRoomController : MonoBehaviour
     private QuizData currentRiddle;
     private bool isQuizActive = false;
     private bool isRoomCleared = false; // 방 클리어 여부 (중복 실행 방지)
+    private bool hasEnteredRoom;
+    private const int MaxQuizAttempts = 2;
+    private int quizAttempts;
     private float currentTimer = 0f;
 
     private void Update()
@@ -49,10 +55,19 @@ public class SphinxRoomController : MonoBehaviour
         }
     }
 
+    public void EnterRoom()
+    {
+        if (hasEnteredRoom || isQuizActive || isRoomCleared || quizAttempts >= MaxQuizAttempts) return;
+        if (riddleList == null || riddleList.Count == 0) return;
+
+        hasEnteredRoom = true;
+        doorController.Close();
+    }
+
     public void StartQuiz()
     {
         // 이미 방을 클리어했거나 퀴즈 진행 중이면 실행 안 함
-        if (isQuizActive || isRoomCleared) return;
+        if (isQuizActive || isRoomCleared || quizAttempts >= MaxQuizAttempts) return;
 
         if (riddleList == null || riddleList.Count == 0)
         {
@@ -63,8 +78,10 @@ public class SphinxRoomController : MonoBehaviour
         int randomIndex = Random.Range(0, riddleList.Count);
         currentRiddle = riddleList[randomIndex];
 
+        quizAttempts++;
         currentTimer = timeLimit;
         isQuizActive = true;
+        doorController.Close();
 
         // 플레이어 이동 멈춤
         SetPlayerInputEnabled(false);
@@ -82,10 +99,7 @@ public class SphinxRoomController : MonoBehaviour
     {
         if (!isQuizActive || currentRiddle == null) return;
 
-        string formattedInput = inputAnswer.Trim();
-        string correctAnswer = currentRiddle.answer.Trim();
-
-        if (formattedInput == correctAnswer)
+        if (currentRiddle.MatchesAnswer(inputAnswer))
         {
             OnCorrectAnswer();
         }
@@ -123,6 +137,7 @@ public class SphinxRoomController : MonoBehaviour
     private void EndQuiz()
     {
         isQuizActive = false;
+        doorController.Open();
 
         if (quizUI != null)
         {
