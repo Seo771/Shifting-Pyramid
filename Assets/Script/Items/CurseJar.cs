@@ -29,6 +29,9 @@ public class CurseJar : MonoBehaviour, IInteractable
             Debug.LogWarning("[CurseJar] GameManager 인스턴스를 찾을 수 없습니다. 저주 단지 카운트가 증가하지 않습니다.");
         }
 
+        SensoryUtility.BroadcastStimulus(
+            new StimulusData(StimulusType.Interaction, transform.position, gameObject));
+
         // 맵에서 저주 단지 제거
         Destroy(gameObject);
     }
