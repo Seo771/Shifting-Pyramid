@@ -94,7 +94,7 @@ public static class MainSceneLighting
         }
         var placement = InScene<ShiftingPyramid.Game.Torch.MazeTorchPlacementController>(scene);
         var placementData = new SerializedObject(placement);
-        placementData.FindProperty("torchScale").floatValue = 3.3f;
+        placementData.FindProperty("torchScale").floatValue = 6.6f;
         placementData.FindProperty("lightRange").floatValue = 20f;
         placementData.ApplyModifiedPropertiesWithoutUndo();
         SetMood();
@@ -115,7 +115,7 @@ public static class MainSceneLighting
             PrefabUtility.SaveAsPrefabAsset(torch, TorchPath);
         }
         finally { PrefabUtility.UnloadPrefabContents(torch); }
-        return "Applied: torch scale 2.5 -> 3.3, warm realtime torch lighting, cool low fill, gradient ambient, subtle fog, ACES/Bloom/color/vignette; MainScene camera post-processing enabled.";
+        return "Applied: torch scale 2.5 -> 6.6, warm realtime torch lighting, cool low fill, gradient ambient, subtle fog, ACES/Bloom/color/vignette; MainScene camera post-processing enabled.";
     }
 
     public static string TuneDarker()
@@ -222,7 +222,7 @@ public static class MainSceneLighting
             if (volume.name == "MazeAtmosphere") volume.weight = 1f;
         foreach (var torch in GeneratedTorches())
         {
-            torch.transform.localScale = Vector3.one * 3.3f;
+            torch.transform.localScale = Vector3.one * 6.6f;
             torch.enabled = true;
             var lamp = torch.GetComponentInChildren<Light>();
             lamp.shadows = LightShadows.Soft; lamp.range = 20f;
@@ -240,7 +240,7 @@ public static class MainSceneLighting
             || (camera.GetUniversalAdditionalCameraData().volumeLayerMask.value & (1 << volume.gameObject.layer)) == 0)
             throw new InvalidOperationException("Atmosphere volume is not reaching the camera.");
         var torches = GeneratedTorches();
-        if (torches.Length == 0 || torches.Any(t => Mathf.Abs(t.transform.localScale.x - 3.3f) > 0.01f))
+        if (torches.Length == 0 || torches.Any(t => Mathf.Abs(t.transform.localScale.x - 6.6f) > 0.01f))
             throw new InvalidOperationException("Torch scaling not applied.");
         return "PASS: live MainScene, " + torches.Length + " enlarged torches, HDR camera + 5 active atmosphere effects; frame=" + Time.frameCount;
     }
