@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using ShiftingPyramid.Maze.Core;
 using ShiftingPyramid.Maze.View;
 
 public class MonsterAI : MonoBehaviour, ISensoryReceiver
@@ -12,14 +13,23 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     [SerializeField] private AIState currentState = AIState.Wander;
 
     [Header("배회(Wander) 설정")]
-    [SerializeField] private float wanderInterval = 4f;        // 다음 목적지 갱신 타이머
-    [SerializeField] private float minWanderDistance = 10f;     // 최소 이동 거리 및 주변 수색 반경
-    [SerializeField] private Vector2 mazeSize = new Vector2(30f, 30f); // 미로 전체 크기 (가로, 세로)
+    [SerializeField, Min(0.1f)] private float wanderInterval = 4f; // 목적지를 찾지 못했을 때 재시도 간격
+    [SerializeField, Min(0f)] private float minWanderDistance = 10f; // 다음 목적지까지의 최소 거리
+    [Tooltip("생성형 미로가 없는 씬에서 사용할 배회 범위입니다. 생성형 미로에서는 실제 타일 좌표를 사용합니다.")]
+    [SerializeField] private Vector2 mazeSize = new Vector2(30f, 30f);
 
     [Header("추적(Chase) 설정")]
     [SerializeField] private Transform targetPlayer;
     [SerializeField] private float detectRange = 8f;       // 감지 거리
     [SerializeField] private float loseTargetRange = 12f;   // 포기 거리
+
+    [Header("시야 설정")]
+    [SerializeField, Range(1f, 360f)] private float viewAngle = 90f;
+    [Tooltip("미라 루트 위치에서 눈까지의 높이. 필요하면 Eye Point로 직접 지정합니다.")]
+    [SerializeField] private float eyeHeight = 0.6f;
+    [SerializeField] private Transform eyePoint;
+    [Tooltip("시야를 가리는 오브젝트의 레이어. Trigger는 시야를 가리지 않습니다.")]
+    [SerializeField] private LayerMask sightBlockingLayers = Physics.DefaultRaycastLayers;
 
     [Header("공격(Attack) 설정")]
     [SerializeField] private float attackRange = 2f;        // 공격 사거리
@@ -32,6 +42,7 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     [SerializeField, Min(0.1f)] private float navigationSnapDistance = 3f;
 
     private NavMeshAgent agent;
+    private NavMeshPath wanderPath;
     private Animator animator;
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
     private float wanderTimer;
@@ -43,6 +54,7 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     private Vector3 lastStimulusPosition;
     private bool investigationDestinationPending;
     private PlayerHP playerHP; // PlayerHP 연동
+    private Collider playerCollider;
     private bool awaitingNavigation;
 
     private bool IsMazeAvailable => mazeBootstrapper == null || mazeBootstrapper.IsMazeReady;
@@ -53,6 +65,7 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        wanderPath = new NavMeshPath();
         // Animator가 MON의 자식 모델에 있어도 찾을 수 있도록 자식까지 검색한다.
         animator = GetComponentInChildren<Animator>(true);
         // 생성형 미로용 프리팹은 Agent를 꺼 둔 채 로드한다.
@@ -91,8 +104,13 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
             if (playerObj != null)
             {
                 targetPlayer = playerObj.transform;
-                playerHP = playerObj.GetComponent<PlayerHP>();
             }
+        }
+
+        if (targetPlayer != null)
+        {
+            playerHP = targetPlayer.GetComponent<PlayerHP>();
+            playerCollider = targetPlayer.GetComponent<Collider>();
         }
     }
 
@@ -142,7 +160,7 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
         // 공격 모션 수행 중일 때는 이동 및 상태 전환을 잠시 멈춤
         if (isAttacking) return;
 
-        // 플레이어 거리 감지 및 상태 전환 체크
+        // 플레이어 시야 감지 및 상태 전환 체크
         CheckPlayerDetection();
 
         // 상태별 행동
@@ -169,6 +187,8 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     #region ISensoryReceiver 구현 (외부 자극 수신)
     public void OnReceiveStimulus(StimulusData stimulus)
     {
+        if (!isActiveAndEnabled
+            || (GameManager.Instance != null && GameManager.Instance.IsGameFinished)) return;
         if (isAttacking) return;
 
         switch (stimulus.type)
@@ -178,7 +198,8 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
                 {
                     targetPlayer = stimulus.source.transform;
                     playerHP = targetPlayer.GetComponent<PlayerHP>();
-                    currentState = AIState.Chase;
+                    playerCollider = targetPlayer.GetComponent<Collider>();
+                    CheckPlayerDetection();
                 }
                 break;
 
@@ -272,9 +293,20 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     private void HandleWander()
     {
         if (agent.isOnNavMesh) agent.isStopped = false;
-        wanderTimer += Time.deltaTime;
+        if (agent.pathPending) return;
 
-        if (wanderTimer >= wanderInterval || (agent.hasPath && agent.remainingDistance <= agent.stoppingDistance))
+        if (agent.hasPath)
+        {
+            // 이동 중에는 목적지를 유지하고, 도착하거나 경로가 끊겼을 때 다시 선택한다.
+            if (agent.pathStatus == NavMeshPathStatus.PathComplete
+                && agent.remainingDistance > agent.stoppingDistance) return;
+
+            agent.ResetPath();
+            wanderTimer = wanderInterval;
+        }
+
+        wanderTimer += Time.deltaTime;
+        if (wanderTimer >= wanderInterval)
         {
             SetRandomDestination();
             wanderTimer = 0f;
@@ -297,12 +329,22 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
         if (investigationDestinationPending)
         {
-            agent.SetDestination(lastStimulusPosition);
             investigationDestinationPending = false;
+            // 상자나 단지가 벽 가까이에 있어도 실제로 걸을 수 있는 위치로 수색한다.
+            if (!NavMesh.SamplePosition(lastStimulusPosition, out var hit, navigationSnapDistance, NavigationFilter())
+                || !agent.SetDestination(hit.position))
+            {
+                agent.ResetPath();
+                currentState = AIState.Wander;
+                wanderTimer = wanderInterval;
+            }
+            return;
         }
 
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
+        if (!agent.pathPending && (!agent.hasPath || agent.pathStatus == NavMeshPathStatus.PathInvalid
+            || agent.remainingDistance <= agent.stoppingDistance))
         {
+            agent.ResetPath();
             currentState = AIState.Wander;
             wanderTimer = wanderInterval;
         }
@@ -404,6 +446,7 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
         // 타격 순간 플레이어가 사거리 내에 있고 살아있는지 검증
         if ((GameManager.Instance == null || GameManager.Instance.CurrentState == GameManager.GameState.Playing)
             && IsNavigationReady && !isFrozen && targetPlayer != null
+            && CanSeePlayer(attackRange + 0.5f)
             && Vector3.Distance(transform.position, targetPlayer.position) <= attackRange + 0.5f)
         {
             if (playerHP != null && !playerHP.isDead)
@@ -420,39 +463,37 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
 
     private void SetRandomDestination()
     {
-        bool isUturnOrLocal = Random.value < 0.2f;
-        float halfX = mazeSize.x * 0.5f;
-        float halfY = mazeSize.y * 0.5f;
+        var grid = mazeBootstrapper != null ? mazeBootstrapper.CurrentGrid : null;
+        var renderer = mazeBootstrapper != null ? mazeBootstrapper.Renderer : null;
 
         for (int i = 0; i < 10; i++)
         {
             Vector3 targetPos;
 
-            if (isUturnOrLocal)
+            if (grid != null && renderer != null)
             {
-                Vector3 randomDir = Random.insideUnitSphere * minWanderDistance;
-                targetPos = transform.position + randomDir;
+                var coordinate = new MazeCoordinate(Random.Range(0, grid.Width), Random.Range(0, grid.Height));
+                if (!renderer.TryGetTileWorldPosition(coordinate, out targetPos)) continue;
             }
             else
             {
+                // 수동 테스트 씬은 기존의 원점 중심 범위를 사용한다.
                 targetPos = new Vector3(
-                    Random.Range(-halfX, halfX),
-                    0f,
-                    Random.Range(-halfY, halfY)
+                    Random.Range(-mazeSize.x * 0.5f, mazeSize.x * 0.5f),
+                    transform.position.y,
+                    Random.Range(-mazeSize.y * 0.5f, mazeSize.y * 0.5f)
                 );
             }
 
-            NavMeshHit hit;
-            if (NavMesh.SamplePosition(targetPos, out hit, 5f, NavMesh.AllAreas))
-            {
-                if (!isUturnOrLocal && Vector3.Distance(transform.position, hit.position) < minWanderDistance)
-                {
-                    continue;
-                }
+            if (!NavMesh.SamplePosition(targetPos, out var hit, navigationSnapDistance, NavigationFilter())) continue;
+            Vector3 offset = Vector3.ProjectOnPlane(hit.position - transform.position, Vector3.up);
+            if (offset.sqrMagnitude < minWanderDistance * minWanderDistance) continue;
 
-                agent.SetDestination(hit.position);
-                return;
-            }
+            // 다른 구역이나 막힌 방의 부분 경로는 배회 목적지로 사용하지 않는다.
+            if (!agent.CalculatePath(hit.position, wanderPath)
+                || wanderPath.status != NavMeshPathStatus.PathComplete) continue;
+
+            if (agent.SetPath(wanderPath)) return;
         }
     }
 
@@ -460,39 +501,89 @@ public class MonsterAI : MonoBehaviour, ISensoryReceiver
     {
         if (targetPlayer == null) return;
 
-        float distanceToPlayer = Vector3.Distance(transform.position, targetPlayer.position);
+        bool isTracking = currentState == AIState.Chase || currentState == AIState.Attack;
+        float sightRange = isTracking ? Mathf.Max(detectRange, loseTargetRange) : detectRange;
 
-        // 1. 공격 사거리 진입 -> Attack
-        if (distanceToPlayer <= attackRange)
+        if (CanSeePlayer(sightRange))
         {
-            currentState = AIState.Attack;
+            lastStimulusPosition = targetPlayer.position;
+            currentState = Vector3.Distance(transform.position, targetPlayer.position) <= attackRange
+                ? AIState.Attack
+                : AIState.Chase;
         }
-        // 2. 공격 사거리 밖이지만 감지 범위 이내 -> Chase
-        else if (distanceToPlayer <= detectRange)
+        else if (isTracking)
         {
-            currentState = AIState.Chase;
+            // 시야에서 놓치면 현재 플레이어 위치 대신 마지막으로 본 위치를 수색한다.
+            investigationDestinationPending = true;
+            currentState = AIState.Investigate;
         }
-        // 3. 포기 거리 벗어남 -> Wander
-        else if (distanceToPlayer > loseTargetRange && currentState == AIState.Chase)
+    }
+
+    private Vector3 EyePosition => eyePoint != null
+        ? eyePoint.position
+        : transform.position + Vector3.up * eyeHeight;
+
+    private bool CanSeePlayer(float range)
+    {
+        if (targetPlayer == null) return false;
+
+        Vector3 toPlayer = targetPlayer.position - transform.position;
+        if (toPlayer.sqrMagnitude > range * range) return false;
+
+        Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
+        Vector3 direction = Vector3.ProjectOnPlane(toPlayer, Vector3.up);
+        if (Vector3.Angle(forward, direction) > viewAngle * 0.5f) return false;
+
+        Vector3 targetPosition = playerCollider != null
+            ? playerCollider.bounds.center
+            : targetPlayer.position;
+        Vector3 sightLine = targetPosition - EyePosition;
+
+        // 자신과 플레이어의 Collider는 제외하고 사이에 있는 장애물을 검사한다.
+        RaycastHit[] hits = Physics.RaycastAll(EyePosition, sightLine.normalized,
+            sightLine.magnitude, sightBlockingLayers, QueryTriggerInteraction.Ignore);
+        foreach (RaycastHit hit in hits)
         {
-            currentState = AIState.Wander;
-            wanderTimer = wanderInterval;
+            Transform hitTransform = hit.collider.transform;
+            if (hitTransform.IsChildOf(transform) || hitTransform.IsChildOf(targetPlayer)) continue;
+            return false;
         }
+
+        return true;
     }
     #endregion
 
     private void OnDrawGizmosSelected()
     {
-        // 감지 거리 (노랑)
+        // 정면 감지 범위 (노랑). 눈높이에서 수평 부채꼴로 표시한다.
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectRange);
+        DrawSightSector(detectRange);
 
-        // 포기 거리 (빨강)
+        // 추적 중 시야 유지 범위 (빨강)
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, loseTargetRange);
+        DrawSightSector(Mathf.Max(detectRange, loseTargetRange));
 
         // 공격 사거리 (파랑)
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, attackRange);
+    }
+
+    private void DrawSightSector(float range)
+    {
+        const int segments = 32;
+        Vector3 origin = EyePosition;
+        Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+        Vector3 previous = origin + Quaternion.AngleAxis(-viewAngle * 0.5f, Vector3.up) * forward * range;
+        Gizmos.DrawLine(origin, previous);
+
+        for (int i = 1; i <= segments; i++)
+        {
+            float angle = -viewAngle * 0.5f + viewAngle * i / segments;
+            Vector3 next = origin + Quaternion.AngleAxis(angle, Vector3.up) * forward * range;
+            Gizmos.DrawLine(previous, next);
+            previous = next;
+        }
+
+        Gizmos.DrawLine(origin, previous);
     }
 }

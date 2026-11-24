@@ -81,6 +81,8 @@ public class RandomBox : MonoBehaviour, IInteractable
     {
         // 열린 BOX는 충돌과 상호작용 대상에서 제외한다.
         isOpened = true;
+        SensoryUtility.BroadcastStimulus(
+            new StimulusData(StimulusType.Interaction, transform.position, gameObject));
         gameObject.SetActive(false);
         Opened?.Invoke(this);
     }

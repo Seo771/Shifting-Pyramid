@@ -3054,6 +3054,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Monster
       objectReference: {fileID: 0}
+    - target: {fileID: 5375418706542552686, guid: ea5e80538ff5769438a49035a8f59a58, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3086,6 +3090,12 @@ MonoBehaviour:
   targetPlayer: {fileID: 0}
   detectRange: 8
   loseTargetRange: 12
+  viewAngle: 90
+  eyeHeight: 0.6
+  eyePoint: {fileID: 0}
+  sightBlockingLayers:
+    serializedVersion: 2
+    m_Bits: 51
   attackRange: 2
   attackCooldown: 2
   attackDamage: 20
@@ -4563,7 +4573,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1804055950
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4581,8 +4591,14 @@ MonoBehaviour:
   minWanderDistance: 10
   mazeSize: {x: 30, y: 30}
   targetPlayer: {fileID: 0}
-  detectRange: 8
-  loseTargetRange: 12
+  detectRange: 15
+  loseTargetRange: 20
+  viewAngle: 90
+  eyeHeight: 3.4
+  eyePoint: {fileID: 0}
+  sightBlockingLayers:
+    serializedVersion: 2
+    m_Bits: 51
   attackRange: 2
   attackCooldown: 2
   attackDamage: 20

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ShiftingPyramid.Game;
 
+[RequireComponent(typeof(PlayerFootstepEmitter))]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("이동 설정")]
@@ -23,12 +24,14 @@ public class PlayerMovement : MonoBehaviour
     private CharacterController controller;
     private PlayerStamina stamina;
     private PlayerHP health;
+    private PlayerFootstepEmitter footstepEmitter;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
         stamina = GetComponent<PlayerStamina>();
         health = GetComponent<PlayerHP>();
+        footstepEmitter = GetComponent<PlayerFootstepEmitter>();
 
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
@@ -57,6 +60,7 @@ public class PlayerMovement : MonoBehaviour
         // 사망 시 이동 및 이동 애니메이션 정지
         if (health != null && health.isDead)
         {
+            footstepEmitter.ResetFootsteps();
             if (animator != null)
                 animator.SetFloat("Speed", 0f);
             return;
@@ -126,7 +130,10 @@ public class PlayerMovement : MonoBehaviour
         // 6. 중력 적용 및 이동 실행
         velocity.y += gravity * Time.deltaTime;
         Vector3 finalMove = moveDirection * currentSpeed + new Vector3(0f, velocity.y, 0f);
+        Vector3 positionBeforeMove = transform.position;
         controller.Move(finalMove * Time.deltaTime);
+        footstepEmitter.ReportMovement(transform.position - positionBeforeMove,
+            controller.isGrounded, isMoving, isRunning);
 
         // 7. 이동 애니메이션 파라미터 전달
         if (animator != null)
@@ -138,5 +145,10 @@ public class PlayerMovement : MonoBehaviour
 
             animator.SetFloat("Speed", targetAnimationSpeed);
         }
+    }
+
+    private void OnDisable()
+    {
+        if (footstepEmitter != null) footstepEmitter.ResetFootsteps();
     }
 }
